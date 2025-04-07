@@ -4,7 +4,7 @@ A comprehensive web application for analyzing stocks, generating investment reco
 
 ## 🚀 Features
 
-- **Stock Data Dashboard**: Track and visualize key stock metrics including price, volume, and historical performance
+- **Stock Data Dashboard**: Track and visualize key stock metrics including price, volumeb, and historical performance
 - **Investment Recommendations**: Get actionable BUY, SELL, or HOLD recommendations based on multiple factors
 - **Technical Analysis**: Leverage powerful indicators including:
   - Relative Strength Index (RSI)
@@ -29,10 +29,12 @@ A comprehensive web application for analyzing stocks, generating investment reco
 
 ## 🔧 Installation
 
+### Option 1: Using pip (requirements.txt)
+
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/financial-investment-analyzer.git
-   cd financial-investment-analyzer
+   git clone https://github.com/int-smart/finances.git
+   cd finances
    ```
 
 2. Create and activate a virtual environment:
@@ -46,18 +48,49 @@ A comprehensive web application for analyzing stocks, generating investment reco
    pip install -r requirements.txt
    ```
 
-4. Set up environment variables:
+### Option 2: Using conda (environment.yml)
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/int-smart/finances.git
+   cd finances
+   ```
+
+2. Create and activate the conda environment:
+   ```bash
+   conda env create -f environment.yml
+   conda activate finance-analyzer  # The name specified in environment.yml
+   ```
+
+### Configuration
+
+1. Set up environment variables:
    ```bash
    cp .env.example .env
    # Edit .env with your API keys and configuration
    ```
 
-5. Run the application:
+2. Run the application:
    ```bash
-   flask run
+   python app.py
    ```
 
-6. Open your browser and navigate to `http://localhost:5000`
+3. Open your browser and navigate to `http://localhost:5000`
+
+## 📦 Dependencies
+
+The application requires several Python packages:
+
+- **Web Framework**: Flask
+- **Data Processing**: pandas, numpy, scipy
+- **Data Visualization**: matplotlib, seaborn
+- **Financial APIs**: yfinance, alpha_vantage
+- **Machine Learning**: scikit-learn
+- **Database**: SQLAlchemy
+
+For the complete list of dependencies:
+- See `requirements.txt` for pip installation
+- See `environment.yml` for conda installation
 
 ## 📝 Usage
 
