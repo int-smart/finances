@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Investment Tracker (AAPL)",
+            "type": "python",
+            "request": "launch",
+            "module": "src.run",
+            "args": [
+                "--tickers", "AAPL",
+                "--output", "investment_reports",
+                // "--skip-news"
+            ],
+            "python": "/home/abhishek/.conda/envs/py311/bin/python",  // Path to Python in venv (Linux/macOS)
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "console": "integratedTerminal"
+        }
+    ]
+}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}News Articles{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card data-card">
+            <div class="card-header">
+                <h5>Recent News Articles</h5>
+            </div>
+            <div class="card-body">
+                {% if news_data %}
+                    <div class="accordion" id="newsAccordion">
+                        {% for ticker, articles in news_data.items() %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="newsHeading{{ loop.index }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#newsCollapse{{ loop.index }}" aria-expanded="false" aria-controls="newsCollapse{{ loop.index }}">
+                                    {{ ticker }} ({{ articles|length }} articles)
+                                </button>
+                            </h2>
+                            <div id="newsCollapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="newsHeading{{ loop.index }}" data-bs-parent="#newsAccordion">
+                                <div class="accordion-body">
+                                    {% if articles %}
+                                        <div class="list-group">
+                                            {% for article in articles %}
+                                            <div class="list-group-item">
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <h5 class="mb-1">{{ article.headline }}</h5>
+                                                    <small>
+                                                        {% if article.date %}{{ article.date }}{% endif %}
+                                                        {% if article.source %} | {{ article.source }}{% endif %}
+                                                    </small>
+                                                </div>
+                                                <p class="mb-1">{{ article.summary }}</p>
+                                                {% if article.full_content %}
+                                                <div class="collapse" id="fullContent{{ ticker }}_{{ loop.index }}">
+                                                    <div class="card card-body mt-2">
+                                                        {{ article.full_content|replace('\n', '<br>')|safe }}
+                                                    </div>
+                                                </div>
+                                                <button class="btn btn-sm btn-outline-primary mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#fullContent{{ ticker }}_{{ loop.index }}" aria-expanded="false">
+                                                    Toggle Full Content
+                                                </button>
+                                                {% endif %}
+                                                {% if article.link %}
+                                                <div>
+                                                    <a href="{{ article.link }}" target="_blank" class="btn btn-sm btn-outline-secondary mt-2">Read at Source</a>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <p>No news articles available for {{ ticker }}.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No news data available. Click "Refresh News" to fetch data.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+</div>
+{% endblock %}

@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+
+{% block title %}Investment Recommendations{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5>Technical Indicators Guide <button class="btn btn-sm btn-light float-end" type="button" data-bs-toggle="collapse" data-bs-target="#indicatorsGuide">Show/Hide</button></h5>
+            </div>
+            <div class="card-body collapse" id="indicatorsGuide">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6>RSI (Relative Strength Index)</h6>
+                        <p>Measures if a stock is overbought or oversold.</p>
+                        <ul>
+                            <li><strong>Below 30:</strong> Oversold (potentially good time to buy)</li>
+                            <li><strong>Above 70:</strong> Overbought (potentially good time to sell)</li>
+                            <li><strong>30-70:</strong> Neutral</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>MACD (Moving Average Convergence Divergence)</h6>
+                        <p>Shows momentum and potential trend changes.</p>
+                        <ul>
+                            <li><strong>Bullish Crossover:</strong> MACD crosses above signal line (potential buy)</li>
+                            <li><strong>Bearish Crossover:</strong> MACD crosses below signal line (potential sell)</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Bollinger Bands</h6>
+                        <p>Shows price volatility and potential reversal points.</p>
+                        <ul>
+                            <li><strong>Lower Band:</strong> Price at lower band may be oversold (potential buy)</li>
+                            <li><strong>Upper Band:</strong> Price at upper band may be overbought (potential sell)</li>
+                            <li><strong>Middle:</strong> Price is within normal range</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <h6>Volume</h6>
+                        <p>Amount of shares traded.</p>
+                        <ul>
+                            <li><strong>High Volume:</strong> More trading than usual (confirms price movements)</li>
+                            <li><strong>Normal Volume:</strong> Average trading activity</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Beta</h6>
+                        <p>Measures stock volatility compared to the market.</p>
+                        <ul>
+                            <li><strong>Beta > 1:</strong> More volatile than market (higher risk/reward)</li>
+                            <li><strong>Beta < 1:</strong> Less volatile than market (lower risk/reward)</li>
+                            <li><strong>Beta = 1:</strong> Same volatility as market</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Patterns</h6>
+                        <p>Chart patterns that may indicate future price moves.</p>
+                        <ul>
+                            <li><strong>Double Bottom:</strong> "W" shape pattern that often signals a potential upward move</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card data-card">
+            <div class="card-header">
+                <h5>Investment Recommendations</h5>
+            </div>
+            <div class="card-body">
+                {% if recommendations %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Ticker</th>
+                                    <th>Recommendation</th>
+                                    <th>Score</th>
+                                    <th>Investor Consensus</th>
+                                    <th>News Sentiment</th>
+                                    <th>Valuation</th>
+                                    <th>Financial Health</th>
+                                    <th>Price Trend</th>
+                                    <!-- New Technical Indicators -->
+                                    <th>RSI</th>
+                                    <th>MACD Signal</th>
+                                    <th>Bollinger Bands</th>
+                                    <th>Volume</th>
+                                    <th>Beta</th>
+                                    <th>Patterns</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ticker, rec in recommendations.items()|sort(attribute='1.score', reverse=true) %}
+                                <tr>
+                                    <td><a href="/stock/{{ ticker }}">{{ ticker }}</a></td>
+                                    <td class="{% if 'BUY' in rec.final_recommendation %}recommendation-buy{% elif 'SELL' in rec.final_recommendation %}recommendation-sell{% else %}recommendation-hold{% endif %}">
+                                        {{ rec.final_recommendation }}
+                                    </td>
+                                    <td>{{ rec.score }}</td>
+                                    <td>{{ rec.investor_consensus }}</td>
+                                    <td>{{ rec.news_sentiment }}</td>
+                                    <td>{{ rec.valuation }}</td>
+                                    <td>{{ rec.financial_health }}</td>
+                                    <td>{{ rec.price_trend }}</td>
+                                    <!-- New Technical Indicators -->
+                                    <td class="{% if rec.rsi_status == 'OVERSOLD' %}text-success{% elif rec.rsi_status == 'OVERBOUGHT' %}text-danger{% endif %}">
+                                        {{ rec.rsi|round(1) if rec.rsi else 'N/A' }} 
+                                        <small>({{ rec.rsi_status }})</small>
+                                    </td>
+                                    <td class="{% if rec.macd_crossover == 'BULLISH' %}text-success{% elif rec.macd_crossover == 'BEARISH' %}text-danger{% endif %}">
+                                        {{ rec.macd_crossover }}
+                                    </td>
+                                    <td class="{% if rec.position_in_bb == 'LOWER' %}text-success{% elif rec.position_in_bb == 'UPPER' %}text-danger{% endif %}">
+                                        {{ rec.position_in_bb }}
+                                    </td>
+                                    <td class="{% if rec.volume_trend == 'HIGH' %}text-primary{% endif %}">
+                                        {{ rec.volume_trend }}
+                                    </td>
+                                    <td>{{ rec.beta|round(2) if rec.beta else 'N/A' }}</td>
+                                    <td>{{ 'Double Bottom' if rec.pattern_double_bottom else 'None' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p>No recommendations available. Click "Refresh Recommendations" to generate them.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card data-card">
+            <div class="card-header">
+                <h5>Top Buy Recommendations</h5>
+            </div>
+            <div class="card-body">
+                {% set buy_recs = [] %}
+                {% for ticker, rec in recommendations.items() %}
+                    {% if 'BUY' in rec.final_recommendation %}
+                        {% set buy_recs = buy_recs + [rec] %}
+                    {% endif %}
+                {% endfor %}
+                {% if buy_recs %}
+                    <div class="list-group">
+                        {% for rec in buy_recs|sort(attribute='score', reverse=true)|slice(0, 5) %}
+                            <a href="/stock/{{ rec.ticker }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ rec.ticker }}</h5>
+                                    <span class="recommendation-buy">{{ rec.final_recommendation }}</span>
+                                </div>
+                                <p class="mb-1">Score: {{ rec.score }}</p>
+                                <div class="d-flex justify-content-between">
+                                    <small>
+                                        Investor Consensus: {{ rec.investor_consensus }} | 
+                                        News Sentiment: {{ rec.news_sentiment }}
+                                    </small>
+                                    <small>
+                                        RSI: <span class="{% if rec.rsi_status == 'OVERSOLD' %}text-success{% elif rec.rsi_status == 'OVERBOUGHT' %}text-danger{% endif %}">
+                                            {{ rec.rsi|round(1) if rec.rsi else 'N/A' }}
+                                        </span>
+                                    </small>
+                                </div>
+                                <div class="technical-indicators mt-2">
+                                    {% if rec.macd_crossover == 'BULLISH' %}
+                                        <span class="badge bg-success">MACD Bullish</span>
+                                    {% endif %}
+                                    {% if rec.position_in_bb == 'LOWER' %}
+                                        <span class="badge bg-success">BB Lower</span>
+                                    {% endif %}
+                                    {% if rec.pattern_double_bottom %}
+                                        <span class="badge bg-info">Double Bottom</span>
+                                    {% endif %}
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No buy recommendations available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card data-card">
+            <div class="card-header">
+                <h5>Top Sell Recommendations</h5>
+            </div>
+            <div class="card-body">
+                {% set sell_recs = [] %}
+                {% for ticker, rec in recommendations.items() %}
+                    {% if 'SELL' in rec.final_recommendation %}
+                        {% set sell_recs = sell_recs + [rec] %}
+                    {% endif %}
+                {% endfor %}
+                {% if sell_recs %}
+                    <div class="list-group">
+                        {% for rec in sell_recs|sort(attribute='score', reverse=true)|slice(0, 5) %}
+                            <a href="/stock/{{ rec.ticker }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ rec.ticker }}</h5>
+                                    <span class="recommendation-sell">{{ rec.final_recommendation }}</span>
+                                </div>
+                                <p class="mb-1">Score: {{ rec.score }}</p>
+                                <div class="d-flex justify-content-between">
+                                    <small>
+                                        Investor Consensus: {{ rec.investor_consensus }} | 
+                                        News Sentiment: {{ rec.news_sentiment }}
+                                    </small>
+                                    <small>
+                                        RSI: <span class="{% if rec.rsi_status == 'OVERSOLD' %}text-success{% elif rec.rsi_status == 'OVERBOUGHT' %}text-danger{% endif %}">
+                                            {{ rec.rsi|round(1) if rec.rsi else 'N/A' }}
+                                        </span>
+                                    </small>
+                                </div>
+                                <div class="technical-indicators mt-2">
+                                    {% if rec.macd_crossover == 'BEARISH' %}
+                                        <span class="badge bg-danger">MACD Bearish</span>
+                                    {% endif %}
+                                    {% if rec.position_in_bb == 'UPPER' %}
+                                        <span class="badge bg-danger">BB Upper</span>
+                                    {% endif %}
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No sell recommendations available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Technical Analysis Summary -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card data-card">
+            <div class="card-header">
+                <h5>Technical Analysis Summary</h5>
+            </div>
+            <div class="card-body">
+                {% if recommendations %}
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h6>Oversold Stocks (RSI < 30)</h6>
+                                    <small class="text-muted">Potentially good buying opportunities</small>
+                                </div>
+                                <div class="card-body">
+                                    {% set oversold_stocks = [] %}
+                                    {% for ticker, rec in recommendations.items() %}
+                                        {% if rec.rsi and rec.rsi < 30 %}
+                                            {% set oversold_stocks = oversold_stocks + [rec] %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if oversold_stocks %}
+                                        <ul class="list-group">
+                                            {% for rec in oversold_stocks|sort(attribute='rsi')|slice(0, 5) %}
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <a href="/stock/{{ rec.ticker }}">{{ rec.ticker }}</a>
+                                                    <span class="badge bg-success rounded-pill">{{ rec.rsi|round(1) }}</span>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p>No oversold stocks found.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h6>Bullish MACD Crossover</h6>
+                                    <small class="text-muted">Shows upward momentum</small>
+                                </div>
+                                <div class="card-body">
+                                    {% set macd_bullish = [] %}
+                                    {% for ticker, rec in recommendations.items() %}
+                                        {% if rec.macd_crossover == 'BULLISH' %}
+                                            {% set macd_bullish = macd_bullish + [rec] %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if macd_bullish %}
+                                        <ul class="list-group">
+                                            {% for rec in macd_bullish|sort(attribute='score', reverse=true)|slice(0, 5) %}
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <a href="/stock/{{ rec.ticker }}">{{ rec.ticker }}</a>
+                                                    <span class="badge bg-success rounded-pill">{{ rec.final_recommendation }}</span>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p>No stocks with bullish MACD crossover.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h6>Double Bottom Patterns</h6>
+                                    <small class="text-muted">Potential reversal patterns</small>
+                                </div>
+                                <div class="card-body">
+                                    {% set double_bottom_stocks = [] %}
+                                    {% for ticker, rec in recommendations.items() %}
+                                        {% if rec.pattern_double_bottom %}
+                                            {% set double_bottom_stocks = double_bottom_stocks + [rec] %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if double_bottom_stocks %}
+                                        <ul class="list-group">
+                                            {% for rec in double_bottom_stocks|sort(attribute='score', reverse=true)|slice(0, 5) %}
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <a href="/stock/{{ rec.ticker }}">{{ rec.ticker }}</a>
+                                                    <span class="badge bg-info rounded-pill">Pattern</span>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p>No stocks with double bottom patterns.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p>No technical analysis available. Generate recommendations first.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add some custom CSS for styling the technical indicators -->
+<style>
+    .technical-indicators .badge {
+        margin-right: 5px;
+    }
+    
+    .recommendation-buy {
+        color: #28a745;
+        font-weight: bold;
+    }
+    
+    .recommendation-sell {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    
+    .recommendation-hold {
+        color: #ffc107;
+        font-weight: bold;
+    }
+    
+    #indicatorsGuide {
+        font-size: 0.9rem;
+    }
+    
+    #indicatorsGuide h6 {
+        color: #0d6efd;
+        margin-top: 0;
+    }
+    
+    #indicatorsGuide ul {
+        padding-left: 1rem;
+    }
+    
+    #indicatorsGuide p {
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}

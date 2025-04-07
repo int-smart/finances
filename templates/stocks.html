@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Stock Data{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card data-card">
+            <div class="card-header">
+                <h5>Stock Summary</h5>
+            </div>
+            <div class="card-body">
+                {% if stock_data and 'stocks' in stock_data %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Ticker</th>
+                                    <th>Latest Price</th>
+                                    <th>1-Day Change</th>
+                                    <th>30-Day Change</th>
+                                    <th>52-Week Low</th>
+                                    <th>52-Week High</th>
+                                    <th>Volume</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ticker, data in stock_data.stocks.items() %}
+                                <tr>
+                                    <td><a href="/stock/{{ ticker }}">{{ ticker }}</a></td>
+                                    <td>${{ data.latest_price|round(2) if data.latest_price else 'N/A' }}</td>
+                                    <td class="{% if data.get('1d_change_%', 0) > 0 %}text-success{% elif data.get('1d_change_%', 0) < 0 %}text-danger{% endif %}">
+                                        {{ data.get('1d_change_%', 'N/A')|round(2) if data.get('1d_change_%') else 'N/A' }}%
+                                    </td>
+                                    <td class="{% if data.get('30d_change_%', 0) > 0 %}text-success{% elif data.get('30d_change_%', 0) < 0 %}text-danger{% endif %}">
+                                        {{ data.get('30d_change_%', 'N/A')|round(2) if data.get('30d_change_%') else 'N/A' }}%
+                                    </td>
+                                    <td>${{ data.get('52w_low', 'N/A')|round(2) if data.get('52w_low') else 'N/A' }}</td>
+                                    <td>${{ data.get('52w_high', 'N/A')|round(2) if data.get('52w_high') else 'N/A' }}</td>
+                                    <td>{{ data.get('volume', 'N/A')|int if data.get('volume') else 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p>No stock data available. Click "Refresh Stocks" to fetch data.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

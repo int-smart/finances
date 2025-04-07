@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Company Fundamentals{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card data-card">
+            <div class="card-header">
+                <h5>Fundamental Analysis</h5>
+            </div>
+            <div class="card-body">
+                {% if fundamentals_data %}
+                    <div class="accordion" id="fundamentalsAccordion">
+                        {% for ticker, data in fundamentals_data.items() %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="fundHeading{{ loop.index }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#fundCollapse{{ loop.index }}" aria-expanded="false" aria-controls="fundCollapse{{ loop.index }}">
+                                    {{ ticker }} Fundamentals
+                                </button>
+                            </h2>
+                            <div id="fundCollapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="fundHeading{{ loop.index }}" data-bs-parent="#fundamentalsAccordion">
+                                <div class="accordion-body">
+                                    {% if data and 'ratios' in data %}
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>Valuation Ratios</h6>
+                                                <table class="table table-sm">
+                                                    <tbody>
+                                                        {% for key, value in data.ratios.items() if key in ['P/E', 'P/B', 'P/S', 'EV/EBITDA', 'PEG'] %}
+                                                        <tr>
+                                                            <td>{{ key }}</td>
+                                                            <td>{{ value|round(2) if value is number else value }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Profitability Ratios</h6>
+                                                <table class="table table-sm">
+                                                    <tbody>
+                                                        {% for key, value in data.ratios.items() if key in ['ROE', 'ROA', 'Profit Margin', 'Operating Margin'] %}
+                                                        <tr>
+                                                            <td>{{ key }}</td>
+                                                            <td>{{ value|round(2) if value is number else value }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-md-6">
+                                                <h6>Financial Health</h6>
+                                                <table class="table table-sm">
+                                                    <tbody>
+                                                        {% for key, value in data.ratios.items() if key in ['Debt/Equity', 'Current Ratio', 'Quick Ratio'] %}
+                                                        <tr>
+                                                            <td>{{ key }}</td>
+                                                            <td>{{ value|round(2) if value is number else value }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Other Metrics</h6>
+                                                <table class="table table-sm">
+                                                    <tbody>
+                                                        {% for key, value in data.ratios.items() if key not in ['P/E', 'P/B', 'P/S', 'EV/EBITDA', 'PEG', 'ROE', 'ROA', 'Profit Margin', 'Operating Margin', 'Debt/Equity', 'Current Ratio', 'Quick Ratio'] %}
+                                                        <tr>
+                                                            <td>{{ key }}</td>
+                                                            <td>{{ value|round(2) if value is number else value }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <p>No fundamental data available for {{ ticker }}.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No fundamentals data available. Click "Refresh Fundamentals" to fetch data.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
