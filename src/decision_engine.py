@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 from scipy.signal import argrelextrema
 import pickle
 from datetime import datetime
@@ -462,4 +463,55 @@ class DecisionEngine:
             recommendations[ticker] = recommendation
         
         self.recommendations = recommendations
+        
+        # Save to historical record
+        self.save_historical_recommendations(recommendations)
+        
         return recommendations
+
+    def save_historical_recommendations(self, recommendations=None):
+        """
+        Save recommendations to a historical record with timestamp as key
+        
+        Args:
+            recommendations: The recommendations to save. If None, use self.recommendations
+        """
+        if recommendations is None:
+            recommendations = self.recommendations
+        
+        if not recommendations:
+            print("No recommendations to save")
+            return
+        
+        # Create data directory if it doesn't exist
+        data_dir = "data"
+        os.makedirs(data_dir, exist_ok=True)
+        
+        # Generate timestamp for this recommendation set
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Load existing historical recommendations if available
+        history_file = os.path.join(data_dir, "recommendations_history.pkl")
+        historical_recommendations = {}
+        
+        if os.path.exists(history_file):
+            try:
+                with open(history_file, 'rb') as f:
+                    historical_recommendations = pickle.load(f)
+            except Exception as e:
+                print(f"Error loading historical recommendations: {e}")
+        
+        # Add current recommendations with timestamp as key
+        historical_recommendations[timestamp] = recommendations
+        
+        # Save updated historical recommendations
+        try:
+            with open(history_file, 'wb') as f:
+                pickle.dump(historical_recommendations, f)
+            print(f"Saved recommendations history with timestamp: {timestamp}")
+        
+            # Also save current recommendations to the regular file for backward compatibility
+            with open(os.path.join(data_dir, "recommendations.pkl"), 'wb') as f:
+                pickle.dump(recommendations, f)
+        except Exception as e:
+            print(f"Error saving recommendations history: {e}")

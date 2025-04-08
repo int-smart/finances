@@ -48,8 +48,33 @@ def index():
     fundamentals_data_fresh = is_data_fresh('fundamentals_data.pkl')
     recommendations_fresh = is_data_fresh('recommendations.pkl')
     
-    # Load recommendations if available
+    # Load current recommendations
     recommendations = load_pickle('recommendations.pkl')
+    
+    # Load historical recommendations
+    history_file = os.path.join(app.config['DATA_DIR'], 'recommendations_history.pkl')
+    historical_dates = []
+    
+    if os.path.exists(history_file):
+        try:
+            with open(history_file, 'rb') as f:
+                historical_recommendations = pickle.load(f)
+                historical_dates = sorted(historical_recommendations.keys(), reverse=True)
+        except Exception as e:
+            print(f"Error loading historical recommendations: {e}")
+    
+    # Get selected date from query parameter, default to most recent
+    selected_date = request.args.get('date', None)
+    
+    # If a date is selected and historical data exists, use that date's recommendations
+    if selected_date and os.path.exists(history_file):
+        try:
+            with open(history_file, 'rb') as f:
+                historical_recommendations = pickle.load(f)
+                if selected_date in historical_recommendations:
+                    recommendations = historical_recommendations[selected_date]
+        except Exception as e:
+            print(f"Error loading recommendations for date {selected_date}: {e}")
     
     return render_template('index.html',
                           stock_data_fresh=stock_data_fresh,
@@ -58,6 +83,8 @@ def index():
                           fundamentals_data_fresh=fundamentals_data_fresh,
                           recommendations_fresh=recommendations_fresh,
                           recommendations=recommendations,
+                          historical_dates=historical_dates,
+                          selected_date=selected_date,
                           tickers=COMPANIES)
 
 @app.route('/refresh_data', methods=['POST'])
@@ -134,8 +161,40 @@ def fundamentals():
 @app.route('/recommendations')
 def recommendations():
     """Recommendations page"""
-    recommendations = load_pickle('recommendations.pkl')
-    return render_template('recommendations.html', recommendations=recommendations)
+    # Load historical recommendations
+    history_file = os.path.join(app.config['DATA_DIR'], 'recommendations_history.pkl')
+    historical_dates = []
+    
+    if os.path.exists(history_file):
+        try:
+            with open(history_file, 'rb') as f:
+                historical_recommendations = pickle.load(f)
+                historical_dates = sorted(historical_recommendations.keys(), reverse=True)
+        except Exception as e:
+            print(f"Error loading historical recommendations: {e}")
+    
+    # Get selected date from query parameter, default to most recent
+    selected_date = request.args.get('date', None)
+    
+    # Load recommendations based on selected date or default to current
+    if selected_date and os.path.exists(history_file):
+        try:
+            with open(history_file, 'rb') as f:
+                historical_recommendations = pickle.load(f)
+                if selected_date in historical_recommendations:
+                    recommendations = historical_recommendations[selected_date]
+                else:
+                    recommendations = load_pickle('recommendations.pkl')
+        except Exception as e:
+            print(f"Error loading recommendations for date {selected_date}: {e}")
+            recommendations = load_pickle('recommendations.pkl')
+    else:
+        recommendations = load_pickle('recommendations.pkl')
+    
+    return render_template('recommendations.html', 
+                          recommendations=recommendations,
+                          historical_dates=historical_dates,
+                          selected_date=selected_date)
 
 @app.route('/stock/<ticker>')
 def stock_detail(ticker):

@@ -69,6 +69,38 @@
     </div>
 </div>
 
+{% if historical_dates %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Historical Recommendations</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="mb-3">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <select name="date" class="form-select">
+                        <option value="">Latest Recommendations</option>
+                        {% for date in historical_dates %}
+                        <option value="{{ date }}" {% if date == selected_date %}selected{% endif %}>
+                            {{ date }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <button type="submit" class="btn btn-primary">View Selected Date</button>
+                </div>
+            </div>
+        </form>
+        {% if selected_date %}
+        <div class="alert alert-info">
+            Showing recommendations from: <strong>{{ selected_date }}</strong>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
 <div class="row">
     <div class="col-md-12">
         <div class="card data-card">
