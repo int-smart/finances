@@ -11,7 +11,7 @@
                 "--output", "investment_reports",
                 // "--skip-news"
             ],
-            "python": "/home/abhishek/.conda/envs/py311/bin/python",  // Path to Python in venv (Linux/macOS)
+            "python": "/home/abhishek/anaconda3/envs/finance-analysis/bin/python",  // Path to Python in venv (Linux/macOS)
             "justMyCode": true,
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"

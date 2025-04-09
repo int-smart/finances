@@ -20,7 +20,7 @@ class FundamentalsTracker:
             print("Warning: TOGETHER_API_KEY environment variable not set. Summarization may not work.")
         self.client = Together(api_key=api_key)
         # self.model = "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"
-        self.model = "meta-llama/Llama-4-Scout-17B-16E-Instruct"
+        self.model = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
     
     def get_financial_ratios(self, ticker):
         """Get key financial ratios for a company"""
@@ -104,10 +104,12 @@ class FundamentalsTracker:
             
             ratios.update(info_ratios)
             self.fundamentals[ticker] = {
-                "ratios": ratios,
-                "income_statement": income_stmt,
-                "balance_sheet": balance_sheet,
-                "cash_flow": cash_flow
+                latest_year.strftime('%Y-%m-%d'): {
+                    "ratios": ratios,
+                    "income_statement": income_stmt,
+                    "balance_sheet": balance_sheet,
+                    "cash_flow": cash_flow
+                }
             }
             
             time.sleep(REQUEST_DELAY)  # Avoid rate limiting
@@ -172,33 +174,93 @@ class FundamentalsTracker:
             return []
     
     def summarize_10k(self, ticker):
+        """Extract and summarize substantive text from a 10-K filing."""
         if ticker not in self.links or "text_file" not in self.links[ticker][0]:
             print(f"No 10-K filings found for {ticker}")
             return None
-    
-        text = self.links[ticker][0]['text_file']
-        """Summarize the 10-K text to extract risks, positive factors, earning sinks, and earning boosters."""
+        
+        # Get raw text
+        raw_text = self.links[ticker][0]['text_file']
+        
+        # Extract all substantive content
+        all_substantive_blocks = []
+        
+        # More precise regex to find the 10-K document section
+        # This looks for the structure shown in SEC filings where TYPE is 10-K
+        # Find the first DOCUMENT section that contains TYPE 10-K
+        # Split the raw text into document sections
+        document_sections = re.findall(r'<DOCUMENT>.*?</DOCUMENT>', raw_text, re.DOTALL | re.IGNORECASE)
+
+        # Find the first section that contains TYPE 10-K
+        ten_k_document = None
+        for section in document_sections:
+            if re.search(r'<TYPE>10-K', section, re.IGNORECASE):
+                ten_k_document = section
+                break
+        
+        if ten_k_document:
+            # We found the 10-K document section
+            doc_section = ten_k_document  # This gives everything inside the DOCUMENT tags
+            
+            # Look for HTML content within the 10-K document
+            html_match = re.search(r'<html.*?>(.*?)</html>', doc_section, re.DOTALL | re.IGNORECASE)
+            
+            if html_match:
+                # We found HTML content - parse it
+                html_content = html_match.group(0)  # Get the entire HTML including tags
+                soup = BeautifulSoup(html_content, 'html.parser')
+            else:
+                # No HTML found, use the whole document section
+                soup = BeautifulSoup(doc_section, 'html.parser')
+            
+            # Extract substantive text
+            threshold = 5  # Minimum number of words
+            
+            # Find all tags with text
+            for tag in soup.find_all('span', recursive=True):
+                # Get text and check if it's substantial
+                text = tag.get_text().strip()
+                if text and len(text.split()) >= threshold:
+                    all_substantive_blocks.append(text)
+        else:
+            print(f"No 10-K document section found for {ticker}")
+            return None
+        
+        print(f"Found {len(all_substantive_blocks)} substantive text blocks")
+        
+        # Combine the blocks, but limit total size to avoid token limits
+        combined_text = ""
+        
+        for block in all_substantive_blocks:
+            combined_text += block + "\n\n"
+        
+        if not combined_text:
+            print(f"No substantive text blocks found for {ticker}")
+            return None
+        
+        # Generate prompt for summarization
         prompt = f"""
-        Analyze the following 10-K filing text and provide a summary focusing on:
+        Analyze the following content from a 10-K filing for {ticker} and provide a summary focusing on:
         
         1. Risks involved in the business
         2. Positive factors
         3. Earning boosters
         4. Earning sinks
         
-        Here is the text:
-        {text}
+        Here is the text from the 10-K:
+        {combined_text}
         
         Please format your response as JSON with the following structure:
         {{
             "risks": ["risk1", "risk2", ...],
             "positive_factors": ["factor1", "factor2", ...],
-            "earning_boosters": ["booster1", "booster2", ...]
+            "earning_boosters": ["booster1", "booster2", ...],
             "earning_sinks": ["sink1", "sink2", ...]
         }}
         """
         
         try:
+            # Generate the summary using the LLM
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[{"role": "user", "content": prompt}],
@@ -220,19 +282,40 @@ class FundamentalsTracker:
             
             # Try to parse as JSON
             try:
-                return json.loads(json_str)
+                if not self.links[ticker][0]['filing_date'] in self.fundamentals[ticker]:
+                    self.fundamentals[ticker][self.links[ticker][0]['filing_date']] = {}
+                self.fundamentals[ticker][self.links[ticker][0]['filing_date']]['10K_summary'] = json.loads(json_str)
             except json.JSONDecodeError as e:
                 print(f"Error parsing JSON: {e}")
                 return {"text": text, "error": str(e)}
             
         except Exception as e:
             return {"summary": f"Error generating summary: {str(e)}", "error": str(e)}
+    
+    def extract_substantive_text(self, soup, threshold=5):
+        """Extract all text blocks with substantial content from a BeautifulSoup object."""
+        substantive_blocks = []
+        
+        # Find all tags with text
+        for tag in soup.find_all(True, recursive=True):
+            # Skip script, style, etc.
+            if tag.name in ['script', 'style', 'meta', 'link', 'head']:
+                continue
+            
+            # Get text and check if it's substantial
+            text = tag.get_text().strip()
+            if text and len(text.split()) >= threshold:
+                # Avoid duplicates
+                if not any(text in block for block in substantive_blocks):
+                    substantive_blocks.append(text)
+        
+        return substantive_blocks
 
     def analyze_all_companies(self, companies):
         """Analyze fundamentals for all given companies"""
         for ticker in companies:
             self.get_financial_ratios(ticker)
             self.get_annual_report_links(ticker)
-            print(self.summarize_10k(ticker))
+            self.summarize_10k(ticker)
         
         return self.fundamentals
