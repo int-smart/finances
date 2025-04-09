@@ -8,6 +8,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from src.config import COMPANIES, NEWS_SOURCES, MAX_ARTICLES_PER_COMPANY, REQUEST_DELAY
+import requests
+import os
+from dotenv import load_dotenv
+from datetime import datetime
+
+
+load_dotenv()
 
 class NewsTracker:
     def __init__(self, tickers=COMPANIES, headless=True):
@@ -398,7 +405,8 @@ class NewsTracker:
                 for article in articles[:3]:  # Show top 3 articles
                     print(f"  {article['headline']}")
                     print(f"  {article['summary'][:100]}...")
-                    print(f"  {article['full_content'][:100]}...")        
+                    if 'full_content' in article:
+                        print(f"  {article['full_content'][:100]}...")        
             return news_data
         finally:
             self.close()        
@@ -407,3 +415,41 @@ class NewsTracker:
         """Close the Selenium WebDriver"""
         if self.driver:
             self.driver.quit()
+
+    def get_news_from_fmp(self, ticker, time_from, time_to):
+        """Get news from Financial Modeling Prep API for a given ticker and time range."""
+        api_key = os.getenv("FMP_API_KEY")
+        base_url = "https://financialmodelingprep.com/stable/fmp-articles"
+        # base_url = "https://financialmodelingprep.com/stable/news/stock-latest"
+        
+        # Convert datetime objects to strings if necessary
+        if isinstance(time_from, datetime):
+            time_from = time_from.strftime('%Y-%m-%d')
+        if isinstance(time_to, datetime):
+            time_to = time_to.strftime('%Y-%m-%d')
+
+        params = {
+            'symbols': ticker,
+            'from': time_from,
+            'to': time_to,
+            'apikey': api_key
+        }
+        
+        try:
+            response = requests.get(base_url, params=params)
+            response.raise_for_status()  # Raise an error for bad responses
+            news_data = response.json()
+            
+            articles = []
+            for article in news_data:
+                articles.append({
+                    'headline': article.get('title', ''),
+                    'link': article.get('url', ''),
+                    'full_content': article.get('text', ''),
+                    'summary': article.get('text', '')[:200] if article.get('text') else ''
+                })
+            return articles
+            
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching news from FMP API: {e}")
+            return []

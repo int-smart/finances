@@ -59,7 +59,7 @@ A comprehensive web application for analyzing stocks, generating investment reco
 2. Create and activate the conda environment:
    ```bash
    conda env create -f environment.yml
-   conda activate finance-analyzer  # The name specified in environment.yml
+   conda activate finance-analysis  # The name specified in environment.yml
    ```
 
 ### Configuration
@@ -73,6 +73,10 @@ A comprehensive web application for analyzing stocks, generating investment reco
 2. Run the application:
    ```bash
    python app.py
+   ```
+   or schedule it with
+   ```bash
+   python -m src.run --schedule
    ```
 
 3. Open your browser and navigate to `http://localhost:5000`

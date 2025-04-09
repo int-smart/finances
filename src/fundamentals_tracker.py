@@ -1,4 +1,8 @@
+import os
+from dotenv import load_dotenv
+from together import Together
 import re
+import json
 import pandas as pd
 import yfinance as yf
 import requests
@@ -9,6 +13,14 @@ import time
 class FundamentalsTracker:
     def __init__(self):
         self.fundamentals = {}
+        self.links = {}
+        load_dotenv()
+        api_key = os.environ.get("TOGETHER_API_KEY")
+        if not api_key:
+            print("Warning: TOGETHER_API_KEY environment variable not set. Summarization may not work.")
+        self.client = Together(api_key=api_key)
+        # self.model = "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"
+        self.model = "meta-llama/Llama-4-Scout-17B-16E-Instruct"
     
     def get_financial_ratios(self, ticker):
         """Get key financial ratios for a company"""
@@ -129,38 +141,98 @@ class FundamentalsTracker:
             response = requests.get(edgar_url, headers=SEC_API_HEADERS)
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            links = []
+            if ticker not in self.links:
+                self.links[ticker] = []
+            
             for row in soup.find_all('tr'):
                 cells = row.find_all('td')
                 if len(cells) > 2 and '10-K' in cells[0].text:
                     doc_link = cells[1].find('a')['href']
                     filing_date = cells[3].text
                     full_link = f"https://www.sec.gov{doc_link}"
-                    links.append({
+                    self.links[ticker].append({
                         'filing_type': '10-K',
                         'filing_date': filing_date,
                         'link': full_link
                     })
             # Iterate over links and fetch the complete text file
-            for link_info in links:
+            for link_info in self.links[ticker]:
                 link_response = requests.get(link_info['link'], headers=SEC_API_HEADERS)
                 link_soup = BeautifulSoup(link_response.text, 'html.parser')
                 for row in link_soup.find_all('tr'):
                     cells = row.find_all('td')
                     if len(cells) > 2 and 'txt' in cells[2].text:
                         doc_link = cells[2].find('a')['href']
-                    link_response = requests.get(f"https://www.sec.gov{doc_link}", headers=SEC_API_HEADERS)
-                    link_info['text_file'] = link_response.text
+                        link_response = requests.get(f"https://www.sec.gov{doc_link}", headers=SEC_API_HEADERS)
+                        link_info['text_file'] = link_response.text
             
-            return links
+            return self.links[ticker]
         except Exception as e:
             print(f"Error fetching annual report links for {ticker}: {e}")
             return []
     
+    def summarize_10k(self, ticker):
+        if ticker not in self.links or "text_file" not in self.links[ticker][0]:
+            print(f"No 10-K filings found for {ticker}")
+            return None
+    
+        text = self.links[ticker][0]['text_file']
+        """Summarize the 10-K text to extract risks, positive factors, earning sinks, and earning boosters."""
+        prompt = f"""
+        Analyze the following 10-K filing text and provide a summary focusing on:
+        
+        1. Risks involved in the business
+        2. Positive factors
+        3. Earning boosters
+        4. Earning sinks
+        
+        Here is the text:
+        {text}
+        
+        Please format your response as JSON with the following structure:
+        {{
+            "risks": ["risk1", "risk2", ...],
+            "positive_factors": ["factor1", "factor2", ...],
+            "earning_boosters": ["booster1", "booster2", ...]
+            "earning_sinks": ["sink1", "sink2", ...]
+        }}
+        """
+        
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            summary = response.choices[0].message.content
+            
+            # Remove <think>...</think> blocks
+            text = re.sub(r'<think>.*?</think>', '', summary, flags=re.DOTALL)
+            
+            # Check if there's a JSON code block
+            json_block_match = re.search(r'```(?:json)?\s*([\s\S]*?)```', text, re.DOTALL)
+            
+            if json_block_match:
+                # Extract the content inside the code block
+                json_str = json_block_match.group(1).strip()
+            else:
+                # If no code block, use the entire text after removing think tags
+                json_str = text.strip()
+            
+            # Try to parse as JSON
+            try:
+                return json.loads(json_str)
+            except json.JSONDecodeError as e:
+                print(f"Error parsing JSON: {e}")
+                return {"text": text, "error": str(e)}
+            
+        except Exception as e:
+            return {"summary": f"Error generating summary: {str(e)}", "error": str(e)}
+
     def analyze_all_companies(self, companies):
         """Analyze fundamentals for all given companies"""
         for ticker in companies:
             self.get_financial_ratios(ticker)
-            # self.get_annual_report_links(ticker)
+            self.get_annual_report_links(ticker)
+            print(self.summarize_10k(ticker))
         
         return self.fundamentals

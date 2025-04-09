@@ -11,7 +11,7 @@ from src.fundamentals_tracker import FundamentalsTracker
 from src.decision_engine import DecisionEngine
 from src.config import COMPANIES, INVESTORS
 import numpy as np
-
+import schedule
 class TaskScheduler:
     """Scheduler for investment research tasks that can run on demand or scheduled"""
     
@@ -175,7 +175,8 @@ class TaskScheduler:
     def run_daily_tasks(self):
         """Run tasks that should happen daily"""
         print(f"Running daily tasks at {datetime.now()}")
-        
+        fundamentals_data = self.collect_fundamentals()
+        return
         # 1. Collect stock data
         stock_data = self.collect_stock_data()
         
@@ -208,6 +209,8 @@ class TaskScheduler:
         print(f"Daily tasks completed at {datetime.now()}")
     
     def run_monthly_tasks(self):
+        if datetime.now().day != 1:
+            return
         """Run tasks that should happen monthly"""
         print(f"Running monthly tasks at {datetime.now()}")
         
@@ -269,7 +272,7 @@ class TaskScheduler:
         schedule.every().day.at("08:00").do(self.run_daily_tasks)
         
         # Schedule monthly tasks on the 1st of each month
-        schedule.every().month.at("10:00").do(self.run_monthly_tasks)
+        schedule.every().day.at("10:00").do(self.run_monthly_tasks)
         
         print("Scheduled tasks:")
         print("- Daily tasks at 8:00 AM")
