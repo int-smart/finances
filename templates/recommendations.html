@@ -145,7 +145,7 @@
                                     <td>{{ rec.price_trend }}</td>
                                     <!-- New Technical Indicators -->
                                     <td class="{% if rec.rsi_status == 'OVERSOLD' %}text-success{% elif rec.rsi_status == 'OVERBOUGHT' %}text-danger{% endif %}">
-                                        {{ rec.rsi|round(1) if rec.rsi else 'N/A' }} 
+                                        {{ rec.rsi|round(1) if rec.rsi is defined and rec.rsi is not none and rec.rsi is number else 'N/A' }}
                                         <small>({{ rec.rsi_status }})</small>
                                     </td>
                                     <td class="{% if rec.macd_crossover == 'BULLISH' %}text-success{% elif rec.macd_crossover == 'BEARISH' %}text-danger{% endif %}">
@@ -157,7 +157,7 @@
                                     <td class="{% if rec.volume_trend == 'HIGH' %}text-primary{% endif %}">
                                         {{ rec.volume_trend }}
                                     </td>
-                                    <td>{{ rec.beta|round(2) if rec.beta else 'N/A' }}</td>
+                                    <td>{{ rec.beta if rec.beta is defined and rec.beta is not none and rec.beta is number else 'N/A' }}</td>
                                     <td>{{ 'Double Bottom' if rec.pattern_double_bottom else 'None' }}</td>
                                 </tr>
                                 {% endfor %}
@@ -201,7 +201,7 @@
                                     </small>
                                     <small>
                                         RSI: <span class="{% if rec.rsi_status == 'OVERSOLD' %}text-success{% elif rec.rsi_status == 'OVERBOUGHT' %}text-danger{% endif %}">
-                                            {{ rec.rsi|round(1) if rec.rsi else 'N/A' }}
+                                            {{ rec.rsi|round(1) if rec.rsi is defined and rec.rsi is not none and rec.rsi is number else 'N/A' }}
                                         </span>
                                     </small>
                                 </div>
@@ -254,7 +254,7 @@
                                     </small>
                                     <small>
                                         RSI: <span class="{% if rec.rsi_status == 'OVERSOLD' %}text-success{% elif rec.rsi_status == 'OVERBOUGHT' %}text-danger{% endif %}">
-                                            {{ rec.rsi|round(1) if rec.rsi else 'N/A' }}
+                                            {{ rec.rsi|round(1) if rec.rsi is defined and rec.rsi is not none and rec.rsi is number else 'N/A' }}
                                         </span>
                                     </small>
                                 </div>
@@ -271,114 +271,6 @@
                     </div>
                 {% else %}
                     <p>No sell recommendations available.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- New Technical Analysis Summary -->
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card data-card">
-            <div class="card-header">
-                <h5>Technical Analysis Summary</h5>
-            </div>
-            <div class="card-body">
-                {% if recommendations %}
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header bg-light">
-                                    <h6>Oversold Stocks (RSI < 30)</h6>
-                                    <small class="text-muted">Potentially good buying opportunities</small>
-                                </div>
-                                <div class="card-body">
-                                    {% set oversold_stocks = [] %}
-                                    {% for ticker, rec in recommendations.items() %}
-                                        {% if rec.rsi and rec.rsi < 30 %}
-                                            {% set oversold_stocks = oversold_stocks + [rec] %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    
-                                    {% if oversold_stocks %}
-                                        <ul class="list-group">
-                                            {% for rec in oversold_stocks|sort(attribute='rsi')|slice(0, 5) %}
-                                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <a href="/stock/{{ rec.ticker }}">{{ rec.ticker }}</a>
-                                                    <span class="badge bg-success rounded-pill">{{ rec.rsi|round(1) }}</span>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% else %}
-                                        <p>No oversold stocks found.</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header bg-light">
-                                    <h6>Bullish MACD Crossover</h6>
-                                    <small class="text-muted">Shows upward momentum</small>
-                                </div>
-                                <div class="card-body">
-                                    {% set macd_bullish = [] %}
-                                    {% for ticker, rec in recommendations.items() %}
-                                        {% if rec.macd_crossover == 'BULLISH' %}
-                                            {% set macd_bullish = macd_bullish + [rec] %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    
-                                    {% if macd_bullish %}
-                                        <ul class="list-group">
-                                            {% for rec in macd_bullish|sort(attribute='score', reverse=true)|slice(0, 5) %}
-                                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <a href="/stock/{{ rec.ticker }}">{{ rec.ticker }}</a>
-                                                    <span class="badge bg-success rounded-pill">{{ rec.final_recommendation }}</span>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% else %}
-                                        <p>No stocks with bullish MACD crossover.</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header bg-light">
-                                    <h6>Double Bottom Patterns</h6>
-                                    <small class="text-muted">Potential reversal patterns</small>
-                                </div>
-                                <div class="card-body">
-                                    {% set double_bottom_stocks = [] %}
-                                    {% for ticker, rec in recommendations.items() %}
-                                        {% if rec.pattern_double_bottom %}
-                                            {% set double_bottom_stocks = double_bottom_stocks + [rec] %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    
-                                    {% if double_bottom_stocks %}
-                                        <ul class="list-group">
-                                            {% for rec in double_bottom_stocks|sort(attribute='score', reverse=true)|slice(0, 5) %}
-                                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <a href="/stock/{{ rec.ticker }}">{{ rec.ticker }}</a>
-                                                    <span class="badge bg-info rounded-pill">Pattern</span>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% else %}
-                                        <p>No stocks with double bottom patterns.</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {% else %}
-                    <p>No technical analysis available. Generate recommendations first.</p>
                 {% endif %}
             </div>
         </div>

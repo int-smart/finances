@@ -175,8 +175,7 @@ class TaskScheduler:
     def run_daily_tasks(self):
         """Run tasks that should happen daily"""
         print(f"Running daily tasks at {datetime.now()}")
-        fundamentals_data = self.collect_fundamentals()
-        return
+        
         # 1. Collect stock data
         stock_data = self.collect_stock_data()
         

@@ -175,7 +175,7 @@ class FundamentalsTracker:
     
     def summarize_10k(self, ticker):
         """Extract and summarize substantive text from a 10-K filing."""
-        if ticker not in self.links or "text_file" not in self.links[ticker][0]:
+        if ticker not in self.links or len(self.links[ticker]) == 0 or "text_file" not in self.links[ticker][0]:
             print(f"No 10-K filings found for {ticker}")
             return None
         

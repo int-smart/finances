@@ -229,6 +229,7 @@ class DecisionEngine:
         trends = {}
         for ticker, data in self.stock_data.get('stocks', {}).items():
             if 'history' not in data or data['history'].empty:
+                print(f"Skipping {ticker} due to missing history data")
                 continue
                 
             hist = data['history']
@@ -409,7 +410,22 @@ class DecisionEngine:
                 'news_sentiment': news_sentiment.get(ticker, {}).get('sentiment', 'NO DATA'),
                 'valuation': fundamental_analysis.get(ticker, {}).get('valuation', 'NO DATA'),
                 'financial_health': fundamental_analysis.get(ticker, {}).get('financial_health', 'NO DATA'),
-                'price_trend': price_trends.get(ticker, {}).get('trend', 'NO DATA')
+                'price_trend': price_trends.get(ticker, {}).get('trend', 'NO DATA'),
+                'trend_strength': price_trends.get(ticker, {}).get('trend_strength', 'NO DATA'),
+                'volatility': price_trends.get(ticker, {}).get('volatility', 'NO DATA'),
+                'latest_close': price_trends.get(ticker, {}).get('latest_close', 'NO DATA'),
+                'ma50': price_trends.get(ticker, {}).get('ma50', 'NO DATA'),
+                'ma200': price_trends.get(ticker, {}).get('ma200', 'NO DATA'),
+                'rsi': price_trends.get(ticker, {}).get('rsi', 'NO DATA'),
+                'rsi_status': price_trends.get(ticker, {}).get('rsi_status', 'NO DATA'),
+                'macd': price_trends.get(ticker, {}).get('macd', 'NO DATA'),
+                'macd_signal': price_trends.get(ticker, {}).get('macd_signal', 'NO DATA'),
+                'macd_crossover': price_trends.get(ticker, {}).get('macd_crossover', 'NO DATA'),
+                'bollinger_width': price_trends.get(ticker, {}).get('bollinger_width', 'NO DATA'),
+                'position_in_bb': price_trends.get(ticker, {}).get('position_in_bb', 'NO DATA'),
+                'volume_trend': price_trends.get(ticker, {}).get('volume_trend', 'NO DATA'),
+                'beta': price_trends.get(ticker, {}).get('beta', 'NO DATA'),
+                'pattern_double_bottom': price_trends.get(ticker, {}).get('pattern_double_bottom', 'NO DATA')
             }
             
             # Simple scoring system
