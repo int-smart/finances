@@ -3,8 +3,9 @@ import pickle
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 from datetime import datetime
+from src.news_summarizer import NewsSummarizer
 
 # Import your existing modules
 from src.investor_tracker import InvestorTracker
@@ -196,26 +197,50 @@ def recommendations():
                           historical_dates=historical_dates,
                           selected_date=selected_date)
 
+def load_news_summary(ticker):
+    """Load news summary for a specific ticker"""
+    summary_file = os.path.join(app.config['DATA_DIR'], 'news_summaries', f"{ticker}.pkl")
+    if os.path.exists(summary_file):
+        try:
+            with open(summary_file, 'rb') as f:
+                summaries = pickle.load(f)
+                # Get the most recent summary (should be the latest date)
+                return summaries
+        except Exception as e:
+            print(f"Error loading news summary for {ticker}: {e}")
+    return None
+
 @app.route('/stock/<ticker>')
 def stock_detail(ticker):
-    """Individual stock detail page"""
+    """Stock detail page"""
+    # Load stock data
     stock_data = load_pickle('stock_data.pkl')
+    
+    # Extract data for the specific ticker
+    ticker_data = stock_data.get('stocks', {}).get(ticker, {}) if stock_data else {}
+    
+    # Load news data
     news_data = load_pickle('news_data.pkl')
-    fundamentals_data = load_pickle('fundamentals_data.pkl')
+    news = news_data.get(ticker, []) if news_data else []
+    
+    # Load recommendations data
     recommendations = load_pickle('recommendations.pkl')
+    recommendation = recommendations.get(ticker, {}) if recommendations else {}
     
-    # Get stock-specific data
-    ticker_stock_data = stock_data.get('stocks', {}).get(ticker, {}) if stock_data else {}
-    ticker_news = news_data.get(ticker, []) if news_data else []
-    ticker_fundamentals = fundamentals_data.get(ticker, {}) if fundamentals_data else {}
-    ticker_recommendation = recommendations.get(ticker, {}) if recommendations else {}
+    # Load fundamentals data
+    fundamentals_data = load_pickle('fundamentals_data.pkl')
+    fundamentals = fundamentals_data.get(ticker, {}) if fundamentals_data else {}
     
-    return render_template('stock_detail.html',
+    # Load news summary
+    news_summary = load_news_summary(ticker)
+
+    return render_template('stock_detail.html', 
                           ticker=ticker,
-                          stock_data=ticker_stock_data,
-                          news=ticker_news,
-                          fundamentals=ticker_fundamentals,
-                          recommendation=ticker_recommendation)
+                          stock_data=ticker_data,
+                          news=news,
+                          recommendation=recommendation,
+                          fundamentals=fundamentals,
+                          news_summary=news_summary)
 
 @app.route('/api/stock_chart/<ticker>')
 def stock_chart_data(ticker):
@@ -239,6 +264,26 @@ def stock_chart_data(ticker):
         chart_data = history
     
     return jsonify(chart_data)
+
+@app.route('/refresh_summary/<ticker>')
+def refresh_summary(ticker):
+    """Generate a fresh news summary for a ticker"""
+    # Load news data
+    news_data = load_pickle('news_data.pkl')
+    articles = news_data.get(ticker, []) if news_data else []
+    
+    if not articles:
+        flash(f"No news articles found for {ticker}.", "warning")
+        return redirect(url_for('stock_detail', ticker=ticker))
+    
+    # Initialize the news summarizer
+    summarizer = NewsSummarizer()
+    
+    # Generate the summary
+    summary = summarizer.summarize_news(ticker, articles)
+    
+    flash(f"News summary for {ticker} has been refreshed.", "success")
+    return redirect(url_for('stock_detail', ticker=ticker))
 
 if __name__ == '__main__':
     # Create data directory if it doesn't exist

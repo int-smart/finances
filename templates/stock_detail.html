@@ -60,29 +60,232 @@
 <div class="row mt-4">
     <div class="col-md-6">
         <div class="card data-card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5>Fundamentals</h5>
+                {% if fundamentals and fundamentals|length > 0 %}
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="fundamentalsDateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            Select Date
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="fundamentalsDateDropdown">
+                            {% for date in fundamentals.keys()|sort(reverse=true) %}
+                                <li><a class="dropdown-item fundamentals-date-selector" href="#" data-date="{{ date }}">{{ date }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
             </div>
             <div class="card-body">
-                {% if fundamentals and 'ratios' in fundamentals %}
-                    <div class="table-responsive">
-                        <table class="table table-striped table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Metric</th>
-                                    <th>Value</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for key, value in fundamentals.ratios.items() %}
-                                <tr>
-                                    <td>{{ key }}</td>
-                                    <td>{{ value|round(2) if value is number else value }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                {% if fundamentals and fundamentals|length > 0 %}
+                    {% set latest_date = fundamentals.keys()|sort(reverse=true)|first %}
+                    {% set current_fundamental = fundamentals[latest_date] %}
+                    
+                    <div id="currentFundamentalsDate" class="text-muted text-end mb-3">
+                        <small>Data from {{ latest_date }}</small>
                     </div>
+                    
+                    <div id="fundamentalsContent">
+                        <ul class="nav nav-tabs" id="fundamentalsTabs" role="tablist">
+                            {% if current_fundamental.ratios %}
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="ratios-tab" data-bs-toggle="tab" data-bs-target="#ratios" type="button" role="tab" aria-controls="ratios" aria-selected="true">Ratios</button>
+                            </li>
+                            {% endif %}
+                            {% if current_fundamental['10K_summary'] %}
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link {% if not current_fundamental.ratios %}active{% endif %}" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="false">10-K Summary</button>
+                            </li>
+                            {% endif %}
+                        </ul>
+                        
+                        <div class="tab-content mt-3" id="fundamentalsTabContent">
+                            {% if current_fundamental.ratios %}
+                            <div class="tab-pane fade show active" id="ratios" role="tabpanel" aria-labelledby="ratios-tab">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Metric</th>
+                                                <th>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for key, value in current_fundamental.ratios.items() %}
+                                            <tr>
+                                                <td>{{ key }}</td>
+                                                <td>{{ value|round(2) if value is number else value }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if current_fundamental['10K_summary'] %}
+                            <div class="tab-pane fade {% if not current_fundamental.ratios %}show active{% endif %}" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+                                <div class="10k-summary">
+                                    <h6>Risks:</h6>
+                                    <ul class="list-group">
+                                        {% for risk in current_fundamental['10K_summary'].risks %}
+                                        <li class="list-group-item">{{ risk }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    
+                                    <h6 class="mt-3">Earnings Boosters:</h6>
+                                    <ul class="list-group">
+                                        {% for booster in current_fundamental['10K_summary'].earning_boosters %}
+                                        <li class="list-group-item">{{ booster }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    
+                                    <h6 class="mt-3">Earnings Sinks:</h6>
+                                    <ul class="list-group">
+                                        {% for sink in current_fundamental['10K_summary'].earning_sinks %}
+                                        <li class="list-group-item">{{ sink }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    
+                                    <h6 class="mt-3">Positive Factors:</h6>
+                                    <ul class="list-group">
+                                        {% for factor in current_fundamental['10K_summary'].positive_factors %}
+                                        <li class="list-group-item">{{ factor }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <script>
+                        const fundamentals = {
+                            {% for date, data in fundamentals.items() %}
+                                "{{ date }}": {
+                                    {% if data.ratios %}
+                                    ratios: {
+                                        {% for key, value in data.ratios.items() %}
+                                            "{{ key }}": {% if value is number %}{{ value }}{% else %}"{{ value|safe }}"{% endif %},
+                                        {% endfor %}
+                                    },
+                                    {% endif %}
+                                    {% if data['10K_summary'] %}
+                                    "10K_summary": {
+                                        risks: {{ data['10K_summary'].risks|tojson }},
+                                        earning_boosters: {{ data['10K_summary'].earning_boosters|tojson }},
+                                        earning_sinks: {{ data['10K_summary'].earning_sinks|tojson }},
+                                        positive_factors: {{ data['10K_summary'].positive_factors|tojson }}
+                                    }
+                                    {% endif %}
+                                },
+                            {% endfor %}
+                        };
+                        
+                        // Function to update the fundamentals content
+                        function updateFundamentals(date) {
+                            const data = fundamentals[date];
+                            if (!data) return;
+                            document.getElementById('currentFundamentalsDate').innerHTML = `<small>Data from ${date}</small>`;
+                            
+                            // Create tabs based on available data
+                            let tabsHtml = '';
+                            let contentHtml = '';
+                            
+                            if (data.ratios) {
+                                tabsHtml += `
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="ratios-tab" data-bs-toggle="tab" data-bs-target="#ratios" type="button" role="tab" aria-controls="ratios" aria-selected="true">Ratios</button>
+                                    </li>
+                                `;
+                                
+                                // Create ratios table
+                                let ratiosRows = '';
+                                for (const [key, value] of Object.entries(data.ratios)) {
+                                    const displayValue = typeof value === 'number' ? value.toFixed(2) : value;
+                                    ratiosRows += `<tr><td>${key}</td><td>${displayValue}</td></tr>`;
+                                }
+                                
+                                contentHtml += `
+                                    <div class="tab-pane fade show active" id="ratios" role="tabpanel" aria-labelledby="ratios-tab">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Metric</th>
+                                                        <th>Value</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${ratiosRows}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                            
+                            if (data["10K_summary"]) {
+                                const isActive = !data.ratios;
+                                tabsHtml += `
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link ${isActive ? 'active' : ''}" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="${isActive}">10-K Summary</button>
+                                    </li>
+                                `;
+                                
+                                const summary = data["10K_summary"];
+                                contentHtml += `
+                                    <div class="tab-pane fade ${isActive ? 'show active' : ''}" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+                                        <div class="10k-summary">
+                                            <h6>Risks:</h6>
+                                            <ul class="list-group">
+                                                ${summary.risks.map(risk => `<li class="list-group-item">${risk}</li>`).join('')}
+                                            </ul>
+                                            
+                                            <h6 class="mt-3">Earnings Boosters:</h6>
+                                            <ul class="list-group">
+                                                ${summary.earning_boosters.map(booster => `<li class="list-group-item">${booster}</li>`).join('')}
+                                            </ul>
+                                            
+                                            <h6 class="mt-3">Earnings Sinks:</h6>
+                                            <ul class="list-group">
+                                                ${summary.earning_sinks.map(sink => `<li class="list-group-item">${sink}</li>`).join('')}
+                                            </ul>
+                                            
+                                            <h6 class="mt-3">Positive Factors:</h6>
+                                            <ul class="list-group">
+                                                ${summary.positive_factors.map(factor => `<li class="list-group-item">${factor}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                            
+                            const fundamentalsContent = document.getElementById('fundamentalsContent');
+                            fundamentalsContent.innerHTML = `
+                                <ul class="nav nav-tabs" id="fundamentalsTabs" role="tablist">
+                                    ${tabsHtml}
+                                </ul>
+                                <div class="tab-content mt-3" id="fundamentalsTabContent">
+                                    ${contentHtml}
+                                </div>
+                            `;
+                            
+                            // Reinitialize Bootstrap tabs
+                            new bootstrap.Tab(document.querySelector('#fundamentalsTabs .nav-link.active')).show();
+                        }
+                        
+                        // Add event listeners to date selectors
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const dateSelectors = document.querySelectorAll('.fundamentals-date-selector');
+                            dateSelectors.forEach(selector => {
+                                selector.addEventListener('click', function(event) {
+                                    event.preventDefault();
+                                    const date = this.getAttribute('data-date');
+                                    updateFundamentals(date);
+                                });
+                            });
+                        });
+                    </script>
                 {% else %}
                     <p>No fundamental data available for {{ ticker }}.</p>
                 {% endif %}
@@ -116,6 +319,160 @@
                     </ul>
                 {% else %}
                     <p>No news available for {{ ticker }}.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card data-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>News Summary</h5>
+                {% if news_summary and news_summary|length > 0 %}
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="summaryDateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            Select Date
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="summaryDateDropdown">
+                            {% for date in news_summary.keys()|sort(reverse=true) %}
+                                <li><a class="dropdown-item summary-date-selector" href="#" data-date="{{ date }}">{{ date }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if news_summary and news_summary|length > 0 %}
+                    {% set latest_date = news_summary.keys()|sort(reverse=true)|first %}
+                    {% set display_summary = news_summary[latest_date] %}
+                    
+                    <div id="currentSummaryDate" class="text-muted text-end mb-3">
+                        <small>Summary from {{ latest_date }}</small>
+                    </div>
+                    
+                    <div id="summaryContent">
+                        <div class="mb-3">
+                            <h6>Key Developments</h6>
+                            <p>{{ display_summary.summary }}</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6>Positive Factors</h6>
+                            <ul class="list-group">
+                                {% for factor in display_summary.positive_factors %}
+                                    <li class="list-group-item list-group-item-success">{{ factor }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6>Negative Factors</h6>
+                            <ul class="list-group">
+                                {% for factor in display_summary.negative_factors %}
+                                    <li class="list-group-item list-group-item-danger">{{ factor }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6>Sentiment</h6>
+                            <span class="badge {% if display_summary.sentiment == 'positive' %}bg-success{% elif display_summary.sentiment == 'negative' %}bg-danger{% else %}bg-secondary{% endif %} p-2">
+                                {{ display_summary.sentiment|upper }}
+                            </span>
+                        </div>
+                        
+                        <div>
+                            <h6>Price Impact</h6>
+                            <p>{{ display_summary.price_impact }}</p>
+                        </div>
+                    </div>
+                    
+                    <script>
+                        // Store all summaries in a JavaScript object
+                        const summaries = {
+                            {% for date, summary in news_summary.items() %}
+                                "{{ date }}": {
+                                    summary: `{{ summary.summary|safe }}`,
+                                    positive_factors: [
+                                        {% for factor in summary.positive_factors %}
+                                            `{{ factor|safe }}`,
+                                        {% endfor %}
+                                    ],
+                                    negative_factors: [
+                                        {% for factor in summary.negative_factors %}
+                                            `{{ factor|safe }}`,
+                                        {% endfor %}
+                                    ],
+                                    sentiment: "{{ summary.sentiment }}",
+                                    price_impact: `{{ summary.price_impact|safe }}`
+                                },
+                            {% endfor %}
+                        };
+                        
+                        // Function to update the summary content
+                        function updateSummary(date) {
+                            const summary = summaries[date];
+                            if (!summary) return;
+                            
+                            // Update date display
+                            document.getElementById('currentSummaryDate').innerHTML = `<small>Summary from ${date}</small>`;
+                            
+                            // Update summary content
+                            let content = `
+                                <div class="mb-3">
+                                    <h6>Key Developments</h6>
+                                    <p>${summary.summary}</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h6>Positive Factors</h6>
+                                    <ul class="list-group">
+                                        ${summary.positive_factors.map(factor => 
+                                            `<li class="list-group-item list-group-item-success">${factor}</li>`
+                                        ).join('')}
+                                    </ul>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h6>Negative Factors</h6>
+                                    <ul class="list-group">
+                                        ${summary.negative_factors.map(factor => 
+                                            `<li class="list-group-item list-group-item-danger">${factor}</li>`
+                                        ).join('')}
+                                    </ul>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h6>Sentiment</h6>
+                                    <span class="badge ${summary.sentiment === 'positive' ? 'bg-success' : summary.sentiment === 'negative' ? 'bg-danger' : 'bg-secondary'} p-2">
+                                        ${summary.sentiment.toUpperCase()}
+                                    </span>
+                                </div>
+                                
+                                <div>
+                                    <h6>Price Impact</h6>
+                                    <p>${summary.price_impact}</p>
+                                </div>
+                            `;
+                            
+                            document.getElementById('summaryContent').innerHTML = content;
+                        }
+                        
+                        // Add event listeners to date selectors
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const dateSelectors = document.querySelectorAll('.summary-date-selector');
+                            dateSelectors.forEach(selector => {
+                                selector.addEventListener('click', function(event) {
+                                    event.preventDefault();
+                                    const date = this.getAttribute('data-date');
+                                    updateSummary(date);
+                                });
+                            });
+                        });
+                    </script>
+                {% else %}
+                    <p>No news summary available for {{ ticker }}.</p>
+                    <a href="/refresh_summary/{{ ticker }}" class="btn btn-primary">Generate Summary</a>
                 {% endif %}
             </div>
         </div>

@@ -44,3 +44,5 @@ MAX_ARTICLES_PER_COMPANY = 20
 
 # Waiting time between requests (in seconds) to avoid rate limiting
 REQUEST_DELAY = 1
+
+DATA_DIR = 'data'

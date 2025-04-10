@@ -15,6 +15,7 @@ class NewsSummarizer:
         self.client = Together(api_key=api_key)
         self.model = "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"
         self.summaries_dir = "data/news_summaries"
+        self.summaries = {}
         os.makedirs(self.summaries_dir, exist_ok=True)
     
     def summarize_news(self, ticker, articles):
@@ -79,7 +80,15 @@ class NewsSummarizer:
             
             # Try to parse as JSON
             try:
-                return json.loads(json_str)
+                summary_data = json.loads(json_str)
+                today = datetime.now().strftime("%Y-%m-%d")
+                
+                if ticker not in self.summaries:
+                    self.summaries[ticker] = {}
+                self.summaries[ticker][today] = summary_data
+                
+                self.save_summary(ticker, self.summaries[ticker])
+                return summary_data
             except json.JSONDecodeError as e:
                 print(f"Error parsing JSON: {e}")
                 return {"text": text, "error": str(e)}
@@ -89,8 +98,7 @@ class NewsSummarizer:
     
     def save_summary(self, ticker, summary):
         """Save news summary to a file"""
-        today = datetime.now().strftime("%Y-%m-%d")
-        filename = f"{self.summaries_dir}/{ticker}_{today}.pkl"
+        filename = f"{self.summaries_dir}/{ticker}.pkl"
         
         with open(filename, 'wb') as f:
             pickle.dump(summary, f)
