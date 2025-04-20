@@ -9,6 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 from src.config import SEC_API_HEADERS, REQUEST_DELAY
 import time
+import pickle
 
 class FundamentalsTracker:
     def __init__(self):
@@ -311,11 +312,28 @@ class FundamentalsTracker:
         
         return substantive_blocks
 
-    def analyze_all_companies(self, companies):
+    def analyze_all_companies(self, tickers):
         """Analyze fundamentals for all given companies"""
-        for ticker in companies:
+        for ticker in tickers:
             self.get_financial_ratios(ticker)
             self.get_annual_report_links(ticker)
             self.summarize_10k(ticker)
-        
         return self.fundamentals
+    
+    def save_data(self, filepath="data/fundamentals_data.pkl"):
+        """Save the tracked data to a pickle file"""
+        try:
+            if os.path.exists(filepath):
+                with open(filepath, 'rb') as f:
+                    existing_data = pickle.load(f)
+                    for ticker, data in self.fundamentals.items():
+                        if ticker not in existing_data:
+                            existing_data[ticker] = data
+                        else:
+                            existing_data[ticker].update(data)        
+            with open(filepath, 'wb') as f:
+                pickle.dump(existing_data, f)
+        except Exception as e:
+            print(f"Error handling fundamentals data file: {e}")
+            with open(filepath, 'wb') as f:
+                pickle.dump(self.fundamentals, f)

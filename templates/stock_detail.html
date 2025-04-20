@@ -39,13 +39,19 @@
                         <h6>Positive Factors:</h6>
                         <ul class="list-group">
                             {% for factor in recommendation.news_positive_factors %}
-                            <li class="list-group-item">{{ factor }}</li>
+                            <li class="list-group-item">
+                                <h6>{{ factor.factor }}</h6>
+                                <p>{{ factor.metrics }}</p>
+                            </li>
                             {% endfor %}
                         </ul>
                         <h6 class="mt-2">Negative Factors:</h6>
                         <ul class="list-group">
                             {% for factor in recommendation.news_negative_factors %}
-                            <li class="list-group-item">{{ factor }}</li>
+                            <li class="list-group-item">
+                                <h6>{{ factor.factor }}</h6>
+                                <p>{{ factor.metrics }}</p>
+                            </li>
                             {% endfor %}
                         </ul>
                     </div>
@@ -360,7 +366,10 @@
                             <h6>Positive Factors</h6>
                             <ul class="list-group">
                                 {% for factor in display_summary.positive_factors %}
-                                    <li class="list-group-item list-group-item-success">{{ factor }}</li>
+                                    <li class="list-group-item list-group-item-success">
+                                        <h6>{{ factor.factor }}</h6>
+                                        <p>{{ factor.metrics }}</p>
+                                    </li>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -369,7 +378,10 @@
                             <h6>Negative Factors</h6>
                             <ul class="list-group">
                                 {% for factor in display_summary.negative_factors %}
-                                    <li class="list-group-item list-group-item-danger">{{ factor }}</li>
+                                    <li class="list-group-item list-group-item-danger">
+                                        <h6>{{ factor.factor }}</h6>
+                                        <p>{{ factor.metrics }}</p>
+                                    </li>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -395,12 +407,18 @@
                                     summary: `{{ summary.summary|safe }}`,
                                     positive_factors: [
                                         {% for factor in summary.positive_factors %}
-                                            `{{ factor|safe }}`,
+                                            {
+                                                factor: `{{ factor.factor|safe }}`,
+                                                metrics: `{{ factor.metrics|safe }}`
+                                            },
                                         {% endfor %}
                                     ],
                                     negative_factors: [
                                         {% for factor in summary.negative_factors %}
-                                            `{{ factor|safe }}`,
+                                            {
+                                                factor: `{{ factor.factor|safe }}`,
+                                                metrics: `{{ factor.metrics|safe }}`
+                                            },
                                         {% endfor %}
                                     ],
                                     sentiment: "{{ summary.sentiment }}",
@@ -428,7 +446,7 @@
                                     <h6>Positive Factors</h6>
                                     <ul class="list-group">
                                         ${summary.positive_factors.map(factor => 
-                                            `<li class="list-group-item list-group-item-success">${factor}</li>`
+                                            `<li class="list-group-item list-group-item-success"><h6>${factor.factor}</h6><p>${factor.metrics}</p></li>`
                                         ).join('')}
                                     </ul>
                                 </div>
@@ -437,7 +455,7 @@
                                     <h6>Negative Factors</h6>
                                     <ul class="list-group">
                                         ${summary.negative_factors.map(factor => 
-                                            `<li class="list-group-item list-group-item-danger">${factor}</li>`
+                                            `<li class="list-group-item list-group-item-danger"><h6>${factor.factor}</h6><p>${factor.metrics}</p></li>`
                                         ).join('')}
                                     </ul>
                                 </div>

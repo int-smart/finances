@@ -10,6 +10,7 @@
 # }
 INVESTORS = {
     "Warren Buffett (Berkshire Hathaway)": "0001067983",
+    "Michael Burry (Scion Asset Management)": "0001649339",
     # "Ray Dalio (Bridgewater)": "0001350694",
     "Bill Ackman (Pershing Square)": "0001336528",
     # "Jim Simons (Renaissance Technologies)": "0001037389",

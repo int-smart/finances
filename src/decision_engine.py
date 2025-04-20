@@ -8,8 +8,8 @@ from src.news_summarizer import NewsSummarizer
 
 class DecisionEngine:
     def __init__(self, investor_data=None, news_data=None, stock_data=None, fundamentals_data=None):
-        self.investor_data = investor_data or {}
-        self.news_data = news_data or {}
+        self.investor_data = investor_data.get(max(investor_data.keys())) if investor_data else {}
+        self.news_data = news_data.get(max(news_data.keys())) if news_data else {}        
         self.stock_data = stock_data or {}
         self.fundamentals_data = fundamentals_data or {}
         self.recommendations = {}
@@ -82,8 +82,8 @@ class DecisionEngine:
             
             # Extract sentiment from the summary result
             if isinstance(summary_result, dict):
-                sentiment_value = summary_result.get('sentiment', 'NEUTRAL')
-                
+                sentiment_value = summary_result.get('sentiment', {})
+                print(sentiment_value)
                 # Standardize sentiment values
                 if sentiment_value.lower() in ['positive', 'bullish', 'optimistic']:
                     sentiment = 'POSITIVE'

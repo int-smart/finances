@@ -56,20 +56,25 @@ class StockTracker:
             print(f"Error fetching data for {commodity}: {e}")
             return None
     
-    def track(self, period="1y", interval="1d"):
+    def track(self, tickers=None, commodities=None, period="1y", interval="1d"):
         """Collect data for all configured companies and commodities"""
+        if not tickers:
+            tickers = self.companies
+        if not commodities:
+            commodities = self.commodities
+
         # Collect company data
-        for ticker in self.companies:
+        for ticker in tickers:
             self.get_stock_data(ticker, period, interval)
         
         # Collect commodity data
-        for commodity in self.commodities:
+        for commodity in commodities:
             self.get_commodity_data(commodity, period, interval)
 
         summary = self.get_summary_stats()
-        for ticker in self.companies:
+        for ticker in tickers:
             self.stock_data[ticker].update(summary["stocks"][ticker])
-        for commodity in self.commodities:
+        for commodity in commodities:
             self.commodity_data[commodity].update(summary["commodities"][commodity])
         
         return {

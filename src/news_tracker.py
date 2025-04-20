@@ -12,6 +12,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from datetime import datetime
+import pickle
 
 
 load_dotenv()
@@ -130,12 +131,12 @@ class NewsTracker:
         """Scrape Yahoo Finance articles about a company"""
         print(f"Scraping Yahoo Finance for news about {company}...")
         search_url = f"https://finance.yahoo.com/quote/{company}/news"
-        
-        self.driver.get(search_url)
-        time.sleep(REQUEST_DELAY)  # Allow time for the page to load
 
         articles = []
         try:
+            self.driver.get(search_url)
+            time.sleep(REQUEST_DELAY)  # Allow time for the page to load
+            
             # Accept cookies if a consent dialog appears
             try:
                 consent_button = WebDriverWait(self.driver, 5).until(
@@ -190,9 +191,11 @@ class NewsTracker:
                     if "retry" in str(e).lower():
                         print(f"Retry error encountered, aborting article processing: {e}")
                         break
-                    raise e
+                    print(e)
                     
         except Exception as e:
+            import pdb
+            pdb.set_trace()
             print(f"Error scraping Yahoo Finance for {company}: {e}")
         
         return articles
@@ -392,22 +395,24 @@ class NewsTracker:
             
         return self.articles
 
-    def track(self):
+    def track(self, tickers=None):
         print("\n" + "-" * 80)
         print("Scraping news articles...")
-        
+        if not tickers:
+            tickers = self.tickers
+        self.articles = {}
         try:
-            news_data = self.get_news_for_tickers(self.tickers)
+            self.get_news_for_tickers(self.tickers)
             
             print("\nRecent news:")
-            for ticker, articles in news_data.items():
+            for ticker, articles in self.articles.items():
                 print(f"\n{ticker}:")
                 for article in articles[:3]:  # Show top 3 articles
                     print(f"  {article['headline']}")
                     print(f"  {article['summary'][:100]}...")
                     if 'full_content' in article:
                         print(f"  {article['full_content'][:100]}...")        
-            return news_data
+            return self.articles
         finally:
             self.close()        
     
@@ -453,3 +458,24 @@ class NewsTracker:
         except requests.exceptions.RequestException as e:
             print(f"Error fetching news from FMP API: {e}")
             return []
+    
+    def save_data(self, filepath="data/news_data.pkl"):
+        """Save the tracked data to a pickle file"""
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        new_data = {
+            current_date: self.articles
+        }
+        
+        if os.path.exists(filepath):
+            with open(filepath, 'rb') as f:
+                existing_data = pickle.load(f)
+                existing_data.update(new_data)
+            with open(filepath, 'wb') as f:
+                pickle.dump(existing_data, f)
+        else:
+            with open(filepath, 'wb') as f:
+                pickle.dump(new_data, f)
+        
+        print(f"News data saved to {filepath}")

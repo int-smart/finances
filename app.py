@@ -1,7 +1,7 @@
 import os
 import pickle
 import pandas as pd
-import plotly.express as px
+import plotly.express as pxb
 import plotly.graph_objects as go
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 from datetime import datetime
@@ -92,34 +92,39 @@ def index():
 def refresh_data():
     """Refresh all data or specific data types"""
     data_type = request.form.get('data_type', 'all')
-    
-    if data_type == 'stock' or data_type == 'all':
-        # Refresh stock data
-        stock_tracker = StockTracker()
-        stock_data = stock_tracker.track()
-        with open(os.path.join(app.config['DATA_DIR'], 'stock_data.pkl'), 'wb') as f:
-            pickle.dump(stock_data, f)
-    
+    tickers = COMPANIES
+    # # Refresh investor data
+    # for investor, data in investor_tracker.holdings_data.items():
+    #     for quarter, companies in data.items():
+    #         for company in companies:
+    #             ticker = find_ticker(company)
+    #             tickers.append(ticker)
+    # print(investor_tracker.holdings_data)
     if data_type == 'investor' or data_type == 'all':
-        # Refresh investor data
         investor_tracker = InvestorTracker()
         investor_tracker.track_all_investors()
         investor_tracker.identify_position_changes()
         investor_tracker.save_data(os.path.join(app.config['DATA_DIR'], 'investor_data.pkl'))
-    
+
+    if data_type == 'stock' or data_type == 'all':
+        # Refresh stock data
+        stock_tracker = StockTracker()
+        stock_data = stock_tracker.track(tickers=tickers)
+        with open(os.path.join(app.config['DATA_DIR'], 'stock_data.pkl'), 'wb') as f:
+            pickle.dump(stock_data, f)
+        
     if data_type == 'news' or data_type == 'all':
         # Refresh news data
         news_tracker = NewsTracker()
-        news_data = news_tracker.track()
-        with open(os.path.join(app.config['DATA_DIR'], 'news_data.pkl'), 'wb') as f:
-            pickle.dump(news_data, f)
+        news_data = news_tracker.track(tickers=tickers)
+        news_tracker.save_data(os.path.join(app.config['DATA_DIR'], 'news_data.pkl'))
+
     
-    if data_type == 'fundamentals' or data_type == 'all':
+    if data_type == 'fundamentals':
         # Refresh fundamentals data
         fundamentals_tracker = FundamentalsTracker()
-        fundamentals_data = fundamentals_tracker.analyze_all_companies(COMPANIES)
-        with open(os.path.join(app.config['DATA_DIR'], 'fundamentals_data.pkl'), 'wb') as f:
-            pickle.dump(fundamentals_data, f)
+        fundamentals_data = fundamentals_tracker.analyze_all_companies(tickers=tickers)
+        fundamentals_tracker.save_data(os.path.join(app.config['DATA_DIR'], 'fundamentals_data.pkl'))
     
     if data_type == 'recommendations' or data_type == 'all':
         # Generate new recommendations
@@ -144,14 +149,52 @@ def stocks():
 @app.route('/investors')
 def investors():
     """Investor data page"""
-    investor_data = load_pickle('investor_data.pkl')
-    return render_template('investors.html', investor_data=investor_data, investors=INVESTORS)
+    investor_data_history = load_pickle('investor_data.pkl')
+    
+    # Get all available dates from the history
+    available_dates = []
+    if investor_data_history:
+        available_dates = sorted(investor_data_history.keys(), reverse=True)
+        
+    # Get selected date from query parameter, default to most recent
+    selected_date = request.args.get('date', None)
+    
+    # If no date is selected or the selected date doesn't exist, use the most recent
+    if not selected_date or selected_date not in available_dates:
+        selected_date = available_dates[0] if available_dates else None
+        
+    # Get the data for the selected date
+    investor_data = investor_data_history.get(selected_date, {}) if selected_date else {}
+    return render_template('investors.html', 
+                          investor_data=investor_data, 
+                          investors=INVESTORS,
+                          available_dates=available_dates,
+                          selected_date=selected_date)
 
 @app.route('/news')
 def news():
     """News data page"""
-    news_data = load_pickle('news_data.pkl')
-    return render_template('news.html', news_data=news_data)
+    news_data_history = load_pickle('news_data.pkl')
+    
+    # Get all available dates from the history
+    available_dates = []
+    if news_data_history:
+        available_dates = sorted(news_data_history.keys(), reverse=True)
+        
+    # Get selected date from query parameter, default to most recent
+    selected_date = request.args.get('date', None)
+    
+    # If no date is selected or the selected date doesn't exist, use the most recent
+    if not selected_date or selected_date not in available_dates:
+        selected_date = available_dates[0] if available_dates else None
+        
+    # Get the data for the selected date
+    news_data = news_data_history.get(selected_date, {}) if selected_date else {}
+    
+    return render_template('news.html', 
+                          news_data=news_data,
+                          available_dates=available_dates,
+                          selected_date=selected_date)
 
 @app.route('/fundamentals')
 def fundamentals():
@@ -220,7 +263,10 @@ def stock_detail(ticker):
     ticker_data = stock_data.get('stocks', {}).get(ticker, {}) if stock_data else {}
     
     # Load news data
-    news_data = load_pickle('news_data.pkl')
+    news_data_history = load_pickle('news_data.pkl')
+    if news_data_history:
+        latest_date = max(news_data_history.keys()) if news_data_history.keys() else None
+        news_data = news_data_history[latest_date] if latest_date else {}
     news = news_data.get(ticker, []) if news_data else []
     
     # Load recommendations data
@@ -269,7 +315,10 @@ def stock_chart_data(ticker):
 def refresh_summary(ticker):
     """Generate a fresh news summary for a ticker"""
     # Load news data
-    news_data = load_pickle('news_data.pkl')
+    news_data_history = load_pickle('news_data.pkl')
+    if news_data_history:
+        latest_date = max(news_data_history.keys()) if news_data_history.keys() else None
+        news_data = news_data_history[latest_date] if latest_date else {}
     articles = news_data.get(ticker, []) if news_data else []
     
     if not articles:

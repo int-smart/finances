@@ -4,6 +4,43 @@
 
 {% block content %}
 
+<!-- Date selector -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Select News Date</h5>
+            </div>
+            <div class="card-body">
+                {% if available_dates %}
+                <form method="get" action="{{ url_for('news') }}" class="d-flex">
+                    <select name="date" class="form-select me-2">
+                        {% for date in available_dates %}
+                        <option value="{{ date }}" {% if date == selected_date %}selected{% endif %}>
+                            {{ date }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary">View</button>
+                </form>
+                {% else %}
+                <p>No historical news data available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Currently Viewing</h5>
+            </div>
+            <div class="card-body">
+                <p>Date: <strong>{{ selected_date or 'No data' }}</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-md-12">
         <div class="card data-card">
@@ -61,7 +98,7 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p>No news data available. Click "Refresh News" to fetch data.</p>
+                    <p>No news data available for the selected date. Click "Refresh News" to fetch data.</p>
                 {% endif %}
             </div>
         </div>

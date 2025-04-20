@@ -62,12 +62,15 @@ class TaskScheduler:
                 "changes": self.investor_tracker.changes
             }
         
+        # for ticker, _ in self.investor_tracker.holdings_data.items():
+        #     self.tickers.append(ticker)
+
         return investor_data
 
     def collect_stock_data(self):
         """Collect stock price data and statistics"""
         print("Collecting stock data...")
-        stock_data = self.stock_tracker.track()
+        stock_data = self.stock_tracker.track(tickers=self.tickers)
         
         with open(f"{self.data_dir}/stock_data.pkl", 'wb') as f:
             pickle.dump(stock_data, f)
@@ -77,11 +80,8 @@ class TaskScheduler:
     def collect_fundamentals(self):
         """Collect and analyze company fundamentals"""
         print("Analyzing company fundamentals...")
-        fundamentals_data = self.fundamentals_tracker.analyze_all_companies(self.tickers)
-        
-        with open(f"{self.data_dir}/fundamentals_data.pkl", 'wb') as f:
-            pickle.dump(fundamentals_data, f)
-        
+        fundamentals_data = self.fundamentals_tracker.analyze_all_companies(tickers=self.tickers)
+        self.fundamentals_tracker.save_data(f"{self.data_dir}/fundamentals_data.pkl")
         return fundamentals_data
     
     def collect_news(self):
@@ -90,15 +90,13 @@ class TaskScheduler:
         
         if not self.skip_news:
             print("Collecting news articles...")
-            news_data = self.news_tracker.track()
-            
-            with open(f"{self.data_dir}/news_data.pkl", 'wb') as f:
-                pickle.dump(news_data, f)
+            news_data = self.news_tracker.track(tickers=self.tickers)
+            self.news_tracker.save_data(f"{self.data_dir}/news_data.pkl")
         else:
             print("Skipping news collection as requested.")
         
         return news_data
-    
+
     def generate_recommendations(self, investor_data, stock_data, fundamentals_data, news_data):
         """Generate investment recommendations based on collected data"""
         print("Generating investment recommendations...")
@@ -243,7 +241,7 @@ class TaskScheduler:
         
         # 1. Track investor positions
         investor_data = self.track_investor_positions()
-        
+        return
         # 2. Collect stock data
         stock_data = self.collect_stock_data()
         
@@ -278,16 +276,16 @@ class TaskScheduler:
         print("- Monthly tasks on the 1st of each month at 10:00 AM")
         
         # Run initial tasks
-        print("Running initial tasks to establish baseline data...")
+        # print("Running initial tasks to establish baseline data...")
         
         # For initial run, decide which tasks to run based on available data
-        if not os.path.exists(f"{self.data_dir}/investor_data.pkl") or \
-           not os.path.exists(f"{self.data_dir}/fundamentals_data.pkl"):
-            # If core data is missing, run monthly tasks
-            self.run_monthly_tasks()
-        else:
-            # Otherwise just run daily tasks
-            self.run_daily_tasks()
+        # if not os.path.exists(f"{self.data_dir}/investor_data.pkl") or \
+        #    not os.path.exists(f"{self.data_dir}/fundamentals_data.pkl"):
+        #     # If core data is missing, run monthly tasks
+        #     self.run_monthly_tasks()
+        # else:
+        #     # Otherwise just run daily tasks
+        #     self.run_daily_tasks()
         
         print("Scheduler running continuously. Press Ctrl+C to exit.")
         
