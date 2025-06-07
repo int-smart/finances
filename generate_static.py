@@ -51,7 +51,6 @@ def generate_static_site():
     
     # Load the latest data
     engine = DecisionEngine()
-    engine.load_data()
     
     # Create static directory
     static_dir = "docs"  # GitHub Pages serves from docs/ folder

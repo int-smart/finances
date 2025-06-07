@@ -17,7 +17,7 @@ INVESTORS = {
     "Mohnish Pabrai (Pabrai Investment Funds)": "0001173334"
 }
 # List of companies to track
-COMPANIES = ["AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "BRK-B", "JPM", "V", "JNJ", "PLTR", "NVDA", "ASML", "QCOM", "INTC"]
+COMPANIES = ["AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "BRK-B", "JPM", "V", "JNJ", "PLTR", "NVDA", "ASML", "QCOM", "INTC", "AMD", "MU", "TSM"]
 # COMPANIES = ["AAPL"]
 
 # List of commodities to track
@@ -44,6 +44,6 @@ QUARTERS_TO_TRACK = 4
 MAX_ARTICLES_PER_COMPANY = 20
 
 # Waiting time between requests (in seconds) to avoid rate limiting
-REQUEST_DELAY = 1
+REQUEST_DELAY = 2
 
 DATA_DIR = 'data'

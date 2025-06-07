@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Investment Dashboard</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="index.html">Home</a>
+                <a class="nav-link active" href="stocks.html">Stocks</a>
+                <a class="nav-link" href="recommendations.html">Recommendations</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card data-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Stock Summary</h5>
+                        <small class="text-muted">Last updated: {{ last_updated }}</small>
+                    </div>
+                    <div class="card-body">
+                        {% if stocks %}
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Ticker</th>
+                                            <th>Latest Price</th>
+                                            <th>1-Day Change</th>
+                                            <th>30-Day Change</th>
+                                            <th>52-Week Low</th>
+                                            <th>52-Week High</th>
+                                            <th>Volume</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ticker, data in stocks.items() %}
+                                        <tr>
+                                            <td><strong>{{ ticker }}</strong></td>
+                                            <td>${{ data.latest_price|round(2) if data.latest_price else 'N/A' }}</td>
+                                            <td class="{% if data.get('1d_change_%', 0) > 0 %}text-success{% elif data.get('1d_change_%', 0) < 0 %}text-danger{% endif %}">
+                                                {{ data.get('1d_change_%', 'N/A')|round(2) if data.get('1d_change_%') else 'N/A' }}%
+                                            </td>
+                                            <td class="{% if data.get('30d_change_%', 0) > 0 %}text-success{% elif data.get('30d_change_%', 0) < 0 %}text-danger{% endif %}">
+                                                {{ data.get('30d_change_%', 'N/A')|round(2) if data.get('30d_change_%') else 'N/A' }}%
+                                            </td>
+                                            <td>${{ data.get('52w_low', 'N/A')|round(2) if data.get('52w_low') else 'N/A' }}</td>
+                                            <td>${{ data.get('52w_high', 'N/A')|round(2) if data.get('52w_high') else 'N/A' }}</td>
+                                            <td>{{ data.get('volume', 'N/A')|int if data.get('volume') else 'N/A' }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info" role="alert">
+                                <h4 class="alert-heading">No Stock Data Available</h4>
+                                <p>Stock data is currently unavailable. This could be due to:</p>
+                                <ul>
+                                    <li>Data collection is still in progress</li>
+                                    <li>API rate limits have been reached</li>
+                                    <li>Network connectivity issues</li>
+                                </ul>
+                                <hr>
+                                <p class="mb-0">The data will be refreshed automatically in the next update cycle.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-light text-center py-3 mt-5">
+        <div class="container">
+            <p>&copy; 2024 Investment Dashboard. Data updated: {{ last_updated }}</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

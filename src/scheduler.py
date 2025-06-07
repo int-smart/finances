@@ -3,7 +3,8 @@ import os
 import pickle
 import time
 import pandas as pd
-from datetime import datetime
+import psutil
+from datetime import datetime, timedelta
 from src.investor_tracker import InvestorTracker
 from src.stock_tracker import StockTracker
 from src.news_tracker import NewsTracker
@@ -62,9 +63,6 @@ class TaskScheduler:
                 "changes": self.investor_tracker.changes
             }
         
-        # for ticker, _ in self.investor_tracker.holdings_data.items():
-        #     self.tickers.append(ticker)
-
         return investor_data
 
     def collect_stock_data(self):
@@ -241,7 +239,7 @@ class TaskScheduler:
         
         # 1. Track investor positions
         investor_data = self.track_investor_positions()
-        return
+
         # 2. Collect stock data
         stock_data = self.collect_stock_data()
         
@@ -264,7 +262,11 @@ class TaskScheduler:
         print(f"Full analysis completed at {datetime.now()}")
     
     def schedule_tasks(self):
-        """Schedule daily and monthly tasks"""
+        """Schedule daily and monthly tasks with startup compensation"""
+        # Check if we missed the daily run due to system being powered off
+        if self.check_missed_daily_run():
+            self.run_daily_tasks()
+        
         # Schedule daily tasks at 8 AM
         schedule.every().day.at("08:00").do(self.run_daily_tasks)
         
@@ -274,18 +276,7 @@ class TaskScheduler:
         print("Scheduled tasks:")
         print("- Daily tasks at 8:00 AM")
         print("- Monthly tasks on the 1st of each month at 10:00 AM")
-        
-        # Run initial tasks
-        # print("Running initial tasks to establish baseline data...")
-        
-        # For initial run, decide which tasks to run based on available data
-        # if not os.path.exists(f"{self.data_dir}/investor_data.pkl") or \
-        #    not os.path.exists(f"{self.data_dir}/fundamentals_data.pkl"):
-        #     # If core data is missing, run monthly tasks
-        #     self.run_monthly_tasks()
-        # else:
-        #     # Otherwise just run daily tasks
-        #     self.run_daily_tasks()
+        print("- Startup compensation for missed daily runs")
         
         print("Scheduler running continuously. Press Ctrl+C to exit.")
         

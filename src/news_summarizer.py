@@ -31,12 +31,12 @@ class NewsSummarizer:
         
         articles_text = "\n".join(formatted_articles)
         
-        prompt = f"""Analyze the following news articles about {ticker} and create a detailed quantitative assessment.
+        prompt = f"""Analyze the following news articles about {ticker} and create a detailed quantitative assessment about the company associated with {ticker}.
 
         Here are the recent news articles:
         {articles_text}
 
-        Please provide:
+        Please provide for the {ticker}:
 
         1. A detailed executive summary (5-7 sentences) that includes specific figures, percentages, or monetary values mentioned in the articles
         2. Key positive developments with quantifiable metrics where available (e.g., "Revenue increased by 15% to $3.2B" rather than just "Revenue increased")
@@ -46,17 +46,17 @@ class NewsSummarizer:
 
         Format your response as JSON with the following structure:
         {{
-        "summary": "Comprehensive analysis with specific figures and details",
+        "summary": "Comprehensive analysis with specific figures and details for the {ticker}",
         "positive_factors": [
-            {{"factor": "Description of positive factor 1", "metrics": "Specific numbers/percentages"}},
-            {{"factor": "Description of positive factor 2", "metrics": "Specific numbers/percentages"}}
+            {{"factor": "Description of positive factor 1 for the {ticker}", "metrics": "Specific numbers/percentages"}},
+            {{"factor": "Description of positive factor 2 for the {ticker}", "metrics": "Specific numbers/percentages"}}
         ],
         "negative_factors": [
-            {{"factor": "Description of negative factor 1", "metrics": "Specific numbers/percentages"}},
-            {{"factor": "Description of negative factor 2", "metrics": "Specific numbers/percentages"}}
+            {{"factor": "Description of negative factor 1 for the {ticker}", "metrics": "Specific numbers/percentages"}},
+            {{"factor": "Description of negative factor 2 for the {ticker}", "metrics": "Specific numbers/percentages"}}
         ],
         "sentiment": "positive/negative/neutral/mixed",
-        "price_impact": "likely impact on price"        
+        "price_impact": "likely impact on price for the {ticker}"        
     }}"""
 
         try:
