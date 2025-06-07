@@ -5,7 +5,7 @@ on:
     - cron: '0 5 * * *'  # Daily at 9 PM PST (5 AM UTC)
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   update-and-deploy:
