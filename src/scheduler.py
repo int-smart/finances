@@ -3,7 +3,6 @@ import os
 import pickle
 import time
 import pandas as pd
-import psutil
 from datetime import datetime, timedelta
 from src.investor_tracker import InvestorTracker
 from src.stock_tracker import StockTracker
