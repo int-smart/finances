@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Investment Analyzer - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="index.html">Financial Investment Analyzer</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="index.html">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="stocks.html">Stocks</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="recommendations.html">Recommendations</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <h1>Dashboard</h1>
+        <p class="text-muted">Last updated: {{ last_updated or moment().format('YYYY-MM-DD HH:mm:ss') }}</p>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card data-card">
+                    <div class="card-header">
+                        <h5>Data Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Stock Data
+                                <span class="badge {% if stock_data_fresh %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                                    {% if stock_data_fresh %}Fresh{% else %}Stale{% endif %}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Investor Data
+                                <span class="badge {% if investor_data_fresh %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                                    {% if investor_data_fresh %}Fresh{% else %}Stale{% endif %}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                News Data
+                                <span class="badge {% if news_data_fresh %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                                    {% if news_data_fresh %}Fresh{% else %}Stale{% endif %}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Fundamentals Data
+                                <span class="badge {% if fundamentals_data_fresh %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                                    {% if fundamentals_data_fresh %}Fresh{% else %}Stale{% endif %}
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Recommendations
+                                <span class="badge {% if recommendations_fresh %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                                    {% if recommendations_fresh %}Fresh{% else %}Stale{% endif %}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if historical_dates %}
+        <div class="card mb-4 mt-4">
+            <div class="card-header">
+                <h5>Historical Recommendations</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" class="mb-3" id="historicalForm">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <select name="date" class="form-select" id="dateSelect">
+                                <option value="">Latest Recommendations</option>
+                                {% for date in historical_dates %}
+                                <option value="{{ date }}" {% if date == selected_date %}selected{% endif %}>
+                                    {{ date }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-primary" onclick="loadHistoricalData()">View Selected Date</button>
+                        </div>
+                    </div>
+                </form>
+                {% if selected_date %}
+                <div class="alert alert-info">
+                    Showing recommendations from: <strong>{{ selected_date }}</strong>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card data-card">
+                    <div class="card-header">
+                        <h5>Top Recommendations</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recommendations %}
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Ticker</th>
+                                            <th>Recommendation</th>
+                                            <th>Score</th>
+                                            <th>Investor Consensus</th>
+                                            <th>News Sentiment</th>
+                                            <th>Valuation</th>
+                                            <th>Price Trend</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recommendationsTableBody">
+                                        {% for ticker, rec in recommendations.items() %}
+                                        <tr>
+                                            <td><a href="#" onclick="showStockDetails('{{ ticker }}')">{{ ticker }}</a></td>
+                                            <td class="{% if 'BUY' in rec.final_recommendation %}recommendation-buy{% elif 'SELL' in rec.final_recommendation %}recommendation-sell{% else %}recommendation-hold{% endif %}">
+                                                {{ rec.final_recommendation }}
+                                            </td>
+                                            <td>{{ rec.score }}</td>
+                                            <td>{{ rec.investor_consensus }}</td>
+                                            <td>{{ rec.news_sentiment }}</td>
+                                            <td>{{ rec.valuation }}</td>
+                                            <td>{{ rec.price_trend }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p>No recommendations available. The system will generate new recommendations on the next scheduled update.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Details Modal -->
+        <div class="modal fade" id="stockModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="stockModalTitle">Stock Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="stockModalBody">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Store all recommendations data for filtering
+        const allRecommendations = {{ recommendations|tojson if recommendations else '{}' }};
+        const historicalData = {{ historical_recommendations|tojson if historical_recommendations else '{}' }};
+
+        function loadHistoricalData() {
+            const selectedDate = document.getElementById('dateSelect').value;
+            const tableBody = document.getElementById('recommendationsTableBody');
+            
+            if (!selectedDate) {
+                // Show latest recommendations
+                updateRecommendationsTable(allRecommendations);
+                return;
+            }
+
+            // Load historical recommendations for selected date
+            if (historicalData[selectedDate]) {
+                updateRecommendationsTable(historicalData[selectedDate]);
+                
+                // Update the info alert
+                const existingAlert = document.querySelector('.alert-info');
+                if (existingAlert) {
+                    existingAlert.innerHTML = `Showing recommendations from: <strong>${selectedDate}</strong>`;
+                } else {
+                    // Create new alert
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-info';
+                    alertDiv.innerHTML = `Showing recommendations from: <strong>${selectedDate}</strong>`;
+                    document.querySelector('#historicalForm').parentNode.appendChild(alertDiv);
+                }
+            }
+        }
+
+        function updateRecommendationsTable(recommendations) {
+            const tableBody = document.getElementById('recommendationsTableBody');
+            tableBody.innerHTML = '';
+
+            for (const [ticker, rec] of Object.entries(recommendations)) {
+                const row = document.createElement('tr');
+                
+                let recommendationClass = 'recommendation-hold';
+                if (rec.final_recommendation && rec.final_recommendation.includes('BUY')) {
+                    recommendationClass = 'recommendation-buy';
+                } else if (rec.final_recommendation && rec.final_recommendation.includes('SELL')) {
+                    recommendationClass = 'recommendation-sell';
+                }
+
+                row.innerHTML = `
+                    <td><a href="#" onclick="showStockDetails('${ticker}')">${ticker}</a></td>
+                    <td class="${recommendationClass}">${rec.final_recommendation || 'N/A'}</td>
+                    <td>${rec.score || 'N/A'}</td>
+                    <td>${rec.investor_consensus || 'N/A'}</td>
+                    <td>${rec.news_sentiment || 'N/A'}</td>
+                    <td>${rec.valuation || 'N/A'}</td>
+                    <td>${rec.price_trend || 'N/A'}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            }
+        }
+
+        function showStockDetails(ticker) {
+            // For static site, we'll show a simple modal with available data
+            const modal = new bootstrap.Modal(document.getElementById('stockModal'));
+            document.getElementById('stockModalTitle').textContent = `${ticker} - Stock Details`;
+            
+            const rec = allRecommendations[ticker];
+            if (rec) {
+                document.getElementById('stockModalBody').innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Recommendation Details</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><strong>Final Recommendation:</strong> ${rec.final_recommendation || 'N/A'}</li>
+                                <li class="list-group-item"><strong>Score:</strong> ${rec.score || 'N/A'}</li>
+                                <li class="list-group-item"><strong>Investor Consensus:</strong> ${rec.investor_consensus || 'N/A'}</li>
+                                <li class="list-group-item"><strong>News Sentiment:</strong> ${rec.news_sentiment || 'N/A'}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Analysis Details</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><strong>Valuation:</strong> ${rec.valuation || 'N/A'}</li>
+                                <li class="list-group-item"><strong>Price Trend:</strong> ${rec.price_trend || 'N/A'}</li>
+                                <li class="list-group-item"><strong>Technical Score:</strong> ${rec.technical_score || 'N/A'}</li>
+                                <li class="list-group-item"><strong>Fundamental Score:</strong> ${rec.fundamental_score || 'N/A'}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    ${rec.reasoning ? `<div class="mt-3"><h6>Reasoning</h6><p class="text-muted">${rec.reasoning}</p></div>` : ''}
+                `;
+            } else {
+                document.getElementById('stockModalBody').innerHTML = `<p>No detailed information available for ${ticker}.</p>`;
+            }
+            
+            modal.show();
+        }
+
+        // Auto-refresh page every 5 minutes to check for updates
+        setTimeout(() => {
+            location.reload();
+        }, 5 * 60 * 1000);
+    </script>
+
+    <style>
+        .data-card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            margin-bottom: 1rem;
+        }
+
+        .recommendation-buy {
+            color: #28a745 !important;
+            font-weight: bold;
+        }
+
+        .recommendation-sell {
+            color: #dc3545 !important;
+            font-weight: bold;
+        }
+
+        .recommendation-hold {
+            color: #ffc107 !important;
+            font-weight: bold;
+        }
+
+        .badge.bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .badge.bg-danger {
+            background-color: #dc3545 !important;
+        }
+
+        .badge.bg-warning {
+            background-color: #ffc107 !important;
+            color: #000;
+        }
+
+        .table-sm th, .table-sm td {
+            padding: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: #007bff !important;
+        }
+
+        .card-header h5 {
+            margin: 0;
+            color: #495057;
+        }
+
+        .list-group-item {
+            border-left: none;
+            border-right: none;
+        }
+
+        .list-group-item:first-child {
+            border-top: none;
+        }
+
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+        .text-success {
+            color: #28a745 !important;
+        }
+
+        .text-danger {
+            color: #dc3545 !important;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 0.8rem;
+            }
+            
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
+    </style>
+</body>
+</html>
