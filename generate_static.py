@@ -4,7 +4,7 @@ import pickle
 from datetime import datetime, timedelta
 from flask import Flask, render_template
 from src.decision_engine import DecisionEngine
-from src.run import main as run_data_collection
+from src.storage_helper import GistStorage
 
 def check_data_freshness():
     """Check if data files are fresh (updated within last 24 hours)"""
@@ -39,18 +39,45 @@ def load_historical_recommendations():
             print(f"Error loading historical recommendations: {e}")
     return {}
 
-def generate_static_site():
-    """Generate static HTML files from the Flask app"""
+def load_data_from_cloud():
+    """Load latest data from cloud storage"""
+    storage = GistStorage()
     
-    # First, run the data collection
-    print("Running data collection...")
-    run_data_collection()
+    data = {}
+    data_types = ['stock_data', 'investor_data', 'news_data', 'fundamentals_data', 'recommendations']
+    
+    for data_type in data_types:
+        try:
+            cloud_data = storage.download_pickle(data_type)
+            if cloud_data:
+                data[data_type] = cloud_data
+                print(f"Loaded {data_type} from cloud")
+            else:
+                print(f"Failed to load {data_type} from cloud")
+        except Exception as e:
+            print(f"Error loading {data_type}: {e}")
+    
+    return data
+
+def generate_static_site():
+    """Generate static HTML files from cloud data"""
+    print("Loading data from cloud storage...")
+    cloud_data = load_data_from_cloud()
     
     # Initialize Flask app
     app = Flask(__name__)
     
-    # Load the latest data
-    engine = DecisionEngine()
+    # Initialize DecisionEngine with cloud data
+    engine = DecisionEngine(
+        investor_data=cloud_data.get('investor_data', {}),
+        news_data=cloud_data.get('news_data', {}),
+        stock_data=cloud_data.get('stock_data', {}),
+        fundamentals_data=cloud_data.get('fundamentals_data', {})
+    )
+    
+    # Use recommendations from cloud if available
+    if 'recommendations' in cloud_data:
+        engine.recommendations = cloud_data['recommendations']
     
     # Create static directory
     static_dir = "docs"  # GitHub Pages serves from docs/ folder

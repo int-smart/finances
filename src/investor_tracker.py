@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from src.config import INVESTORS, SEC_API_HEADERS, QUARTERS_TO_TRACK, REQUEST_DELAY
 from lxml import etree
+from src.storage_helper import GistStorage
 
 class InvestorTracker:
     def __init__(self):
@@ -393,3 +394,23 @@ class InvestorTracker:
         except (FileNotFoundError, pickle.UnpicklingError):
             print(f"No valid data found at {filepath}")
             return False
+
+    def save_latest_data(self, filepath="data/investor_data_latest.pkl"):
+        """Save only the latest data (for cloud upload)"""
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        latest_data = {
+            current_date: {
+                "holdings": self.holdings_data,
+                "changes": self.changes,
+                "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+        }
+        
+        with open(filepath, 'wb') as f:
+            pickle.dump(latest_data, f)
+        
+        # Upload to cloud storage
+        storage = GistStorage()
+        storage.upload_pickle(latest_data, 'investor_data')
+        
+        print(f"Latest investor data saved and uploaded")

@@ -13,7 +13,7 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 import pickle
-
+from src.storage_helper import GistStorage
 
 load_dotenv()
 
@@ -194,8 +194,8 @@ class NewsTracker:
                     print(e)
                     
         except Exception as e:
-            import pdb
-            pdb.set_trace()
+            # import pdb
+            # pdb.set_trace()
             print(f"Error scraping Yahoo Finance for {company}: {e}")
         
         return articles
@@ -479,3 +479,19 @@ class NewsTracker:
                 pickle.dump(new_data, f)
         
         print(f"News data saved to {filepath}")
+
+    def save_latest_data(self, filepath="data/news_data_latest.pkl"):
+        """Save only the latest data (for cloud upload)"""
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        latest_data = {
+            current_date: self.articles
+        }
+        
+        with open(filepath, 'wb') as f:
+            pickle.dump(latest_data, f)
+        
+        # Upload to cloud storage
+        storage = GistStorage()
+        storage.upload_pickle(latest_data, 'news_data')
+        
+        print(f"Latest news data saved and uploaded")

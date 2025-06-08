@@ -4,6 +4,9 @@ from src.config import COMPANIES, COMMODITIES, REQUEST_DELAY
 import time
 import os
 from dotenv import load_dotenv
+from src.storage_helper import GistStorage
+from datetime import datetime
+import pickle
 
 load_dotenv()
 class StockTracker:
@@ -185,3 +188,20 @@ class StockTracker:
                 }
         
         return summary
+
+    def save_latest_data(self, filepath="data/stock_data_latest.pkl"):
+        """Save only the latest data (for cloud upload)"""
+        latest_data = {
+            "stocks": self.stock_data,
+            "commodities": self.commodity_data,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        with open(filepath, 'wb') as f:
+            pickle.dump(latest_data, f)
+        
+        # Upload to cloud storage
+        storage = GistStorage()
+        storage.upload_pickle(latest_data, 'stock_data')
+        
+        print(f"Latest stock data saved and uploaded")

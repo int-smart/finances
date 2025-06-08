@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from src.config import SEC_API_HEADERS, REQUEST_DELAY
 import time
 import pickle
+from src.storage_helper import GistStorage
 
 class FundamentalsTracker:
     def __init__(self):
@@ -272,7 +273,7 @@ class FundamentalsTracker:
             text = re.sub(r'<think>.*?</think>', '', summary, flags=re.DOTALL)
             
             # Check if there's a JSON code block
-            json_block_match = re.search(r'```(?:json)?\s*([\s\S]*?)```', text, re.DOTALL)
+            json_block_match = re.search(r'(?:json)?\s*([\s\S]*?)', text, re.DOTALL)
             
             if json_block_match:
                 # Extract the content inside the code block
@@ -337,3 +338,14 @@ class FundamentalsTracker:
             print(f"Error handling fundamentals data file: {e}")
             with open(filepath, 'wb') as f:
                 pickle.dump(self.fundamentals, f)
+    
+    def save_latest_data(self, filepath="data/fundamentals_data_latest.pkl"):
+        """Save only the latest data (for cloud upload)"""
+        with open(filepath, 'wb') as f:
+            pickle.dump(self.fundamentals, f)
+        
+        # Upload to cloud storage
+        storage = GistStorage()
+        storage.upload_pickle(self.fundamentals, 'fundamentals_data')
+        
+        print(f"Latest fundamentals data saved and uploaded")
