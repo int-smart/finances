@@ -41,7 +41,11 @@ def load_historical_recommendations():
 
 def load_data_from_cloud():
     """Load latest data from cloud storage"""
-    storage = GistStorage()
+    try:
+        storage = GistStorage()
+    except ValueError as e:
+        print(f"Error initializing storage: {e}")
+        return {}
     
     data = {}
     data_types = ['stock_data', 'investor_data', 'news_data', 'fundamentals_data', 'recommendations']
@@ -67,56 +71,79 @@ def generate_static_site():
     # Initialize Flask app
     app = Flask(__name__)
     
-    # Initialize DecisionEngine with cloud data
-    engine = DecisionEngine(
-        investor_data=cloud_data.get('investor_data', {}),
-        news_data=cloud_data.get('news_data', {}),
-        stock_data=cloud_data.get('stock_data', {}),
-        fundamentals_data=cloud_data.get('fundamentals_data', {})
-    )
-    
-    # Use recommendations from cloud if available
-    if 'recommendations' in cloud_data:
-        engine.recommendations = cloud_data['recommendations']
-    
     # Create static directory
-    static_dir = "docs"  # GitHub Pages serves from docs/ folder
+    static_dir = "docs"
     os.makedirs(static_dir, exist_ok=True)
     os.makedirs(f"{static_dir}/static", exist_ok=True)
+    
+    # Extract data
+    stock_data = cloud_data.get('stock_data', {})
+    investor_data = cloud_data.get('investor_data', {})
+    news_data = cloud_data.get('news_data', {})
+    fundamentals_data = cloud_data.get('fundamentals_data', {})
+    recommendations = cloud_data.get('recommendations', {})
     
     # Get data freshness status
     freshness_data = check_data_freshness()
     
-    # Load historical data
+    # Load historical recommendations
     historical_recommendations = load_historical_recommendations()
-    historical_dates = sorted(historical_recommendations.keys(), reverse=True)
+    historical_dates = sorted(historical_recommendations.keys(), reverse=True) if historical_recommendations else []
     
     with app.app_context():
+        last_updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
         # Generate index page
-        recommendations = getattr(engine, 'recommendations', {})
         with open(f"{static_dir}/index.html", "w") as f:
             html_content = render_template('static_index.html', 
                                          recommendations=recommendations,
                                          historical_recommendations=historical_recommendations,
                                          historical_dates=historical_dates,
                                          selected_date=None,
-                                         last_updated=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                         last_updated=last_updated,
                                          **freshness_data)
             f.write(html_content)
         
         # Generate stocks page
-        stock_data = getattr(engine, 'stock_data', {})
         with open(f"{static_dir}/stocks.html", "w") as f:
             html_content = render_template('static_stocks.html', 
                                          stocks=stock_data.get('stocks', {}),
-                                         last_updated=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                                         last_updated=last_updated)
             f.write(html_content)
         
         # Generate recommendations page
         with open(f"{static_dir}/recommendations.html", "w") as f:
             html_content = render_template('static_recommendations.html', 
                                          recommendations=recommendations,
-                                         last_updated=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                                         last_updated=last_updated)
+            f.write(html_content)
+        
+        # Generate fundamentals page
+        with open(f"{static_dir}/fundamentals.html", "w") as f:
+            html_content = render_template('static_fundamentals.html', 
+                                         fundamentals_data=fundamentals_data,
+                                         last_updated=last_updated)
+            f.write(html_content)
+        
+        # Generate investors page
+        with open(f"{static_dir}/investors.html", "w") as f:
+            # Extract holdings and changes from investor data
+            investor_holdings = {}
+            investor_changes = {}
+            
+            if investor_data:
+                # Get the most recent date's data
+                if isinstance(investor_data, dict):
+                    latest_date = max(investor_data.keys()) if investor_data.keys() else None
+                    if latest_date:
+                        latest_data = investor_data[latest_date]
+                        investor_holdings = latest_data.get('holdings', {})
+                        investor_changes = latest_data.get('changes', {})
+            
+            html_content = render_template('static_investors.html', 
+                                         investor_holdings=investor_holdings,
+                                         investor_changes=investor_changes,
+                                         last_updated=last_updated)
             f.write(html_content)
     
     # Copy static assets (CSS, JS)
@@ -125,6 +152,12 @@ def generate_static_site():
         shutil.copytree("static", f"{static_dir}/static", dirs_exist_ok=True)
     
     print("Static site generated successfully!")
+    print(f"Generated pages:")
+    print(f"  - index.html")
+    print(f"  - stocks.html")
+    print(f"  - recommendations.html")
+    print(f"  - fundamentals.html")
+    print(f"  - investors.html")
 
 if __name__ == "__main__":
     generate_static_site()
