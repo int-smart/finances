@@ -27,6 +27,7 @@ jobs:
     - name: Set up environment variables
       run: |
         echo "TOKEN_GIST=${{ secrets.TOKEN_GIST }}" >> $GITHUB_ENV
+        echo "TOGETHER_API_KEY=${{ secrets.TOGETHER_API_KEY }}" >> $GITHUB_ENV
     
     - name: Generate static site from cloud data
       run: |
