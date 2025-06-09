@@ -276,23 +276,23 @@ class TaskScheduler:
         """Save and upload all latest data"""
         print("Saving and uploading latest data...")
         
-        # Save latest data from each tracker
-        if hasattr(self, 'stock_tracker'):
-            self.stock_tracker.save_latest_data()
+        # # Save latest data from each tracker
+        # if hasattr(self, 'stock_tracker'):
+        #     self.stock_tracker.save_latest_data()
         
-        if hasattr(self, 'investor_tracker'):
-            self.investor_tracker.save_latest_data()
+        # if hasattr(self, 'investor_tracker'):
+        #     self.investor_tracker.save_latest_data()
         
         if hasattr(self, 'news_tracker'):
             self.news_tracker.save_latest_data()
         
-        if hasattr(self, 'fundamentals_tracker'):
-            self.fundamentals_tracker.save_latest_data()
+        # if hasattr(self, 'fundamentals_tracker'):
+        #     self.fundamentals_tracker.save_latest_data()
         
-        # Upload recommendations
-        if hasattr(self, 'decision_engine') and self.decision_engine.recommendations:
-            storage = GistStorage()
-            storage.upload_pickle(self.decision_engine.recommendations, 'recommendations')
+        # # Upload recommendations
+        # if hasattr(self, 'decision_engine') and self.decision_engine.recommendations:
+        #     storage = GistStorage()
+        #     storage.upload_pickle(self.decision_engine.recommendations, 'recommendations')
             
     def run_monthly_tasks(self):
         """Run tasks that should happen monthly"""
@@ -329,27 +329,27 @@ class TaskScheduler:
         """Run all tasks in one go (for one-time execution)"""
         print(f"Running full analysis at {datetime.now()}")
         
-        # 1. Track investor positions
-        investor_data = self.track_investor_positions()
+        # # 1. Track investor positions
+        # investor_data = self.track_investor_positions()
 
-        # 2. Collect stock data
-        stock_data = self.collect_stock_data()
+        # # 2. Collect stock data
+        # stock_data = self.collect_stock_data()
         
-        # 3. Collect fundamentals
-        fundamentals_data = self.collect_fundamentals()
+        # # 3. Collect fundamentals
+        # fundamentals_data = self.collect_fundamentals()
         
         # 4. Collect news
         news_data = self.collect_news()
         
-        # 5. Generate recommendations
-        recommendations = self.generate_recommendations(
-            investor_data, stock_data, fundamentals_data, news_data
-        )
+        # # 5. Generate recommendations
+        # recommendations = self.generate_recommendations(
+        #     investor_data, stock_data, fundamentals_data, news_data
+        # )
         
-        # 6. Generate report
-        self.generate_report(
-            investor_data, stock_data, fundamentals_data, news_data, recommendations
-        )
+        # # 6. Generate report
+        # self.generate_report(
+        #     investor_data, stock_data, fundamentals_data, news_data, recommendations
+        # )
         
         # 7. Save and upload latest data
         self.save_all_latest_data()

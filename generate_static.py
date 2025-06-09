@@ -108,6 +108,7 @@ def generate_static_site():
         with open(f"{static_dir}/stocks.html", "w") as f:
             html_content = render_template('static_stocks.html', 
                                          stocks=stock_data.get('stocks', {}),
+                                         news_data=news_data,
                                          last_updated=last_updated)
             f.write(html_content)
         
@@ -127,12 +128,10 @@ def generate_static_site():
         
         # Generate investors page
         with open(f"{static_dir}/investors.html", "w") as f:
-            # Extract holdings and changes from investor data
             investor_holdings = {}
             investor_changes = {}
             
             if investor_data:
-                # Get the most recent date's data
                 if isinstance(investor_data, dict):
                     latest_date = max(investor_data.keys()) if investor_data.keys() else None
                     if latest_date:
@@ -143,6 +142,13 @@ def generate_static_site():
             html_content = render_template('static_investors.html', 
                                          investor_holdings=investor_holdings,
                                          investor_changes=investor_changes,
+                                         last_updated=last_updated)
+            f.write(html_content)
+        
+        # Generate news page
+        with open(f"{static_dir}/news.html", "w") as f:
+            html_content = render_template('static_news.html', 
+                                         news_data=news_data,
                                          last_updated=last_updated)
             f.write(html_content)
     
@@ -158,6 +164,7 @@ def generate_static_site():
     print(f"  - recommendations.html")
     print(f"  - fundamentals.html")
     print(f"  - investors.html")
+    print(f"  - news.html")
 
 if __name__ == "__main__":
     generate_static_site()

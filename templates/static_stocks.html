@@ -17,6 +17,7 @@
                 <a class="nav-link" href="recommendations.html">Recommendations</a>
                 <a class="nav-link" href="fundamentals.html">Fundamentals</a>
                 <a class="nav-link" href="investors.html">Investors</a>
+                <a class="nav-link" href="news.html">News</a>
             </div>
         </div>
     </nav>
@@ -42,6 +43,7 @@
                                             <th>52-Week Low</th>
                                             <th>52-Week High</th>
                                             <th>Volume</th>
+                                            <th>News</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -58,11 +60,82 @@
                                             <td>${{ data.get('52w_low', 'N/A')|round(2) if data.get('52w_low') else 'N/A' }}</td>
                                             <td>${{ data.get('52w_high', 'N/A')|round(2) if data.get('52w_high') else 'N/A' }}</td>
                                             <td>{{ data.get('volume', 'N/A')|int if data.get('volume') else 'N/A' }}</td>
+                                            <td>
+                                                {% set news_count = 0 %}
+                                                {% set found_news = false %}
+                                                {% if news_data and not found_news %}
+                                                    {% for date, daily_news in news_data.items() %}
+                                                        {% if ticker in daily_news and not found_news %}
+                                                            {% set news_count = daily_news[ticker]|length %}
+                                                            {% set found_news = true %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endif %}
+                                                
+                                                {% if news_count > 0 %}
+                                                    <button class="btn btn-sm btn-outline-info" onclick="showNews('{{ ticker }}')">
+                                                        {{ news_count }} articles
+                                                    </button>
+                                                {% else %}
+                                                    <span class="text-muted">No recent news</span>
+                                                {% endif %}
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
+                            
+                            {% if news_data %}
+                            <div class="mt-5">
+                                <h6 class="border-bottom pb-2">Recent News Summary</h6>
+                                {% for date, daily_news in news_data.items() %}
+                                    {% for ticker, articles in daily_news.items() %}
+                                        {% if ticker in stocks %}
+                                        <div class="card mb-3" id="news-{{ ticker }}" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">{{ ticker }}</span>
+                                                    Recent News ({{ articles|length }} articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                {% if articles %}
+                                                    {% for article in articles[:3] %}
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            {% if article.link %}
+                                                                <a href="{{ article.link }}" target="_blank" class="text-decoration-none">
+                                                                    {{ article.headline }}
+                                                                </a>
+                                                            {% else %}
+                                                                {{ article.headline }}
+                                                            {% endif %}
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">{{ article.summary[:150] if article.summary else 'No summary available' }}...</p>
+                                                        {% if article.get('source') %}
+                                                        <small class="text-secondary">{{ article.source }}</small>
+                                                        {% endif %}
+                                                    </div>
+                                                    {% endfor %}
+                                                    
+                                                    {% if articles|length > 3 %}
+                                                    <div class="text-center">
+                                                        <a href="news.html#{{ ticker }}" class="btn btn-sm btn-outline-primary">
+                                                            View All {{ articles|length }} Articles
+                                                        </a>
+                                                    </div>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <p class="text-muted">No articles available</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
                         {% else %}
                             <div class="alert alert-info" role="alert">
                                 <h4 class="alert-heading">No Stock Data Available</h4>
@@ -89,5 +162,20 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showNews(ticker) {
+            // Hide all news cards
+            document.querySelectorAll('[id^="news-"]').forEach(card => {
+                card.style.display = 'none';
+            });
+            
+            // Show the selected ticker's news
+            const newsCard = document.getElementById('news-' + ticker);
+            if (newsCard) {
+                newsCard.style.display = 'block';
+                newsCard.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
 </body>
 </html>

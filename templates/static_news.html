@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Investment Dashboard</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="index.html">Home</a>
+                <a class="nav-link" href="stocks.html">Stocks</a>
+                <a class="nav-link" href="recommendations.html">Recommendations</a>
+                <a class="nav-link" href="fundamentals.html">Fundamentals</a>
+                <a class="nav-link" href="investors.html">Investors</a>
+                <a class="nav-link active" href="news.html">News</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card data-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Financial News</h5>
+                        <small class="text-muted">Last updated: {{ last_updated }}</small>
+                    </div>
+                    <div class="card-body">
+                        {% if news_data %}
+                            {% for date, daily_news in news_data.items() %}
+                            <div class="mb-4">
+                                <h5 class="text-primary border-bottom pb-2">{{ date }}</h5>
+                                
+                                {% for ticker, articles in daily_news.items() %}
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <span class="badge bg-primary me-2">{{ ticker }}</span>
+                                            {{ articles|length }} articles
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if articles %}
+                                            {% for article in articles %}
+                                            <div class="news-article mb-3 p-3 border-start border-3 border-secondary">
+                                                <h6 class="news-headline mb-2">
+                                                    {% if article.link %}
+                                                        <a href="{{ article.link }}" target="_blank" class="text-decoration-none">
+                                                            {{ article.headline }}
+                                                            <i class="fas fa-external-link-alt ms-1" style="font-size: 0.8em;"></i>
+                                                        </a>
+                                                    {% else %}
+                                                        {{ article.headline }}
+                                                    {% endif %}
+                                                </h6>
+                                                
+                                                {% if article.summary %}
+                                                <p class="text-muted mb-2">{{ article.summary }}</p>
+                                                {% endif %}
+                                                
+                                                {% if article.get('full_content') and article.full_content|length > 200 %}
+                                                <div class="news-content">
+                                                    <div class="content-preview">
+                                                        <p class="text-secondary small mb-2">{{ article.full_content[:300] }}...</p>
+                                                        <button class="btn btn-sm btn-outline-secondary read-more-btn" onclick="toggleContent(this)">
+                                                            Read More
+                                                        </button>
+                                                    </div>
+                                                    <div class="content-full" style="display: none;">
+                                                        <p class="text-secondary small mb-2">{{ article.full_content }}</p>
+                                                        <button class="btn btn-sm btn-outline-secondary read-less-btn" onclick="toggleContent(this)">
+                                                            Read Less
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                                
+                                                {% if article.get('source') %}
+                                                <small class="text-muted">Source: {{ article.source }}</small>
+                                                {% endif %}
+                                                
+                                                {% if article.get('date') %}
+                                                <small class="text-muted ms-3">{{ article.date }}</small>
+                                                {% endif %}
+                                            </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <p class="text-muted">No articles available for {{ ticker }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="alert alert-info" role="alert">
+                                <h4 class="alert-heading">No News Data Available</h4>
+                                <p>News data is currently unavailable. This could be due to:</p>
+                                <ul>
+                                    <li>Data collection is still in progress</li>
+                                    <li>API rate limits have been reached</li>
+                                    <li>Network connectivity issues</li>
+                                    <li>News sources temporarily unavailable</li>
+                                </ul>
+                                <hr>
+                                <p class="mb-0">The data will be refreshed automatically in the next update cycle.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-light text-center py-3 mt-5">
+        <div class="container">
+            <p>&copy; 2024 Investment Dashboard. Data updated: {{ last_updated }}</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleContent(button) {
+            const newsContent = button.closest('.news-content');
+            const preview = newsContent.querySelector('.content-preview');
+            const full = newsContent.querySelector('.content-full');
+            
+            if (preview.style.display === 'none') {
+                preview.style.display = 'block';
+                full.style.display = 'none';
+            } else {
+                preview.style.display = 'none';
+                full.style.display = 'block';
+            }
+        }
+    </script>
+
+    <style>
+        .news-article {
+            transition: all 0.3s ease;
+        }
+        
+        .news-article:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+        }
+        
+        .news-headline a {
+            color: #495057;
+        }
+        
+        .news-headline a:hover {
+            color: #007bff;
+        }
+        
+        .content-preview, .content-full {
+            transition: all 0.3s ease;
+        }
+        
+        .border-start {
+            border-left-width: 4px !important;
+        }
+    </style>
+</body>
+</html>
