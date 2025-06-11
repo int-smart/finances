@@ -2,102 +2,146 @@ import requests
 import pickle
 import json
 import os
-import base64
-import re
+import tempfile
+import zipfile
 from datetime import datetime
 from dotenv import load_dotenv
 
 # Add this at the top
 load_dotenv()
-class GistStorage:
-    def __init__(self, token=None):
-        # Prioritize gist-specific token
-        self.token = token or os.environ.get('TOKEN_GIST') or os.environ.get('GITHUB_TOKEN')
+
+class GitHubReleaseStorage:
+    def __init__(self, token=None, repo_owner="int-smart", repo_name="finances"):
+        # Prioritize specific tokens and repo info
+        self.token = token or os.environ.get('TOKEN_GIST')
+        self.repo_owner = repo_owner or os.environ.get('GITHUB_REPO_OWNER')
+        self.repo_name = repo_name or os.environ.get('GITHUB_REPO_NAME')
         
         if not self.token:
-            raise ValueError("No GitHub token found. Set GITHUB_TOKEN_GIST environment variable.")
+            raise ValueError("No GitHub token found. Set GITHUB_TOKEN environment variable.")
+        if not self.repo_owner or not self.repo_name:
+            raise ValueError("Repository info missing. Set GITHUB_REPO_OWNER and GITHUB_REPO_NAME environment variables.")
             
-        self.base_url = "https://api.github.com/gists"
+        self.base_url = f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}"
         self.headers = {
             'Authorization': f'token {self.token}',
             'Accept': 'application/vnd.github.v3+json'
         }
-        # Store gist IDs for each data type
-        self.gist_ids = {
-            'stock_data': None,
-            'investor_data': None,
-            'news_data': None,
-            'fundamentals_data': None,
-            'recommendations': None
-        }
-        self.load_gist_config()
-    
-    def load_gist_config(self):
-        """Load gist IDs from config file"""
-        config_file = "gist_config.json"
-        if os.path.exists(config_file):
-            with open(config_file, 'r') as f:
-                self.gist_ids.update(json.load(f))
-    
-    def save_gist_config(self):
-        """Save gist IDs to config file"""
-        with open("gist_config.json", 'w') as f:
-            json.dump(self.gist_ids, f)
-    
-    def _fix_base64_padding(self, data):
-        """Fix base64 padding and clean the string"""
-        # Remove any whitespace
-        data = re.sub(r'\s+', '', data)
         
-        # Add padding if needed
-        missing_padding = len(data) % 4
-        if missing_padding:
-            data += '=' * (4 - missing_padding)
+        # Release tag for data storage
+        self.release_tag = "data-storage"
+        self.release_name = "Financial Data Storage"
         
-        return data
+        # Ensure release exists
+        self.ensure_release_exists()
+    
+    def ensure_release_exists(self):
+        """Ensure the data storage release exists"""
+        try:
+            # Check if release exists
+            url = f"{self.base_url}/releases/tags/{self.release_tag}"
+            response = requests.get(url, headers=self.headers)
+            
+            if response.status_code == 404:
+                # Create release
+                release_data = {
+                    "tag_name": self.release_tag,
+                    "name": self.release_name,
+                    "body": "Automated storage for financial data files",
+                    "draft": False,
+                    "prerelease": True
+                }
+                
+                url = f"{self.base_url}/releases"
+                response = requests.post(url, headers=self.headers, json=release_data)
+                
+                if response.status_code == 201:
+                    print(f"Created release: {self.release_tag}")
+                else:
+                    print(f"Failed to create release: {response.status_code}")
+                    print(response.text)
+            elif response.status_code == 200:
+                print(f"Release {self.release_tag} exists")
+            else:
+                print(f"Error checking release: {response.status_code}")
+                
+        except Exception as e:
+            print(f"Error ensuring release exists: {e}")
+    
+    def get_release_info(self):
+        """Get release information"""
+        try:
+            url = f"{self.base_url}/releases/tags/{self.release_tag}"
+            response = requests.get(url, headers=self.headers)
+            
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(f"Failed to get release info: {response.status_code}")
+                return None
+                
+        except Exception as e:
+            print(f"Error getting release info: {e}")
+            return None
+    
+    def delete_existing_asset(self, filename):
+        """Delete existing asset with the same name"""
+        try:
+            release_info = self.get_release_info()
+            if not release_info:
+                return
+            
+            for asset in release_info.get('assets', []):
+                if asset['name'] == filename:
+                    delete_url = f"{self.base_url}/releases/assets/{asset['id']}"
+                    response = requests.delete(delete_url, headers=self.headers)
+                    if response.status_code == 204:
+                        print(f"Deleted existing asset: {filename}")
+                    else:
+                        print(f"Failed to delete asset {filename}: {response.status_code}")
+                    break
+                    
+        except Exception as e:
+            print(f"Error deleting existing asset: {e}")
     
     def upload_pickle(self, data, data_type, description=None):
-        """Upload pickle data to GitHub Gist"""
+        """Upload pickle data to GitHub Release"""
         try:
-            # Serialize data
-            pickled_data = pickle.dumps(data)
+            release_info = self.get_release_info()
+            if not release_info:
+                return None
             
-            # Convert to base64
-            encoded_data = base64.b64encode(pickled_data).decode('utf-8')
+            # Create temporary file
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pkl') as temp_file:
+                pickle.dump(data, temp_file)
+                temp_file_path = temp_file.name
             
-            filename = f"{data_type}_{datetime.now().strftime('%Y%m%d')}.pkl"
+            filename = f"{data_type}.pkl"
             
-            gist_data = {
-                "description": description or f"Financial data - {data_type}",
-                "public": False,
-                "files": {
-                    filename: {
-                        "content": encoded_data
-                    },
-                    "metadata.json": {
-                        "content": json.dumps({
-                            "data_type": data_type,
-                            "timestamp": datetime.now().isoformat(),
-                            "size_bytes": len(pickled_data)
-                        })
-                    }
-                }
-            }
+            # Delete existing asset if it exists
+            self.delete_existing_asset(filename)
             
-            if self.gist_ids[data_type]:
-                # Update existing gist
-                url = f"{self.base_url}/{self.gist_ids[data_type]}"
-                response = requests.patch(url, headers=self.headers, json=gist_data)
-            else:
-                # Create new gist
-                response = requests.post(self.base_url, headers=self.headers, json=gist_data)
-                if response.status_code == 201:
-                    self.gist_ids[data_type] = response.json()['id']
-                    self.save_gist_config()
+            # Upload new asset
+            upload_url = release_info['upload_url'].replace('{?name,label}', f'?name={filename}')
             
-            if response.status_code in [200, 201]:
-                print(f"Successfully uploaded {data_type} to gist")
-                return response.json()['html_url']
+            with open(temp_file_path, 'rb') as f:
+                files = {'file': (filename, f, 'application/octet-stream')}
+                
+                upload_headers = self.headers.copy()
+                upload_headers['Content-Type'] = 'application/octet-stream'
+                
+                response = requests.post(
+                    upload_url,
+                    headers=upload_headers,
+                    data=f.read()
+                )
+            
+            # Clean up temp file
+            os.unlink(temp_file_path)
+            
+            if response.status_code == 201:
+                print(f"Successfully uploaded {data_type} to release")
+                return response.json()['browser_download_url']
             else:
                 print(f"Failed to upload {data_type}: {response.status_code}")
                 print(response.text)
@@ -108,60 +152,94 @@ class GistStorage:
             return None
     
     def download_pickle(self, data_type):
-        """Download pickle data from GitHub Gist"""
-        if not self.gist_ids[data_type]:
-            print(f"No gist ID found for {data_type}")
-            return None
-        
+        """Download pickle data from GitHub Release"""
         try:
-            url = f"{self.base_url}/{self.gist_ids[data_type]}"
-            response = requests.get(url, headers=self.headers)
-            
-            if response.status_code != 200:
-                print(f"Failed to download {data_type}: {response.status_code}")
-                print(response.text)
+            release_info = self.get_release_info()
+            if not release_info:
                 return None
             
-            gist_data = response.json()
+            filename = f"{data_type}.pkl"
+            download_url = None
             
-            # Find the pickle file
-            for filename, file_data in gist_data['files'].items():
-                if filename.endswith('.pkl'):
-                    # Get and fix the base64 content
-                    encoded_content = file_data['content']
-                    encoded_content = self._fix_base64_padding(encoded_content)
-                    
-                    # Decode base64 to get pickled data
-                    pickled_data = base64.b64decode(encoded_content)
-                    
-                    # Deserialize pickle
-                    data = pickle.loads(pickled_data)
-                    print(f"Successfully downloaded {data_type} from gist")
-                    return data
+            # Find the asset
+            for asset in release_info.get('assets', []):
+                if asset['name'] == filename:
+                    download_url = asset['browser_download_url']
+                    break
             
-            print(f"No pickle file found for {data_type}")
-            return None
+            if not download_url:
+                print(f"No asset found for {data_type}")
+                return None
             
+            # Download the file
+            response = requests.get(download_url)
+            
+            if response.status_code == 200:
+                # Load pickle data directly from response content
+                data = pickle.loads(response.content)
+                print(f"Successfully downloaded {data_type} from release")
+                return data
+            else:
+                print(f"Failed to download {data_type}: {response.status_code}")
+                return None
+                
         except Exception as e:
             print(f"Error downloading {data_type}: {e}")
             return None
-
+    
+    def list_assets(self):
+        """List all assets in the release"""
+        try:
+            release_info = self.get_release_info()
+            if not release_info:
+                return []
+            
+            assets = []
+            for asset in release_info.get('assets', []):
+                assets.append({
+                    'name': asset['name'],
+                    'size': asset['size'],
+                    'download_count': asset['download_count'],
+                    'created_at': asset['created_at'],
+                    'updated_at': asset['updated_at'],
+                    'download_url': asset['browser_download_url']
+                })
+            
+            return assets
+            
+        except Exception as e:
+            print(f"Error listing assets: {e}")
+            return []
+    
     @classmethod
-    def download_without_auth(cls, gist_id, filename):
-        """Download from public gist without authentication"""
-        url = f"https://api.github.com/gists/{gist_id}"
-        response = requests.get(url)
-        
-        if response.status_code == 200:
-            gist_data = response.json()
-            if filename in gist_data['files']:
-                encoded_content = gist_data['files'][filename]['content']
-                # Fix padding issues
-                encoded_content = re.sub(r'\s+', '', encoded_content)
-                missing_padding = len(encoded_content) % 4
-                if missing_padding:
-                    encoded_content += '=' * (4 - missing_padding)
+    def download_without_auth(cls, repo_owner, repo_name, data_type, release_tag="data-storage"):
+        """Download from public release without authentication"""
+        try:
+            base_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}"
+            url = f"{base_url}/releases/tags/{release_tag}"
+            
+            response = requests.get(url)
+            
+            if response.status_code == 200:
+                release_info = response.json()
+                filename = f"{data_type}.pkl"
                 
-                pickled_data = base64.b64decode(encoded_content)
-                return pickle.loads(pickled_data)
-        return None
+                # Find the asset
+                for asset in release_info.get('assets', []):
+                    if asset['name'] == filename:
+                        download_url = asset['browser_download_url']
+                        
+                        # Download the file
+                        download_response = requests.get(download_url)
+                        if download_response.status_code == 200:
+                            return pickle.loads(download_response.content)
+                        break
+            
+            return None
+            
+        except Exception as e:
+            print(f"Error downloading without auth: {e}")
+            return None
+
+# Backward compatibility alias
+GistStorage = GitHubReleaseStorage
