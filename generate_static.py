@@ -82,6 +82,17 @@ def generate_static_site():
     news_data = cloud_data.get('news_data', {})
     fundamentals_data = cloud_data.get('fundamentals_data', {})
     recommendations = cloud_data.get('recommendations', {})
+
+    # Generate news summaries
+    news_summaries = {
+        company_name: {
+            "summary": company_data.get("detailed_news_summary"),
+            "positive_factors": company_data.get("news_positive_factors"),
+            "negative_factors": company_data.get("news_negative_factors"),
+            "score": company_data.get("score"),
+        }
+        for company_name, company_data in recommendations.items()
+    }
     
     # Get data freshness status
     freshness_data = check_data_freshness()
@@ -151,6 +162,14 @@ def generate_static_site():
                                          news_data=news_data,
                                          last_updated=last_updated)
             f.write(html_content)
+        
+        # Generate news summaries page
+        with open(f"{static_dir}/news_summaries.html", "w") as f:
+            html_content = render_template('static_news_summaries.html', 
+                                         news_summaries=news_summaries,
+                                         news_data=news_data,
+                                         last_updated=last_updated)
+            f.write(html_content)
     
     # Copy static assets (CSS, JS)
     import shutil
@@ -165,6 +184,7 @@ def generate_static_site():
     print(f"  - fundamentals.html")
     print(f"  - investors.html")
     print(f"  - news.html")
+    print(f"  - news_summaries.html")
 
 if __name__ == "__main__":
     generate_static_site()

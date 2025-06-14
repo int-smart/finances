@@ -267,6 +267,7 @@ class TaskScheduler:
             
             # 7. Save and upload latest data
             self.save_all_latest_data()
+            
             print(f"Daily tasks completed successfully at {datetime.now()}")
             
         except Exception as e:
@@ -336,32 +337,32 @@ class TaskScheduler:
         print(f"Running full analysis at {datetime.now()}")
         
         # 1. Track investor positions
-        # investor_data = self.track_investor_positions()
+        investor_data = self.track_investor_positions()
 
-        # # 2. Collect stock data
-        # stock_data = self.collect_stock_data()
+        # 2. Collect stock data
+        stock_data = self.collect_stock_data()
         
-        # # 3. Collect fundamentals
-        # fundamentals_data = self.collect_fundamentals()
+        # 3. Collect fundamentals
+        fundamentals_data = self.collect_fundamentals()
         
-        # # 4. Collect news
-        # news_data = self.collect_news()
+        # 4. Collect news
+        news_data = self.collect_news()
         
-        # # 5. Generate recommendations
-        # recommendations = self.generate_recommendations(
-        #     investor_data, stock_data, fundamentals_data, news_data
-        # )
+        # 5. Generate recommendations
+        recommendations = self.generate_recommendations(
+            investor_data, stock_data, fundamentals_data, news_data
+        )
         
-        # # 6. Generate report
-        # self.generate_report(
-        #     investor_data, stock_data, fundamentals_data, news_data, recommendations
-        # )
+        # 6. Generate report
+        self.generate_report(
+            investor_data, stock_data, fundamentals_data, news_data, recommendations
+        )
         
         # 7. Save and upload latest data
         self.save_all_latest_data()
         
         # 8. Update the last run timestamp
-        # self.update_last_daily_run()
+        self.update_last_daily_run()
         
         print(f"Full analysis completed at {datetime.now()}")
     
