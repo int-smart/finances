@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Investment Dashboard</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="index.html">Home</a>
+                <a class="nav-link active" href="stocks.html">Stocks</a>
+                <a class="nav-link" href="recommendations.html">Recommendations</a>
+                <a class="nav-link" href="fundamentals.html">Fundamentals</a>
+                <a class="nav-link" href="investors.html">Investors</a>
+                <a class="nav-link" href="news.html">News</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card data-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Stock Summary</h5>
+                        <small class="text-muted">Last updated: 2025-06-15 05:14:18</small>
+                    </div>
+                    <div class="card-body">
+                        
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Ticker</th>
+                                            <th>Latest Price</th>
+                                            <th>1-Day Change</th>
+                                            <th>30-Day Change</th>
+                                            <th>52-Week Low</th>
+                                            <th>52-Week High</th>
+                                            <th>Volume</th>
+                                            <th>News</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        
+                                        <tr>
+                                            <td><strong>AAPL</strong></td>
+                                            <td>$196.45</td>
+                                            <td class="text-danger">
+                                                -1.38%
+                                            </td>
+                                            <td class="text-danger">
+                                                -4.21%
+                                            </td>
+                                            <td>$168.99</td>
+                                            <td>$259.47</td>
+                                            <td>51362400</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>MSFT</strong></td>
+                                            <td>$474.96</td>
+                                            <td class="text-danger">
+                                                -0.82%
+                                            </td>
+                                            <td class="text-success">
+                                                9.32%
+                                            </td>
+                                            <td>$344.16</td>
+                                            <td>$480.42</td>
+                                            <td>16806900</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>AMZN</strong></td>
+                                            <td>$212.1</td>
+                                            <td class="text-danger">
+                                                -0.53%
+                                            </td>
+                                            <td class="text-success">
+                                                11.64%
+                                            </td>
+                                            <td>$151.61</td>
+                                            <td>$242.52</td>
+                                            <td>29300100</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>GOOGL</strong></td>
+                                            <td>$174.67</td>
+                                            <td class="text-danger">
+                                                -0.59%
+                                            </td>
+                                            <td class="text-success">
+                                                6.62%
+                                            </td>
+                                            <td>$140.36</td>
+                                            <td>$206.56</td>
+                                            <td>27641100</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>META</strong></td>
+                                            <td>$682.87</td>
+                                            <td class="text-danger">
+                                                -1.51%
+                                            </td>
+                                            <td class="text-success">
+                                                14.38%
+                                            </td>
+                                            <td>$441.48</td>
+                                            <td>$740.25</td>
+                                            <td>9261100</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>TSLA</strong></td>
+                                            <td>$325.31</td>
+                                            <td class="text-success">
+                                                1.94%
+                                            </td>
+                                            <td class="text-success">
+                                                13.27%
+                                            </td>
+                                            <td>$176.92</td>
+                                            <td>$488.54</td>
+                                            <td>128495300</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>BRK-B</strong></td>
+                                            <td>$487.54</td>
+                                            <td class="text-danger">
+                                                -0.57%
+                                            </td>
+                                            <td class="text-danger">
+                                                -9.68%
+                                            </td>
+                                            <td>$403.33</td>
+                                            <td>$542.07</td>
+                                            <td>3996300</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>JPM</strong></td>
+                                            <td>$264.95</td>
+                                            <td class="text-danger">
+                                                -1.23%
+                                            </td>
+                                            <td class="text-success">
+                                                4.93%
+                                            </td>
+                                            <td>$187.08</td>
+                                            <td>$278.53</td>
+                                            <td>7095300</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>V</strong></td>
+                                            <td>$352.85</td>
+                                            <td class="text-danger">
+                                                -4.99%
+                                            </td>
+                                            <td class="text-success">
+                                                1.68%
+                                            </td>
+                                            <td>$250.88</td>
+                                            <td>$375.51</td>
+                                            <td>14177500</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>JNJ</strong></td>
+                                            <td>$157.1</td>
+                                            <td class="text-success">
+                                                0.28%
+                                            </td>
+                                            <td class="text-success">
+                                                1.49%
+                                            </td>
+                                            <td>$138.38</td>
+                                            <td>$168.55</td>
+                                            <td>6587500</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>PLTR</strong></td>
+                                            <td>$137.4</td>
+                                            <td class="text-success">
+                                                1.63%
+                                            </td>
+                                            <td class="text-success">
+                                                10.56%
+                                            </td>
+                                            <td>$21.23</td>
+                                            <td>$140.0</td>
+                                            <td>93322300</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>NVDA</strong></td>
+                                            <td>$141.97</td>
+                                            <td class="text-danger">
+                                                -2.09%
+                                            </td>
+                                            <td class="text-success">
+                                                24.0%
+                                            </td>
+                                            <td>$86.61</td>
+                                            <td>$153.11</td>
+                                            <td>180374800</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>ASML</strong></td>
+                                            <td>$761.0</td>
+                                            <td class="text-danger">
+                                                -3.21%
+                                            </td>
+                                            <td class="text-success">
+                                                10.24%
+                                            </td>
+                                            <td>$576.87</td>
+                                            <td>$1100.01</td>
+                                            <td>1742100</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>QCOM</strong></td>
+                                            <td>$154.72</td>
+                                            <td class="text-danger">
+                                                -2.51%
+                                            </td>
+                                            <td class="text-success">
+                                                11.33%
+                                            </td>
+                                            <td>$120.08</td>
+                                            <td>$225.67</td>
+                                            <td>8444900</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>INTC</strong></td>
+                                            <td>$20.14</td>
+                                            <td class="text-danger">
+                                                -3.03%
+                                            </td>
+                                            <td class="text-danger">
+                                                -2.33%
+                                            </td>
+                                            <td>$17.67</td>
+                                            <td>$36.93</td>
+                                            <td>87425300</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>AMD</strong></td>
+                                            <td>$116.16</td>
+                                            <td class="text-danger">
+                                                -1.97%
+                                            </td>
+                                            <td class="text-success">
+                                                17.57%
+                                            </td>
+                                            <td>$76.48</td>
+                                            <td>$187.28</td>
+                                            <td>39636200</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>MU</strong></td>
+                                            <td>$115.6</td>
+                                            <td class="text-danger">
+                                                -0.5%
+                                            </td>
+                                            <td class="text-success">
+                                                43.21%
+                                            </td>
+                                            <td>$61.54</td>
+                                            <td>$156.82</td>
+                                            <td>17408100</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>TSM</strong></td>
+                                            <td>$211.1</td>
+                                            <td class="text-danger">
+                                                -2.01%
+                                            </td>
+                                            <td class="text-success">
+                                                17.75%
+                                            </td>
+                                            <td>$132.14</td>
+                                            <td>$225.52</td>
+                                            <td>10140000</td>
+                                            <td>
+                                                
+                                                
+                                                
+                                                    
+                                                        
+                                                            
+                                                            
+                                                        
+                                                    
+                                                
+                                                
+                                                
+                                                    <span class="text-muted">No recent news</span>
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            
+                            <div class="mt-5">
+                                <h6 class="border-bottom pb-2">Recent News Summary</h6>
+                                
+                                    
+                                        
+                                        <div class="card mb-3" id="news-AAPL" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">AAPL</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/the-2025-stock-market-rally-is-about-more-than-just-the-magnificent-7-morning-brief-100042029.html" target="_blank" class="text-decoration-none">
+                                                                    The 2025 stock market rally is about more than just the &#39;Magnificent 7&#39;: Morning Brief
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">After two years of few S&amp;P 500 companies outperforming the index, market participation is broadening in 2025....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/why-apple-aapl-dipped-more-214502072.html" target="_blank" class="text-decoration-none">
+                                                                    Why Apple (AAPL) Dipped More Than Broader Market Today
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Apple (AAPL) reached $196.45 at the closing of the latest trading day, reflecting a -1.38% change compared to its last close....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/apples-4-4b-india-play-210646717.html" target="_blank" class="text-decoration-none">
+                                                                    Apple&#39;s $4.4B India Play: The Secret iPhone Shift That&#39;s Reshaping U.S. Supply Chains
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">As Trump targets China, Apple quietly reroutes billions in iPhone exports through India--and it&#39;s just getting started...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#AAPL" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-MSFT" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">MSFT</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/video/microsoft-plays-both-offense-defense-151750955.html" target="_blank" class="text-decoration-none">
+                                                                    How Microsoft plays both &#39;offense and defense&#39;
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Microsoft&#39;s (MSFT) recent climb is a result of the tech giant&#39;s role as both an artificial intelligence (AI) play and a stable megacap play due to its...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/the-2025-stock-market-rally-is-about-more-than-just-the-magnificent-7-morning-brief-100042029.html" target="_blank" class="text-decoration-none">
+                                                                    The 2025 stock market rally is about more than just the &#39;Magnificent 7&#39;: Morning Brief
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">After two years of few S&amp;P 500 companies outperforming the index, market participation is broadening in 2025....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/analysis-metas-14-8-billion-215926560.html" target="_blank" class="text-decoration-none">
+                                                                    Analysis-Meta&#39;s $14.8 billion Scale AI deal latest test of AI partnerships
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">(Reuters) -Facebook owner Meta&#39;s $14.8 billion investment in Scale AI and hiring of the data-labeling startup&#39;s CEO will test how the Trump administra...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#MSFT" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-AMZN" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">AMZN</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/video/visa-mastercard-archer-raises-850m-161012867.html" target="_blank" class="text-decoration-none">
+                                                                    Visa and Mastercard, Archer raises $850M, GM EV sales in April
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Yahoo Finance host Allie Canal tracks today&#39;s top moving stocks and biggest market stories in this Market Minute, including Visa (V) and Mastercard (M...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/video/rh-tariffs-adobe-outlook-walmart-134347401.html" target="_blank" class="text-decoration-none">
+                                                                    RH tariffs, Adobe outlook, Walmart &amp; Amazon: Trending Tickers
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">RH (RH) stock is surging after the company said it is taking efforts to reduce tariff costs by moving production out of China and increasing US produc...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/m/7e78ac06-cec1-3125-bee3-23922fc9ea27/walmart-and-amazon-are.html" target="_blank" class="text-decoration-none">
+                                                                    Walmart and Amazon Are Exploring Issuing Their Own Stablecoins
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Walmart Amazon com and other multinational giants have recently explored whether to issue their own stablecoins in the U.S., according to people famil...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#AMZN" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-GOOGL" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">GOOGL</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/the-2025-stock-market-rally-is-about-more-than-just-the-magnificent-7-morning-brief-100042029.html" target="_blank" class="text-decoration-none">
+                                                                    The 2025 stock market rally is about more than just the &#39;Magnificent 7&#39;: Morning Brief
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">After two years of few S&amp;P 500 companies outperforming the index, market participation is broadening in 2025....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/how-waymo-got-the-edge-on-the-competition-and-teslas-robotaxi-so-far-090019552.html" target="_blank" class="text-decoration-none">
+                                                                    How Waymo got the edge on the competition and Tesla&#39;s robotaxi (so far)
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">While Tesla is on the verge of starting a new chapter, Alphabet’s Waymo has been quietly providing actual paid robotaxi rides to customers in San Fran...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/google-comes-top-years-long-231327495.html" target="_blank" class="text-decoration-none">
+                                                                    Google comes out on top as years-long Mexico antitrust case closed
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">MEXICO CITY (Reuters) -Mexico&#39;s antitrust watchdog said on Friday it had closed a case against Google, clearing the tech giant from any potential fine...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#GOOGL" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-META" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">META</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/the-2025-stock-market-rally-is-about-more-than-just-the-magnificent-7-morning-brief-100042029.html" target="_blank" class="text-decoration-none">
+                                                                    The 2025 stock market rally is about more than just the &#39;Magnificent 7&#39;: Morning Brief
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">After two years of few S&amp;P 500 companies outperforming the index, market participation is broadening in 2025....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/analysis-metas-14-8-billion-215926560.html" target="_blank" class="text-decoration-none">
+                                                                    Analysis-Meta&#39;s $14.8 billion Scale AI deal latest test of AI partnerships
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">(Reuters) -Facebook owner Meta&#39;s $14.8 billion investment in Scale AI and hiring of the data-labeling startup&#39;s CEO will test how the Trump administra...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/m/84f7ad83-4fb9-3184-afac-08494a0eb4da/we-stayed-for-the-rise-and.html" target="_blank" class="text-decoration-none">
+                                                                    We Stayed For The Rise And Left Before The Fall On Meta Stock
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">You don&#39;t have to get multiple 10-baggers to do well in the market. A lot of little gains can add up....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#META" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-TSLA" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">TSLA</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/video/tesla-ev-registrations-us-fall-203209231.html" target="_blank" class="text-decoration-none">
+                                                                    Tesla EV registrations in the US fall 16% in April
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Tesla (TSLA) electric vehicle registrations in the United States fell by 16% in April, acording to the latest data out from S&amp;P Global Mobility. Yahoo...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/video/top-holdings-cathie-woods-ark-103004950.html" target="_blank" class="text-decoration-none">
+                                                                    What are the top holdings of Cathie Wood&#39;s ARK Innovation ETF?
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Tesla (TSLA) dominates Cathie Wood&#39;s ARK Innovation ETF (ARKK) holdings, but what other names back up the fund? Yahoo Finance Markets and Data Editor ...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/how-waymo-got-the-edge-on-the-competition-and-teslas-robotaxi-so-far-090019552.html" target="_blank" class="text-decoration-none">
+                                                                    How Waymo got the edge on the competition and Tesla&#39;s robotaxi (so far)
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">While Tesla is on the verge of starting a new chapter, Alphabet’s Waymo has been quietly providing actual paid robotaxi rides to customers in San Fran...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#TSLA" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-BRK-B" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">BRK-B</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/m/ce2ffe06-f882-3e0d-8b97-fa77d137e8bb/warren-buffett-stocks-.html" target="_blank" class="text-decoration-none">
+                                                                    Warren Buffett Stocks: Berkshire Exits Citi, Nu Holdings; Cuts These Names
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Warren Buffett stocks shift as Berkshire Hathaway exits Citi, Nu Holdings, reduces stakes in Bank of America, Capital One among Q1 moves....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/m/1a755c74-b0dc-3897-96c6-e0d4b1a5c17f/replacing-warren-buffett%E2%80%99s.html" target="_blank" class="text-decoration-none">
+                                                                    Replacing Warren Buffett’s Insurance Mastermind Is Berkshire’s Next Succession Mystery
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Who should take over for Ajit Jain—the brains behind Berkshire Hathaway’s insurance powerhouse—when he is ready to step down? Berkshire watchers have ...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/m/9f2a2412-5845-3dca-b080-a403190ed869/kraft-heinz-is-evaluating.html" target="_blank" class="text-decoration-none">
+                                                                    Kraft Heinz Is Evaluating Strategic Transactions
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">The food company also said two directors representing Berkshire Hathaway would step down from its board....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#BRK-B" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-JPM" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">JPM</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/jpmorgan-chase-co-jpm-registers-214503894.html" target="_blank" class="text-decoration-none">
+                                                                    JPMorgan Chase &amp; Co. (JPM) Registers a Bigger Fall Than the Market: Important Facts to Note
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">JPMorgan Chase &amp; Co. (JPM) concluded the recent trading session at $264.95, signifying a -1.23% move from its prior day&#39;s close....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/dollar-haven-status-faces-key-044329586.html" target="_blank" class="text-decoration-none">
+                                                                    Dollar’s Tepid Rebound Reinforces Questions Around Haven Role
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">(Bloomberg) -- The dollar’s muted rally against major peers after Israel’s strikes on Iran reinforced the impression that the greenback’s role as a gl...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/jpmorganchase-declares-preferred-stock-dividends-203500113.html" target="_blank" class="text-decoration-none">
+                                                                    JPMorganChase Declares Preferred Stock Dividends
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">NEW YORK, June 13, 2025--JPMorgan Chase &amp; Co. (NYSE: JPM) (&#34;JPMorganChase&#34; or the &#34;Firm&#34;) has declared dividends on the outstanding shares of the Firm...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#JPM" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-V" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">V</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/video/visa-mastercard-amex-fall-whirlpool-200118708.html" target="_blank" class="text-decoration-none">
+                                                                    Visa, Mastercard, AmEx fall; Whirlpool upgrade: Trending Tickers
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Visa (V), Mastercard (MA), and American Express (AXP) are falling from reports from the Wall Street Journal saying that Walmart (WMT) and Amazon (AMZN...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/video/visa-mastercard-archer-raises-850m-161012867.html" target="_blank" class="text-decoration-none">
+                                                                    Visa and Mastercard, Archer raises $850M, GM EV sales in April
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Yahoo Finance host Allie Canal tracks today&#39;s top moving stocks and biggest market stories in this Market Minute, including Visa (V) and Mastercard (M...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/m/120c7616-58d2-3fa0-a8ce-1fd8a6018d68/stocks-to-watch-recap-exxon-.html" target="_blank" class="text-decoration-none">
+                                                                    Stocks to Watch Recap: Exxon, Chevron, Visa, Occidental
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">↗️ Chevron (CVX), Occidental Petroleum (OXY), ConocoPhillips (COP), Exxon Mobil (XOM): Shares in the U.S. energy companies rose Friday between 0.6% an...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#V" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-JNJ" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">JNJ</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/ubs-backs-johnson-johnson-defensive-013036522.html" target="_blank" class="text-decoration-none">
+                                                                    UBS Backs Johnson &amp; Johnson as a Defensive Play in Uncertain Times
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Johnson &amp; Johnson (NYSE:JNJ) is one of the best stocks for a retirement stock portfolio. On June 12, UBS global equity strategist Andrew Garthwaite’s ...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/healthcare-sector-taps-ai-boom-005600144.html" target="_blank" class="text-decoration-none">
+                                                                    Healthcare Sector Taps AI Boom via Intuitive Surgical Stock (ISRG)
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">When investors think of artificial intelligence (AI), names like Nvidia (NVDA), Palantir (PLTR), and Alphabet (GOOGL) typically come to mind. But AI’s...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/sector-health-care-stocks-softer-175956087.html" target="_blank" class="text-decoration-none">
+                                                                    Sector Update: Health Care Stocks Softer Friday Afternoon
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Health care stocks declined Friday afternoon, with the NYSE Health Care Index shedding 0.3% and the...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#JNJ" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-PLTR" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">PLTR</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/defense-stocks-trade-higher-after-israel-airstrikes-in-iran-raise-middle-east-tensions-135055335.html" target="_blank" class="text-decoration-none">
+                                                                    Defense stocks trade higher after Israel airstrikes in Iran raise Middle East tensions
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Defense stocks climbed early Friday after Israel launched a series of strikes on Iran and put the Middle East on the brink of war....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/the-2025-stock-market-rally-is-about-more-than-just-the-magnificent-7-morning-brief-100042029.html" target="_blank" class="text-decoration-none">
+                                                                    The 2025 stock market rally is about more than just the &#39;Magnificent 7&#39;: Morning Brief
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">After two years of few S&amp;P 500 companies outperforming the index, market participation is broadening in 2025....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/why-palantir-pltr-shares-jumping-195046596.html" target="_blank" class="text-decoration-none">
+                                                                    Why Are Palantir (PLTR) Shares Jumping Today
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Middle East Tensions Roil Markets: Defense Stocks Surge...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#PLTR" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-NVDA" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">NVDA</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/video/amd-launches-m1350-chips-chime-152638727.html" target="_blank" class="text-decoration-none">
+                                                                    AMD launches M1350 chips, Chime post-IPO: Trending Tickers
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Advanced Micro Devices (AMD) launches its new M1350 semiconductor, positioned to rival Nvidia&#39;s (NVDA) Blackwell line of AI chips. Shares of Chime Fin...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/the-2025-stock-market-rally-is-about-more-than-just-the-magnificent-7-morning-brief-100042029.html" target="_blank" class="text-decoration-none">
+                                                                    The 2025 stock market rally is about more than just the &#39;Magnificent 7&#39;: Morning Brief
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">After two years of few S&amp;P 500 companies outperforming the index, market participation is broadening in 2025....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/m/aa1f23bf-885a-3360-90e9-c9d2158d402f/dow-jones-futures-.html" target="_blank" class="text-decoration-none">
+                                                                    Dow Jones Futures: Israel-Iran Attacks Hit Market; The Next AI Winners After Nvidia, Broadcom?
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Israel-Iran fears hit the stock market Friday. Will these AI hardware stocks follow Nvidia, Broadcom higher?...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#NVDA" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-ASML" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">ASML</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/boeing-adobe-exxon-oracle-novo-nordisk-trending-tickers-094358406.html" target="_blank" class="text-decoration-none">
+                                                                    Trending tickers: Boeing, Adobe, Exxon, Oracle and Novo Nordisk
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">The latest investor updates on stocks that are trending on Friday...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/logic-memory-growth-help-asml-143500087.html" target="_blank" class="text-decoration-none">
+                                                                    Will Logic and Memory Growth Help ASML Meet 30-35B Euro Sales Target?
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">With EUV ramping and High NA traction building, ASML Holding targets up to 35 billion euros in 2025 sales backed by logic and memory demand....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/amat-expects-advanced-dram-sales-142300593.html" target="_blank" class="text-decoration-none">
+                                                                    AMAT Expects Advanced DRAM Sales to Grow 40%: Can It Keep its Lead?
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Applied Materials bets big on DDR5 and HBM, projecting over 40% DRAM revenue growth and strong traction for Sym3 Magnum....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#ASML" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-QCOM" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">QCOM</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/week-ai-chips-amd-advances-113753858.html" target="_blank" class="text-decoration-none">
+                                                                    This Week In AI Chips - AMD Advances AI Innovation With Open Ecosystem Approach
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">AMD recently showcased its vision for an open AI ecosystem, emphasizing a collaborative approach through new silicon, software, and systems at its Adv...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/2-cash-producing-stocks-worth-043830474.html" target="_blank" class="text-decoration-none">
+                                                                    2 Cash-Producing Stocks Worth Your Attention and 1 to Avoid
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">While strong cash flow is a key indicator of stability, it doesn’t always translate to superior returns. Some cash-heavy businesses struggle with inef...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/incredibly-cheap-artificial-intelligence-ai-003000770.html" target="_blank" class="text-decoration-none">
+                                                                    This Incredibly Cheap Artificial Intelligence (AI) Chip Stock Wants to Become the Next Broadcom
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Broadcom is currently the leading player in the market for custom AI processors, but it&#39;s about to get a new competitor very soon. This competitor rec...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#QCOM" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-INTC" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">INTC</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/intel-intc-dips-more-broader-214504200.html" target="_blank" class="text-decoration-none">
+                                                                    Intel (INTC) Dips More Than Broader Market: What You Should Know
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Intel (INTC) concluded the recent trading session at $20.14, signifying a -3.03% move from its prior day&#39;s close....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/nanosheet-chip-nodes-cement-tsms-140200293.html" target="_blank" class="text-decoration-none">
+                                                                    Can New Nanosheet Chip Nodes Cement TSM&#39;s Long-Term Tech Leadership?
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Taiwan Semiconductor sharpens nanosheet roadmap with N2, N2P, and A16 nodes to power future AI and HPC demand....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/m/f6d9eb4a-7a99-3a34-85a8-1e770a581ef8/the-only-remedy-for-intel%E2%80%99s.html" target="_blank" class="text-decoration-none">
+                                                                    The Only Remedy for Intel’s Woes May Be a Breakup
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">To emerge from a yearslong financial and technological rut, Intel needs to better compete with chip makers like Taiwan Semiconductor Manufacturing It ...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#INTC" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-AMD" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">AMD</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/video/amd-launches-m1350-chips-chime-152638727.html" target="_blank" class="text-decoration-none">
+                                                                    AMD launches M1350 chips, Chime post-IPO: Trending Tickers
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Advanced Micro Devices (AMD) launches its new M1350 semiconductor, positioned to rival Nvidia&#39;s (NVDA) Blackwell line of AI chips. Shares of Chime Fin...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/advanced-micro-devices-stock-amd-005700875.html" target="_blank" class="text-decoration-none">
+                                                                    Advanced Micro Devices Stock (AMD) Poised for Breakout as AI Demand Accelerates
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Advanced Micro Devices (AMD) has faced its share of volatility, with the stock down 23% over the past year. However, recent momentum suggests a potent...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/m/aa1f23bf-885a-3360-90e9-c9d2158d402f/dow-jones-futures-.html" target="_blank" class="text-decoration-none">
+                                                                    Dow Jones Futures: Israel-Iran Attacks Hit Market; The Next AI Winners After Nvidia, Broadcom?
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Israel-Iran fears hit the stock market Friday. Will these AI hardware stocks follow Nvidia, Broadcom higher?...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#AMD" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-MU" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">MU</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/video/chipmakers-navigating-manufacturing-export-shifts-113014838.html" target="_blank" class="text-decoration-none">
+                                                                    How chipmakers are navigating manufacturing &amp; export shifts
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Christopher Miller, professor at Tufts University&#39;s Fletcher School, joins Asking for a Trend with Josh Lipton to discuss the current state of the chi...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/m/aa1f23bf-885a-3360-90e9-c9d2158d402f/dow-jones-futures-.html" target="_blank" class="text-decoration-none">
+                                                                    Dow Jones Futures: Israel-Iran Attacks Hit Market; The Next AI Winners After Nvidia, Broadcom?
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Israel-Iran fears hit the stock market Friday. Will these AI hardware stocks follow Nvidia, Broadcom higher?...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/micron-mu-commits-200-billion-205707185.html" target="_blank" class="text-decoration-none">
+                                                                    Micron (MU) Commits $200 Billion to U.S. Chip Manufacturing Expansion
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Secures $6.4B in federal support under CHIPS Act as firms respond to Trump&#39;s push for reshoring...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#MU" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                        
+                                        <div class="card mb-3" id="news-TSM" style="display: none;">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">
+                                                    <span class="badge bg-primary me-2">TSM</span>
+                                                    Recent News (20 articles)
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/nanosheet-chip-nodes-cement-tsms-140200293.html" target="_blank" class="text-decoration-none">
+                                                                    Can New Nanosheet Chip Nodes Cement TSM&#39;s Long-Term Tech Leadership?
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Taiwan Semiconductor sharpens nanosheet roadmap with N2, N2P, and A16 nodes to power future AI and HPC demand....</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/2-top-tech-stocks-buy-093600099.html" target="_blank" class="text-decoration-none">
+                                                                    2 Top Tech Stocks to Buy Right Now
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Taiwan Semiconductor Manufacturing Company has a 67% market share in the third-party chip foundry space. The chipmaker estimates its revenue will grow...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="border-start border-3 border-secondary ps-3 mb-3">
+                                                        <h6 class="mb-1">
+                                                            
+                                                                <a href="https://finance.yahoo.com/news/5-no-brainer-artificial-intelligence-083500592.html" target="_blank" class="text-decoration-none">
+                                                                    5 No-Brainer Artificial intelligence (AI) Stocks to Buy Right Now
+                                                                </a>
+                                                            
+                                                        </h6>
+                                                        <p class="text-muted small mb-1">Palantir is quickly becoming one of the biggest artificial intelligence (AI) winners. Nvidia, AMD, and TSMC are all set up to be big AI infrastructure...</p>
+                                                        
+                                                    </div>
+                                                    
+                                                    
+                                                    
+                                                    <div class="text-center">
+                                                        <a href="news.html#TSM" class="btn btn-sm btn-outline-primary">
+                                                            View All 20 Articles
+                                                        </a>
+                                                    </div>
+                                                    
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                
+                            </div>
+                            
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-light text-center py-3 mt-5">
+        <div class="container">
+            <p>&copy; 2024 Investment Dashboard. Data updated: 2025-06-15 05:14:18</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showNews(ticker) {
+            // Hide all news cards
+            document.querySelectorAll('[id^="news-"]').forEach(card => {
+                card.style.display = 'none';
+            });
+            
+            // Show the selected ticker's news
+            const newsCard = document.getElementById('news-' + ticker);
+            if (newsCard) {
+                newsCard.style.display = 'block';
+                newsCard.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>
