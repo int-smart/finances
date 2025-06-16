@@ -243,15 +243,19 @@ class TaskScheduler:
             try:
                 with open(f"{self.data_dir}/investor_data.pkl", 'rb') as f:
                     investor_data = pickle.load(f)
+                    latest_date = max(investor_data.keys())
+                    self.investor_tracker.changes = investor_data[latest_date]['changes']
+                    self.investor_tracker.holdings_data = investor_data[latest_date]['holdings']
             except (FileNotFoundError, pickle.UnpicklingError):
                 investor_data = {}
-            
+                    
             try:
                 with open(f"{self.data_dir}/fundamentals_data.pkl", 'rb') as f:
                     fundamentals_data = pickle.load(f)
+                    self.fundamentals_tracker.fundamentals = fundamentals_data
             except (FileNotFoundError, pickle.UnpicklingError):
                 fundamentals_data = {}
-            
+
             # 4. Generate recommendations
             recommendations = self.generate_recommendations(
                 investor_data, stock_data, fundamentals_data, news_data

@@ -11,6 +11,7 @@ from src.config import SEC_API_HEADERS, REQUEST_DELAY
 import time
 import pickle
 from src.storage_helper import GistStorage
+from datetime import datetime
 
 class FundamentalsTracker:
     def __init__(self):
@@ -24,7 +25,7 @@ class FundamentalsTracker:
         # self.model = "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"
         self.model = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
     
-    def get_financial_ratios(self, ticker):
+    def get_financial_ratios(self, ticker, index_date):
         """Get key financial ratios for a company"""
         print(f"Fetching financial ratios for {ticker}...")
         try:
@@ -106,7 +107,7 @@ class FundamentalsTracker:
             
             ratios.update(info_ratios)
             self.fundamentals[ticker] = {
-                latest_year.strftime('%Y-%m-%d'): {
+                index_date: {
                     "ratios": ratios,
                     "income_statement": income_stmt,
                     "balance_sheet": balance_sheet,
@@ -175,7 +176,7 @@ class FundamentalsTracker:
             print(f"Error fetching annual report links for {ticker}: {e}")
             return []
     
-    def summarize_10k(self, ticker):
+    def summarize_10k(self, ticker, index_date):
         """Extract and summarize substantive text from a 10-K filing."""
         if ticker not in self.links or len(self.links[ticker]) == 0 or "text_file" not in self.links[ticker][0]:
             print(f"No 10-K filings found for {ticker}")
@@ -242,7 +243,7 @@ class FundamentalsTracker:
         
         # Generate prompt for summarization
         prompt = f"""
-        Analyze the following content from a 10-K filing for {ticker} and provide a summary focusing on:
+        Analyze the following content from a 10-K filing for {ticker} and provide a summary in strict json format focusing on:
         
         1. Risks involved in the business
         2. Positive factors
@@ -252,15 +253,15 @@ class FundamentalsTracker:
         Here is the text from the 10-K:
         {combined_text}
         
-        Please format your response as JSON with the following structure:
+        Please respond ONLY with valid JSON in the following structure:
         {{
             "risks": ["risk1", "risk2", ...],
             "positive_factors": ["factor1", "factor2", ...],
             "earning_boosters": ["booster1", "booster2", ...],
             "earning_sinks": ["sink1", "sink2", ...]
         }}
+        Do not include any other text, notes, code blocks, quotes or formatting.
         """
-        
         try:
             # Generate the summary using the LLM
             response = self.client.chat.completions.create(
@@ -271,27 +272,19 @@ class FundamentalsTracker:
             
             # Remove <think>...</think> blocks
             text = re.sub(r'<think>.*?</think>', '', summary, flags=re.DOTALL)
-            
-            # Check if there's a JSON code block
-            json_block_match = re.search(r'(?:json)?\s*([\s\S]*?)', text, re.DOTALL)
-            
-            if json_block_match:
-                # Extract the content inside the code block
-                json_str = json_block_match.group(1).strip()
-            else:
-                # If no code block, use the entire text after removing think tags
-                json_str = text.strip()
+            json_str = text.strip()
             
             # Try to parse as JSON
             try:
-                if not self.links[ticker][0]['filing_date'] in self.fundamentals[ticker]:
-                    self.fundamentals[ticker][self.links[ticker][0]['filing_date']] = {}
-                self.fundamentals[ticker][self.links[ticker][0]['filing_date']]['10K_summary'] = json.loads(json_str)
+                if not index_date in self.fundamentals[ticker]:
+                    self.fundamentals[ticker][index_date] = {}
+                self.fundamentals[ticker][index_date]['10K_summary'] = json.loads(json_str)
             except json.JSONDecodeError as e:
                 print(f"Error parsing JSON: {e}")
                 return {"text": text, "error": str(e)}
             
         except Exception as e:
+            print("Error: ", e)
             return {"summary": f"Error generating summary: {str(e)}", "error": str(e)}
     
     def extract_substantive_text(self, soup, threshold=5):
@@ -315,10 +308,13 @@ class FundamentalsTracker:
 
     def analyze_all_companies(self, tickers):
         """Analyze fundamentals for all given companies"""
+        index_date = datetime.now().date().strftime('%Y-%m-%d')
         for ticker in tickers:
-            self.get_financial_ratios(ticker)
+            self.get_financial_ratios(ticker, index_date)
             self.get_annual_report_links(ticker)
-            self.summarize_10k(ticker)
+            self.summarize_10k(ticker, index_date)
+            time.sleep(60*REQUEST_DELAY)
+            
         return self.fundamentals
     
     def save_data(self, filepath="data/fundamentals_data.pkl"):

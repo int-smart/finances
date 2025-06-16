@@ -32,88 +32,137 @@
                     <div class="card-body">
                         {% if fundamentals_data %}
                             {% for ticker, company_data in fundamentals_data.items() %}
+                            {% set latest_date = company_data.keys() | list | sort | last %}
+                            {% set data = company_data[latest_date] %}
                             <div class="card mb-4">
                                 <div class="card-header">
                                     <h6 class="mb-0">{{ ticker }}</h6>
                                 </div>
                                 <div class="card-body">
-                                    {% for date, data in company_data.items() %}
-                                    <div class="mb-4">
-                                        <h6 class="text-primary">{{ date }}</h6>
-                                        
-                                        {% if data.ratios %}
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <h6>Financial Ratios</h6>
-                                                <div class="table-responsive">
-                                                    <table class="table table-sm">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Metric</th>
-                                                                <th>Value</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {% for ratio, value in data.ratios.items() %}
-                                                            <tr>
-                                                                <td>{{ ratio }}</td>
-                                                                <td>
-                                                                    {% if value is number %}
-                                                                        {{ value|round(2) }}
-                                                                    {% else %}
-                                                                        {{ value or 'N/A' }}
-                                                                    {% endif %}
-                                                                </td>
-                                                            </tr>
-                                                            {% endfor %}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
+                                    
+                                    <!-- 10-K Analysis at the top -->
+                                    {% if data.get('10K_summary') %}
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-file-alt me-2"></i>10-K Analysis - {{ latest_date }}
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            {% set summary = data.get('10K_summary') %}
                                             
-                                            {% if data.get('10K_summary') %}
-                                            <div class="col-md-6">
-                                                <h6>10-K Analysis</h6>
-                                                {% set summary = data.get('10K_summary') %}
-                                                
+                                            <div class="row">
                                                 {% if summary.risks %}
-                                                <div class="mb-3">
-                                                    <strong class="text-danger">Risks:</strong>
-                                                    <ul class="list-unstyled ms-3">
-                                                        {% for risk in summary.risks[:3] %}
-                                                        <li>• {{ risk[:100] }}{% if risk|length > 100 %}...{% endif %}</li>
+                                                <div class="col-md-6 mb-3">
+                                                    <h6 class="text-danger">
+                                                        <i class="fas fa-exclamation-triangle me-2"></i>Risks
+                                                    </h6>
+                                                    <ul class="list-unstyled">
+                                                        {% for risk in summary.risks %}
+                                                        <li class="mb-2">
+                                                            <i class="fas fa-dot-circle text-danger me-2" style="font-size: 0.8em;"></i>
+                                                            {{ risk[:150] }}{% if risk|length > 150 %}...{% endif %}
+                                                        </li>
                                                         {% endfor %}
                                                     </ul>
                                                 </div>
                                                 {% endif %}
                                                 
                                                 {% if summary.positive_factors %}
-                                                <div class="mb-3">
-                                                    <strong class="text-success">Positive Factors:</strong>
-                                                    <ul class="list-unstyled ms-3">
-                                                        {% for factor in summary.positive_factors[:3] %}
-                                                        <li>• {{ factor[:100] }}{% if factor|length > 100 %}...{% endif %}</li>
-                                                        {% endfor %}
-                                                    </ul>
-                                                </div>
-                                                {% endif %}
-                                                
-                                                {% if summary.earning_boosters %}
-                                                <div class="mb-3">
-                                                    <strong class="text-info">Earning Boosters:</strong>
-                                                    <ul class="list-unstyled ms-3">
-                                                        {% for booster in summary.earning_boosters[:2] %}
-                                                        <li>• {{ booster[:100] }}{% if booster|length > 100 %}...{% endif %}</li>
+                                                <div class="col-md-6 mb-3">
+                                                    <h6 class="text-success">
+                                                        <i class="fas fa-thumbs-up me-2"></i>Positive Factors
+                                                    </h6>
+                                                    <ul class="list-unstyled">
+                                                        {% for factor in summary.positive_factors %}
+                                                        <li class="mb-2">
+                                                            <i class="fas fa-dot-circle text-success me-2" style="font-size: 0.8em;"></i>
+                                                            {{ factor[:150] }}{% if factor|length > 150 %}...{% endif %}
+                                                        </li>
                                                         {% endfor %}
                                                     </ul>
                                                 </div>
                                                 {% endif %}
                                             </div>
-                                            {% endif %}
+                                            
+                                            <div class="row">
+                                                {% if summary.earning_boosters %}
+                                                <div class="col-md-6 mb-3">
+                                                    <h6 class="text-info">
+                                                        <i class="fas fa-arrow-up me-2"></i>Earning Boosters
+                                                    </h6>
+                                                    <ul class="list-unstyled">
+                                                        {% for booster in summary.earning_boosters %}
+                                                        <li class="mb-2">
+                                                            <i class="fas fa-dot-circle text-info me-2" style="font-size: 0.8em;"></i>
+                                                            {{ booster[:150] }}{% if booster|length > 150 %}...{% endif %}
+                                                        </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                                {% endif %}
+                                                
+                                                {% if summary.earning_sinks %}
+                                                <div class="col-md-6 mb-3">
+                                                    <h6 class="text-warning">
+                                                        <i class="fas fa-arrow-down me-2"></i>Earning Sinks
+                                                    </h6>
+                                                    <ul class="list-unstyled">
+                                                        {% for sink in summary.earning_sinks %}
+                                                        <li class="mb-2">
+                                                            <i class="fas fa-dot-circle text-warning me-2" style="font-size: 0.8em;"></i>
+                                                            {{ sink[:150] }}{% if sink|length > 150 %}...{% endif %}
+                                                        </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                                {% endif %}
+                                            </div>
                                         </div>
-                                        {% endif %}
                                     </div>
-                                    {% endfor %}
+                                    {% endif %}
+                                    
+                                    <!-- Financial Ratios section -->
+                                    {% if data.ratios %}
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-chart-bar me-2"></i>Financial Ratios - {{ latest_date }}
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-hover">
+                                                    <thead class="table-dark">
+                                                        <tr>
+                                                            <th>Metric</th>
+                                                            <th>Value</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for ratio, value in data.ratios.items() %}
+                                                        <tr>
+                                                            <td><strong>{{ ratio }}</strong></td>
+                                                            <td>
+                                                                {% if value is number %}
+                                                                    <span class="badge bg-primary">
+                                                                        {{ value|round(2) }}
+                                                                    </span>
+                                                                {% else %}
+                                                                    <span class="text-muted">
+                                                                        {{ value or 'N/A' }}
+                                                                    </span>
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
                                 </div>
                             </div>
                             {% endfor %}
