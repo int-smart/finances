@@ -63,6 +63,32 @@ def load_data_from_cloud():
     
     return data
 
+def copy_standalone_pages():
+    """Copy standalone HTML pages to static site"""
+    standalone_files = [
+        'information/candlestick-patterns.html',  # Candlestick Pattern Recognition Guide
+        'information/price-patterns-guide.html',  # Price Patterns and Chart Formations Guide
+        'information/patterns-guide.html',
+        'information/support-resistance-guide.html'
+    ]
+    
+    static_dir = "docs"
+    
+    for file_path in standalone_files:
+        if os.path.exists(file_path):
+            try:
+                import shutil
+                # Extract just the filename from the path
+                filename = os.path.basename(file_path)
+                dest_path = os.path.join(static_dir, filename)
+                
+                shutil.copy2(file_path, dest_path)
+                print(f"Copied {file_path} to {filename}")
+            except Exception as e:
+                print(f"Error copying {file_path}: {e}")
+        else:
+            print(f"Warning: {file_path} not found")
+
 def generate_static_site():
     """Generate static HTML files from cloud data"""
     print("Loading data from cloud storage...")
@@ -104,7 +130,7 @@ def generate_static_site():
     with app.app_context():
         last_updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Generate index page
+        # Generate main index page (dashboard)
         with open(f"{static_dir}/index.html", "w") as f:
             html_content = render_template('static_index.html', 
                                          recommendations=recommendations,
@@ -176,15 +202,22 @@ def generate_static_site():
     if os.path.exists("static"):
         shutil.copytree("static", f"{static_dir}/static", dirs_exist_ok=True)
     
+    # Copy standalone educational pages
+    copy_standalone_pages()
+    
     print("Static site generated successfully!")
     print(f"Generated pages:")
-    print(f"  - index.html")
+    print(f"  - index.html (main dashboard)")
     print(f"  - stocks.html")
     print(f"  - recommendations.html")
     print(f"  - fundamentals.html")
     print(f"  - investors.html")
     print(f"  - news.html")
     print(f"  - news_summaries.html")
+    print(f"  - candlestick-patterns.html (educational)")
+    print(f"  - price-patterns-guide.html (educational)")
+    print(f"  - patterns-guide.html (educational)")
+    print(f"  - support-resistance-guide.html (educational)")
 
 if __name__ == "__main__":
     generate_static_site()

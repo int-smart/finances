@@ -13,20 +13,76 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
                 <a class="navbar-brand" href="index.html">Investment Dashboard</a>
-                <div class="navbar-nav">
-                    <a class="nav-link active" href="index.html">Home</a>
-                    <a class="nav-link" href="stocks.html">Stocks</a>
-                    <a class="nav-link" href="recommendations.html">Recommendations</a>
-                    <a class="nav-link" href="fundamentals.html">Fundamentals</a>
-                    <a class="nav-link" href="investors.html">Investors</a>
-                    <a class="nav-link" href="news.html">News</a>
-                    <a class="nav-link" href="news_summaries.html">News Summaries</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <div class="navbar-nav me-auto">
+                        <a class="nav-link active" href="index.html">Home</a>
+                        <a class="nav-link" href="stocks.html">Stocks</a>
+                        <a class="nav-link" href="recommendations.html">Recommendations</a>
+                        <a class="nav-link" href="fundamentals.html">Fundamentals</a>
+                        <a class="nav-link" href="investors.html">Investors</a>
+                        <a class="nav-link" href="news.html">News</a>
+                        <a class="nav-link" href="news_summaries.html">News Summaries</a>
+                    </div>
+                    <div class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="educationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                📚 Education
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="educationDropdown">
+                                <li><a class="dropdown-item" href="candlestick-patterns.html">🕯️ Candlestick Patterns</a></li>
+                                <li><a class="dropdown-item" href="price-patterns-guide.html">📈 Price Patterns Guide</a></li>
+                                <li><a class="dropdown-item" href="patterns-guide.html">🔍 Pattern Recognition</a></li>
+                                <li><a class="dropdown-item" href="support-resistance-guide.html">⚖️ Support & Resistance</a></li>
+                            </ul>
+                        </li>
+                    </div>
                 </div>
             </div>
         </nav>
 
         <h1>Dashboard</h1>
         <p class="text-muted">Last updated: {{ last_updated or moment().format('YYYY-MM-DD HH:mm:ss') }}</p>
+
+        <!-- Quick Links to Educational Resources -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>📚 Educational Resources</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6 mb-2">
+                                <a href="candlestick-patterns.html" class="btn btn-outline-primary btn-sm w-100">
+                                    🕯️ Candlestick Patterns
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-2">
+                                <a href="price-patterns-guide.html" class="btn btn-outline-success btn-sm w-100">
+                                    📈 Price Patterns Guide
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-2">
+                                <a href="patterns-guide.html" class="btn btn-outline-info btn-sm w-100">
+                                    🔍 Pattern Recognition
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-2">
+                                <a href="support-resistance-guide.html" class="btn btn-outline-warning btn-sm w-100">
+                                    ⚖️ Support & Resistance
+                                </a>
+                            </div>
+                        </div>
+                        <p class="text-muted mt-2 mb-0">
+                            <small>Learn technical analysis fundamentals to better understand market patterns and trading strategies.</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-md-12">
