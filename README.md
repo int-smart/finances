@@ -20,6 +20,11 @@ A comprehensive web application for analyzing stocks, generating investment reco
   - Valuation Metrics
   - Financial Health
 - **Portfolio Management**: Track your investments and monitor performance
+- **News Scraping**: Automated WSJ business article scraping and analysis
+  - Full business page scraping (all sections: Autos, Energy, Airlines, C-Suite, etc.)
+  - Article content extraction with metadata
+  - JSON export functionality
+  - Both manual and automated login support
 
 ## 📊 Screenshots
 
@@ -59,7 +64,7 @@ A comprehensive web application for analyzing stocks, generating investment reco
 2. Create and activate the conda environment:
    ```bash
    conda env create -f environment.yml
-   conda activate finance-analysis  # The name specified in environment.yml
+   conda activate finance  # The name specified in environment.yml
    ```
 
 ### Configuration

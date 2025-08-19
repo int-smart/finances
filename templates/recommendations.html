@@ -57,10 +57,14 @@
                         </ul>
                     </div>
                     <div class="col-md-4">
-                        <h6>Patterns</h6>
-                        <p>Chart patterns that may indicate future price moves.</p>
+                        <h6>Candlestick Patterns</h6>
+                        <p>Chart patterns that indicate potential price moves.</p>
                         <ul>
-                            <li><strong>Double Bottom:</strong> "W" shape pattern that often signals a potential upward move</li>
+                            <li><strong>Hammer:</strong> Bullish reversal pattern</li>
+                            <li><strong>Doji:</strong> Indecision, potential reversal</li>
+                            <li><strong>Engulfing:</strong> Strong reversal signals</li>
+                            <li><strong>Shooting Star:</strong> Bearish reversal pattern</li>
+                            <li><strong>Marubozu:</strong> Strong directional momentum</li>
                         </ul>
                     </div>
                 </div>
@@ -121,13 +125,13 @@
                                     <th>Valuation</th>
                                     <th>Financial Health</th>
                                     <th>Price Trend</th>
-                                    <!-- New Technical Indicators -->
+                                    <!-- Technical Indicators -->
                                     <th>RSI</th>
                                     <th>MACD Signal</th>
                                     <th>Bollinger Bands</th>
                                     <th>Volume</th>
                                     <th>Beta</th>
-                                    <th>Patterns</th>
+                                    <th>Candlestick Patterns</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -143,7 +147,7 @@
                                     <td>{{ rec.valuation }}</td>
                                     <td>{{ rec.financial_health }}</td>
                                     <td>{{ rec.price_trend }}</td>
-                                    <!-- New Technical Indicators -->
+                                    <!-- Technical Indicators -->
                                     <td class="{% if rec.rsi_status == 'OVERSOLD' %}text-success{% elif rec.rsi_status == 'OVERBOUGHT' %}text-danger{% endif %}">
                                         {{ rec.rsi|round(1) if rec.rsi is defined and rec.rsi is not none and rec.rsi is number else 'N/A' }}
                                         <small>({{ rec.rsi_status }})</small>
@@ -158,7 +162,28 @@
                                         {{ rec.volume_trend }}
                                     </td>
                                     <td>{{ rec.beta if rec.beta is defined and rec.beta is not none and rec.beta is number else 'N/A' }}</td>
-                                    <td>{{ 'Double Bottom' if rec.pattern_double_bottom else 'None' }}</td>
+                                    <td>
+                                        {% if rec.latest_candlestick_patterns %}
+                                            <div class="pattern-badges">
+                                                {% for pattern, active in rec.latest_candlestick_patterns.items() %}
+                                                    {% if active %}
+                                                        {% if pattern in ['hammer', 'engulfing_bullish', 'marubozu_bullish'] %}
+                                                            <span class="badge bg-success mb-1">{{ pattern|replace('_', ' ')|title }}</span>
+                                                        {% elif pattern in ['hanging_man', 'engulfing_bearish', 'shooting_star', 'marubozu_bearish'] %}
+                                                            <span class="badge bg-danger mb-1">{{ pattern|replace('_', ' ')|title }}</span>
+                                                        {% else %}
+                                                            <span class="badge bg-warning mb-1">{{ pattern|replace('_', ' ')|title }}</span>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {% if rec.pattern_double_bottom %}
+                                                    <span class="badge bg-info mb-1">Double Bottom</span>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">None</span>
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -215,6 +240,13 @@
                                     {% if rec.pattern_double_bottom %}
                                         <span class="badge bg-info">Double Bottom</span>
                                     {% endif %}
+                                    {% if rec.latest_candlestick_patterns %}
+                                        {% for pattern, active in rec.latest_candlestick_patterns.items() %}
+                                            {% if active and pattern in ['hammer', 'engulfing_bullish', 'marubozu_bullish'] %}
+                                                <span class="badge bg-success">{{ pattern|replace('_', ' ')|title }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
                                 </div>
                             </a>
                         {% endfor %}
@@ -265,6 +297,13 @@
                                     {% if rec.position_in_bb == 'UPPER' %}
                                         <span class="badge bg-danger">BB Upper</span>
                                     {% endif %}
+                                    {% if rec.latest_candlestick_patterns %}
+                                        {% for pattern, active in rec.latest_candlestick_patterns.items() %}
+                                            {% if active and pattern in ['hanging_man', 'engulfing_bearish', 'shooting_star', 'marubozu_bearish'] %}
+                                                <span class="badge bg-danger">{{ pattern|replace('_', ' ')|title }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
                                 </div>
                             </a>
                         {% endfor %}
@@ -277,10 +316,69 @@
     </div>
 </div>
 
-<!-- Add some custom CSS for styling the technical indicators -->
+<!-- Pattern Details Modal -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Candlestick Pattern Details <button class="btn btn-sm btn-secondary float-end" type="button" data-bs-toggle="collapse" data-bs-target="#patternDetails">Show/Hide</button></h5>
+            </div>
+            <div class="card-body collapse" id="patternDetails">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-success">Bullish Patterns</h6>
+                        <ul>
+                            <li><strong>Hammer:</strong> Small body at top with long lower shadow. Suggests potential upward reversal.</li>
+                            <li><strong>Bullish Engulfing:</strong> Large bullish candle completely engulfs previous bearish candle.</li>
+                            <li><strong>Bullish Marubozu:</strong> Long bullish candle with no shadows. Shows strong buying pressure.</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-danger">Bearish Patterns</h6>
+                        <ul>
+                            <li><strong>Hanging Man:</strong> Small body at top with long lower shadow in uptrend. Potential reversal.</li>
+                            <li><strong>Shooting Star:</strong> Small body at bottom with long upper shadow. Suggests selling pressure.</li>
+                            <li><strong>Bearish Engulfing:</strong> Large bearish candle completely engulfs previous bullish candle.</li>
+                            <li><strong>Bearish Marubozu:</strong> Long bearish candle with no shadows. Shows strong selling pressure.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6 class="text-warning">Neutral/Indecision Patterns</h6>
+                        <ul>
+                            <li><strong>Doji:</strong> Open and close prices are nearly equal. Indicates market indecision.</li>
+                            <li><strong>Spinning Top:</strong> Small body with upper and lower shadows. Shows equilibrium between buyers and sellers.</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-info">Chart Patterns</h6>
+                        <ul>
+                            <li><strong>Double Bottom:</strong> "W" shaped pattern indicating potential bullish reversal after downtrend.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add custom CSS for styling -->
 <style>
     .technical-indicators .badge {
         margin-right: 5px;
+        font-size: 0.7rem;
+    }
+    
+    .pattern-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px;
+    }
+    
+    .pattern-badges .badge {
+        font-size: 0.6rem;
+        padding: 0.2rem 0.4rem;
     }
     
     .recommendation-buy {
@@ -298,21 +396,34 @@
         font-weight: bold !important;
     }
     
-    #indicatorsGuide {
+    #indicatorsGuide, #patternDetails {
         font-size: 0.9rem;
     }
     
-    #indicatorsGuide h6 {
+    #indicatorsGuide h6, #patternDetails h6 {
         color: #0d6efd;
         margin-top: 0;
     }
     
-    #indicatorsGuide ul {
+    #indicatorsGuide ul, #patternDetails ul {
         padding-left: 1rem;
     }
     
-    #indicatorsGuide p {
+    #indicatorsGuide p, #patternDetails p {
         margin-bottom: 0.5rem;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .table th {
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    
+    .table td:last-child {
+        min-width: 150px;
     }
 </style>
 {% endblock %}

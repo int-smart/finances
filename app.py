@@ -14,6 +14,7 @@ from src.stock_tracker import StockTracker
 from src.fundamentals_tracker import FundamentalsTracker
 from src.decision_engine import DecisionEngine
 from src.config import COMPANIES, INVESTORS
+from src.storage_helper import GistStorage
 
 app = Flask(__name__)
 app.config['DATA_DIR'] = 'data'
@@ -137,6 +138,44 @@ def refresh_data():
         recommendations = decision_engine.generate_recommendations()
         with open(os.path.join(app.config['DATA_DIR'], 'recommendations.pkl'), 'wb') as f:
             pickle.dump(recommendations, f)
+    
+    return redirect(url_for('index'))
+
+@app.route('/refresh_gist', methods=['POST'])
+def refresh_gist():
+    """Upload all current data to gist storage"""
+    try:
+        storage = GistStorage()
+        
+        # Upload stock data from latest file
+        stock_data_latest = load_pickle('stock_data_latest.pkl')
+        if stock_data_latest:
+            storage.upload_pickle(stock_data_latest, 'stock_data')
+        
+        # Upload investor data from latest file
+        investor_data_latest = load_pickle('investor_data_latest.pkl')
+        if investor_data_latest:
+            storage.upload_pickle(investor_data_latest, 'investor_data')
+        
+        # Upload news data from latest file
+        news_data_latest = load_pickle('news_data_latest.pkl')
+        if news_data_latest:
+            storage.upload_pickle(news_data_latest, 'news_data')
+        
+        # Upload fundamentals data from latest file
+        fundamentals_data_latest = load_pickle('fundamentals_data_latest.pkl')
+        if fundamentals_data_latest:
+            storage.upload_pickle(fundamentals_data_latest, 'fundamentals_data')
+        
+        # Upload recommendations from latest file
+        recommendations_latest = load_pickle('recommendations_latest.pkl')
+        if recommendations_latest:
+            storage.upload_pickle(recommendations_latest, 'recommendations')
+        
+        print("All data uploaded to gist storage successfully")
+        
+    except Exception as e:
+        print(f"Error uploading data to gist: {e}")
     
     return redirect(url_for('index'))
 
@@ -279,7 +318,6 @@ def stock_detail(ticker):
     
     # Load news summary
     news_summary = load_news_summary(ticker)
-
     return render_template('stock_detail.html', 
                           ticker=ticker,
                           stock_data=ticker_data,

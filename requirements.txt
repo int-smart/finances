@@ -2,6 +2,10 @@
 flask
 werkzeug
 gunicorn
+yfinance
+
+# Env
+dotenv
 
 # Data Processing
 pandas
@@ -25,9 +29,12 @@ lxml
 nltk
 textblob
 
+# Web Scraping & Browser Automation
+playwright
+selenium
+webdriver-manager
+
 # Additional Utilities
 python-dotenv
 schedule
-webdriver-manager
-selenium
 together

@@ -17,7 +17,7 @@ INVESTORS = {
     "Mohnish Pabrai (Pabrai Investment Funds)": "0001173334"
 }
 # List of companies to track
-COMPANIES = ["AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "BRK-B", "JPM", "V", "JNJ", "PLTR", "NVDA", "ASML", "QCOM", "INTC", "AMD", "MU", "TSM", "AVGO"]
+COMPANIES = ["AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "BRK-B", "JPM", "V", "LTBR", "PLTR", "NVDA", "ASML", "QCOM", "INTC", "AMD", "MU", "TSM", "AVGO", "CEG", "LEU", "XOM", "BEPC", "NEE"]
 # COMPANIES = ["AAPL"]
 
 # List of commodities to track

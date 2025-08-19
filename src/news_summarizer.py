@@ -38,7 +38,7 @@ class NewsSummarizer:
 
         Please provide for the {ticker}:
 
-        1. A detailed executive summary (5-7 sentences) that includes specific figures, percentages, or monetary values mentioned in the articles
+        1. A detailed executive summary (5-7 sentences) that includes specific figures, percentages, or monetary values mentioned in the articles. If you use any financial terminologies (like EPS, PEG, PE ratio, net income, prtofit margin etc.) here explain what they are as if you are talking to a 5 year old.
         2. Key positive developments with quantifiable metrics where available (e.g., "Revenue increased by 15% to $3.2B" rather than just "Revenue increased")
         3. Specific negative factors or risks with concrete examples and data points from the articles
         4. Nuanced sentiment analysis that goes beyond simple positive/negative/neutral and discusses the degree and context of the sentiment
@@ -75,6 +75,7 @@ class NewsSummarizer:
                 json_str = text.strip()
             return json.loads(json_str)
         except Exception as e:
+            print(f"Error processing article batch for {ticker}: {str(e)}")
             return {"summary": f"Error generating summary: {str(e)}", "error": str(e)}
 
     def merge_summaries(self, summaries_list):

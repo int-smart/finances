@@ -5,6 +5,7 @@ from scipy.signal import argrelextrema
 import pickle
 from datetime import datetime
 from src.news_summarizer import NewsSummarizer
+from src.trend_analyzer import TrendAnalyzer
 
 class DecisionEngine:
     def __init__(self, investor_data=None, news_data=None, stock_data=None, fundamentals_data=None):
@@ -221,6 +222,60 @@ class DecisionEngine:
         
         return analysis
     
+    def analyze_candlestick_patterns(self):
+        """Analyze candlestick patterns using TrendAnalyzer"""
+        if not self.stock_data or 'stocks' not in self.stock_data:
+            return {'error': 'No stock price data available'}
+        
+        pattern_analysis = {}
+        
+        for ticker, data in self.stock_data.get('stocks', {}).items():
+            if 'history' not in data or data['history'].empty:
+                print(f"Skipping {ticker} due to missing history data")
+                continue
+            
+            hist = data['history']
+            
+            # Initialize TrendAnalyzer with stock data
+            analyzer = TrendAnalyzer(hist)
+            
+            # Analyze all patterns
+            patterns = analyzer.analyze_patterns()
+            
+            # Get latest patterns (now returns native Python booleans)
+            latest_patterns = analyzer.get_latest_patterns()
+            
+            # Count recent pattern occurrences using the new method
+            recent_patterns = analyzer.count_recent_patterns(days=10)
+            
+            # Determine overall pattern signal
+            bullish_patterns = ['hammer', 'engulfing_bullish', 'marubozu_bullish']
+            bearish_patterns = ['hanging_man', 'engulfing_bearish', 'shooting_star', 'marubozu_bearish']
+            neutral_patterns = ['doji', 'spinning_top']
+            
+            bullish_signals = sum(1 for pattern in bullish_patterns if latest_patterns.get(pattern, False))
+            bearish_signals = sum(1 for pattern in bearish_patterns if latest_patterns.get(pattern, False))
+            neutral_signals = sum(1 for pattern in neutral_patterns if latest_patterns.get(pattern, False))
+            
+            # Determine pattern consensus
+            if bullish_signals > bearish_signals:
+                pattern_consensus = 'BULLISH'
+            elif bearish_signals > bullish_signals:
+                pattern_consensus = 'BEARISH'
+            else:
+                pattern_consensus = 'NEUTRAL'
+            
+            pattern_analysis[ticker] = {
+                'latest_patterns': latest_patterns,
+                'recent_patterns': recent_patterns,
+                'pattern_consensus': pattern_consensus,
+                'bullish_signals': bullish_signals,
+                'bearish_signals': bearish_signals,
+                'neutral_signals': neutral_signals
+            }
+        
+        return pattern_analysis
+    
     def analyze_price_trends(self):
         """Analyze price trends from stock data using multiple financial heuristics"""
         if not self.stock_data or 'stocks' not in self.stock_data:
@@ -390,7 +445,8 @@ class DecisionEngine:
         news_sentiment = self.analyze_news_sentiment()
         fundamental_analysis = self.analyze_fundamentals()
         price_trends = self.analyze_price_trends()
-        
+        candlestick_patterns = self.analyze_candlestick_patterns()
+
         recommendations = {}
         
         # Combine all analyses
@@ -399,6 +455,7 @@ class DecisionEngine:
         all_tickers.update(news_sentiment.keys() if isinstance(news_sentiment, dict) else [])
         all_tickers.update(fundamental_analysis.keys() if isinstance(fundamental_analysis, dict) else [])
         all_tickers.update(price_trends.keys() if isinstance(price_trends, dict) else [])
+        all_tickers.update(candlestick_patterns.keys() if isinstance(candlestick_patterns, dict) else [])
         
         for ticker in all_tickers:
             if ticker == 'error':
@@ -425,10 +482,14 @@ class DecisionEngine:
                 'position_in_bb': price_trends.get(ticker, {}).get('position_in_bb', 'NO DATA'),
                 'volume_trend': price_trends.get(ticker, {}).get('volume_trend', 'NO DATA'),
                 'beta': price_trends.get(ticker, {}).get('beta', 'NO DATA'),
-                'pattern_double_bottom': price_trends.get(ticker, {}).get('pattern_double_bottom', 'NO DATA')
+                'pattern_double_bottom': price_trends.get(ticker, {}).get('pattern_double_bottom', 'NO DATA'),
+                'pattern_consensus': candlestick_patterns.get(ticker, {}).get('pattern_consensus', 'NO DATA'),
+                'latest_candlestick_patterns': candlestick_patterns.get(ticker, {}).get('latest_patterns', {}),
+                'bullish_pattern_signals': candlestick_patterns.get(ticker, {}).get('bullish_signals', 0),
+                'bearish_pattern_signals': candlestick_patterns.get(ticker, {}).get('bearish_signals', 0)
             }
             
-            # Simple scoring system
+            # Enhanced scoring system with candlestick patterns
             score = 0
             
             if recommendation['investor_consensus'] == 'BULLISH':
@@ -454,6 +515,12 @@ class DecisionEngine:
             if recommendation['price_trend'] == 'UPTREND':
                 score += 1
             elif recommendation['price_trend'] == 'DOWNTREND':
+                score -= 1
+            
+            # Add candlestick pattern scoring
+            if recommendation['pattern_consensus'] == 'BULLISH':
+                score += 1
+            elif recommendation['pattern_consensus'] == 'BEARISH':
                 score -= 1
             
             # Get news summary and incorporate it

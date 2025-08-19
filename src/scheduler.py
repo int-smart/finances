@@ -76,7 +76,7 @@ class TaskScheduler:
             
             # Check if more than 25 hours have passed (giving 1 hour buffer)
             # This accounts for the daily run scheduled at 8 AM
-            if time_since_last_run > timedelta(hours=18):
+            if time_since_last_run > timedelta(hours=24) or current_time.date() != last_run_time.date():
                 print(f"Missed daily run detected. Last run: {last_run_time}, Current time: {current_time}")
                 print(f"Time since last run: {time_since_last_run}")
                 return True

@@ -1,4 +1,4 @@
-name: finance-analysis
+name: finance
 channels:
   - defaults
   - conda-forge
