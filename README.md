@@ -52,6 +52,8 @@ A comprehensive web application for analyzing stocks, generating investment reco
    ```bash
    pip install -r requirements.txt
    ```
+   
+   **Note**: This project uses the `gist-storage-python` package for cloud data storage via GitHub Releases.
 
 ### Option 2: Using conda (environment.yml)
 

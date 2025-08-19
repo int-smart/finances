@@ -14,7 +14,7 @@ from src.stock_tracker import StockTracker
 from src.fundamentals_tracker import FundamentalsTracker
 from src.decision_engine import DecisionEngine
 from src.config import COMPANIES, INVESTORS
-from src.storage_helper import GistStorage
+from gist_storage_python import GistStorage
 
 app = Flask(__name__)
 app.config['DATA_DIR'] = 'data'
@@ -145,7 +145,7 @@ def refresh_data():
 def refresh_gist():
     """Upload all current data to gist storage"""
     try:
-        storage = GistStorage()
+        storage = GistStorage(token=os.environ.get('TOKEN_GIST'), repo_owner="int-smart", repo_name="finances")
         
         # Upload stock data from latest file
         stock_data_latest = load_pickle('stock_data_latest.pkl')

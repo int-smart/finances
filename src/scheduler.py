@@ -12,7 +12,7 @@ from src.decision_engine import DecisionEngine
 from src.config import COMPANIES, INVESTORS
 import numpy as np
 import schedule
-from src.storage_helper import GistStorage
+from gist_storage_python import GistStorage
 class TaskScheduler:
     """Scheduler for investment research tasks that can run on demand or scheduled"""
     
@@ -300,7 +300,7 @@ class TaskScheduler:
         if hasattr(self, 'decision_engine') and self.decision_engine.recommendations:
             with open('data/recommendations_latest.pkl', 'wb') as f:
                 pickle.dump(self.decision_engine.recommendations, f)
-            storage = GistStorage()
+            storage = GistStorage(token=os.environ.get('TOKEN_GIST'), repo_owner="int-smart", repo_name="finances")
             storage.upload_pickle(self.decision_engine.recommendations, 'recommendations')
             
     def run_monthly_tasks(self):

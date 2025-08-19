@@ -4,7 +4,7 @@ import pickle
 from datetime import datetime, timedelta
 from flask import Flask, render_template
 from src.decision_engine import DecisionEngine
-from src.storage_helper import GistStorage
+from gist_storage_python import GistStorage
 
 def check_data_freshness():
     """Check if data files are fresh (updated within last 24 hours)"""
@@ -42,7 +42,7 @@ def load_historical_recommendations():
 def load_data_from_cloud():
     """Load latest data from cloud storage"""
     try:
-        storage = GistStorage()
+        storage = GistStorage(token=os.environ.get('TOKEN_GIST'), repo_owner="int-smart", repo_name="finances")
     except ValueError as e:
         print(f"Error initializing storage: {e}")
         return {}

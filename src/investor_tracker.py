@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from src.config import INVESTORS, SEC_API_HEADERS, QUARTERS_TO_TRACK, REQUEST_DELAY
 from lxml import etree
-from src.storage_helper import GistStorage
+from gist_storage_python import GistStorage
 
 class InvestorTracker:
     def __init__(self):
@@ -410,7 +410,7 @@ class InvestorTracker:
             pickle.dump(latest_data, f)
         
         # Upload to cloud storage
-        storage = GistStorage()
+        storage = GistStorage(token=os.environ.get('TOKEN_GIST'), repo_owner="int-smart", repo_name="finances")
         storage.upload_pickle(latest_data, 'investor_data')
         
         print(f"Latest investor data saved and uploaded")

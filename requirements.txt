@@ -38,3 +38,4 @@ webdriver-manager
 python-dotenv
 schedule
 together
+gist-storage-python

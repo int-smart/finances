@@ -13,7 +13,7 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 import pickle
-from src.storage_helper import GistStorage
+from gist_storage_python import GistStorage
 
 load_dotenv()
 
@@ -491,7 +491,7 @@ class NewsTracker:
             pickle.dump(latest_data, f)
         
         # Upload to cloud storage
-        storage = GistStorage()
+        storage = GistStorage(token=os.environ.get('TOKEN_GIST'), repo_owner="int-smart", repo_name="finances")
         storage.upload_pickle(latest_data, 'news_data')
         
         print(f"Latest news data saved and uploaded")

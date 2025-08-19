@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 from src.config import SEC_API_HEADERS, REQUEST_DELAY
 import time
 import pickle
-from src.storage_helper import GistStorage
+from gist_storage_python import GistStorage
 from datetime import datetime
 
 class FundamentalsTracker:
@@ -341,7 +341,7 @@ class FundamentalsTracker:
             pickle.dump(self.fundamentals, f)
         
         # Upload to cloud storage
-        storage = GistStorage()
+        storage = GistStorage(token=os.environ.get('TOKEN_GIST'), repo_owner="int-smart", repo_name="finances")
         storage.upload_pickle(self.fundamentals, 'fundamentals_data')
         
         print(f"Latest fundamentals data saved and uploaded")

@@ -26,3 +26,4 @@ dependencies:
     - webdriver-manager
     - werkzeug
     - together
+    - gist-storage-python

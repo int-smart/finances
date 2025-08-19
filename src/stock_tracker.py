@@ -4,7 +4,7 @@ from src.config import COMPANIES, COMMODITIES, REQUEST_DELAY
 import time
 import os
 from dotenv import load_dotenv
-from src.storage_helper import GistStorage
+from gist_storage_python import GistStorage
 from datetime import datetime
 import pickle
 
@@ -201,7 +201,7 @@ class StockTracker:
             pickle.dump(latest_data, f)
         
         # Upload to cloud storage
-        storage = GistStorage()
+        storage = GistStorage(token=os.environ.get('TOKEN_GIST'), repo_owner="int-smart", repo_name="finances")
         storage.upload_pickle(latest_data, 'stock_data')
         
         print(f"Latest stock data saved and uploaded")
