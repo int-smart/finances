@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Subreddit Analysis{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Subreddit Investment Analysis</h1>
+            <p class="text-muted">Analysis of investment discussions from popular Reddit communities</p>
+            
+            {% if available_dates %}
+            <div class="mb-3">
+                <label for="dateSelect" class="form-label">Select Date:</label>
+                <select class="form-select" id="dateSelect" onchange="changeDate()">
+                    {% for date in available_dates %}
+                    <option value="{{ date }}" {% if date == selected_date %}selected{% endif %}>{{ date }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            
+            {% if subreddit_data %}
+            <div class="row">
+                {% for subreddit, analysis in subreddit_data.items() %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">r/{{ analysis.subreddit if analysis.subreddit else subreddit }}</h5>
+                            {% if analysis.total_posts %}
+                            <small class="text-muted">{{ analysis.total_posts }} posts analyzed</small>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            {% if analysis.summary and not analysis.get('error') %}
+                                <div class="mb-3">
+                                    <h6>Community Discussion Summary</h6>
+                                    <p class="text-sm">{{ analysis.summary }}</p>
+                                </div>
+                                
+                                {% if analysis.mentioned_tickers %}
+                                <div class="mb-3">
+                                    <h6>Popular Tickers Mentioned</h6>
+                                    {# Handle list format (new AI format) #}
+                                    {% for ticker in analysis.mentioned_tickers[:5] %}
+                                    <span class="badge bg-primary me-1">{{ ticker }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                
+                                {% if analysis.get('opportunities') %}
+                                <div class="mb-3">
+                                    <h6>Investment Opportunities</h6>
+                                    {% for opportunity in analysis.opportunities[:3] %}
+                                    <div class="mb-2 p-2 border rounded">
+                                        <strong>{{ opportunity.type }}</strong>
+                                        {% if opportunity.sentiment == 'positive' %}
+                                            <span class="badge bg-success ms-1">{{ opportunity.sentiment }}</span>
+                                        {% elif opportunity.sentiment == 'negative' %}
+                                            <span class="badge bg-danger ms-1">{{ opportunity.sentiment }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary ms-1">{{ opportunity.sentiment }}</span>
+                                        {% endif %}
+                                        <br>
+                                        <small>{{ opportunity.description }}</small>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                
+                                {% if analysis.get('themes') %}
+                                <div class="mb-3">
+                                    <h6>Key Themes</h6>
+                                    {% for theme in analysis.themes[:4] %}
+                                    <span class="badge bg-info me-1">{{ theme }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                
+                                {% if analysis.get('catalysts') %}
+                                <div class="mb-2">
+                                    <h6 class="text-success">Potential Catalysts</h6>
+                                    <ul class="list-unstyled">
+                                        {% for catalyst in analysis.catalysts[:3] %}
+                                        <li><small>• {{ catalyst }}</small></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                
+                                {% if analysis.get('risks') %}
+                                <div class="mb-2">
+                                    <h6 class="text-danger">Potential Risks</h6>
+                                    <ul class="list-unstyled">
+                                        {% for risk in analysis.risks[:3] %}
+                                        <li><small>• {{ risk }}</small></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                
+                                {% if analysis.get('sentiment') %}
+                                <div class="mt-3">
+                                    <h6>Overall Sentiment</h6>
+                                    {% if analysis.sentiment == 'positive' %}
+                                        <span class="badge bg-success">{{ analysis.sentiment.title() }}</span>
+                                    {% elif analysis.sentiment == 'negative' %}
+                                        <span class="badge bg-danger">{{ analysis.sentiment.title() }}</span>
+                                    {% elif analysis.sentiment == 'mixed' %}
+                                        <span class="badge bg-warning">{{ analysis.sentiment.title() }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ analysis.sentiment.title() }}</span>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                
+                                {% if analysis.get('top_posts') %}
+                                <div class="mt-3">
+                                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="collapse" data-bs-target="#posts-{{ loop.index }}">
+                                        <i class="fas fa-eye"></i> View Top Posts ({{ analysis.top_posts|length }})
+                                    </button>
+                                    <div class="collapse mt-3" id="posts-{{ loop.index }}">
+                                        <h6 class="mb-3">Top Posts from r/{{ analysis.subreddit if analysis.subreddit else subreddit }}</h6>
+                                        {% for post in analysis.top_posts[:4] %}
+                                        <div class="card mb-3 border-start border-success border-3 post-card">
+                                            <div class="card-body py-2">
+                                                <h6 class="card-title mb-1">{{ post.title }}</h6>
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span class="badge bg-success">r/{{ post.subreddit }}</span>
+                                                    <div class="text-muted small">
+                                                        <i class="fas fa-arrow-up"></i> {{ post.score }} • 
+                                                        <i class="fas fa-comment"></i> {{ post.comments_count }}
+                                                    </div>
+                                                </div>
+                                                {% if post.content %}
+                                                <p class="card-text small text-muted mb-1">
+                                                    {{ post.content[:250] }}{% if post.content|length > 250 %}...{% endif %}
+                                                </p>
+                                                {% endif %}
+                                                <div class="d-flex gap-2">
+                                                    {% if post.url and post.url != post.permalink %}
+                                                    <a href="{{ post.url }}" target="_blank" class="btn btn-outline-secondary btn-xs">
+                                                        <i class="fas fa-external-link-alt"></i> View Link
+                                                    </a>
+                                                    {% endif %}
+                                                    <a href="https://reddit.com{{ post.permalink }}" target="_blank" class="btn btn-outline-primary btn-xs">
+                                                        <i class="fab fa-reddit"></i> View on Reddit
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                        {% if analysis.top_posts|length > 4 %}
+                                        <div class="text-center">
+                                            <small class="text-muted">Showing 4 of {{ analysis.top_posts|length }} posts</small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="text-center text-muted">
+                                    {% if analysis.get('error') %}
+                                    <p>Error analyzing r/{{ subreddit }}: {{ analysis.error }}</p>
+                                    {% else %}
+                                    <p>No analysis available for r/{{ subreddit }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <h5>No Subreddit Analysis Available</h5>
+                <p>Subreddit analysis data hasn't been collected yet. Please refresh the Reddit data to see community analysis.</p>
+                <form method="post" action="/refresh_data">
+                    <input type="hidden" name="data_type" value="reddit">
+                    <button type="submit" class="btn btn-primary">Refresh Reddit Data</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function changeDate() {
+    const select = document.getElementById('dateSelect');
+    const selectedDate = select.value;
+    window.location.href = `{{ url_for('subreddits') }}?date=${selectedDate}`;
+}
+</script>
+
+<style>
+.btn-xs {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.775rem;
+    line-height: 1.2;
+    border-radius: 0.2rem;
+}
+
+.card .border-start {
+    border-left-width: 4px !important;
+}
+
+.post-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.post-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

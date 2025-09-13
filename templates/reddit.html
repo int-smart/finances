@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Reddit Stock Discussions{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Reddit Stock Discussions</h1>
+            <p class="text-muted">Analysis of stock discussions from popular Reddit communities</p>
+            
+            {% if available_dates %}
+            <div class="mb-3">
+                <label for="dateSelect" class="form-label">Select Date:</label>
+                <select class="form-select" id="dateSelect" onchange="changeDate()">
+                    {% for date in available_dates %}
+                    <option value="{{ date }}" {% if date == selected_date %}selected{% endif %}>{{ date }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            
+            {% if reddit_data %}
+            <div class="row">
+                {% for ticker, data in reddit_data.items() %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">{{ ticker }}</h5>
+                            {% if data.summary %}
+                                {% if data.summary.sentiment == 'positive' %}
+                                    <span class="badge bg-success">{{ data.summary.sentiment.title() }}</span>
+                                {% elif data.summary.sentiment == 'negative' %}
+                                    <span class="badge bg-danger">{{ data.summary.sentiment.title() }}</span>
+                                {% elif data.summary.sentiment == 'mixed' %}
+                                    <span class="badge bg-warning">{{ data.summary.sentiment.title() }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ data.summary.sentiment.title() }}</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            {% if data.summary %}
+                                <div class="mb-3">
+                                    <h6>Summary</h6>
+                                    <p class="text-sm">{{ data.summary.summary[:200] }}{% if data.summary.summary|length > 200 %}...{% endif %}</p>
+                                </div>
+                                
+                                <div class="row text-center mb-3">
+                                    <div class="col-6">
+                                        <div class="border-end">
+                                            <div class="h5 mb-0 text-success">{{ data.summary.positive_sentiment_posts }}</div>
+                                            <small class="text-muted">Positive</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="h5 mb-0 text-danger">{{ data.summary.negative_sentiment_posts }}</div>
+                                        <small class="text-muted">Negative</small>
+                                    </div>
+                                </div>
+                                
+                                {% if data.summary.subreddit_breakdown %}
+                                <div class="mb-3">
+                                    <h6>Top Subreddits</h6>
+                                    {% for subreddit, count in data.summary.subreddit_breakdown.items() %}
+                                        {% if loop.index <= 3 %}
+                                        <span class="badge bg-primary me-1">r/{{ subreddit }} ({{ count }})</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                
+                                {% if data.summary.positive_factors %}
+                                <div class="mb-2">
+                                    <h6 class="text-success">Positive Factors</h6>
+                                    <ul class="list-unstyled">
+                                        {% for factor in data.summary.positive_factors[:2] %}
+                                        <li><small>• {{ factor.factor }}</small></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                
+                                {% if data.summary.negative_factors %}
+                                <div class="mb-2">
+                                    <h6 class="text-danger">Negative Factors</h6>
+                                    <ul class="list-unstyled">
+                                        {% for factor in data.summary.negative_factors[:2] %}
+                                        <li><small>• {{ factor.factor }}</small></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="text-center text-muted">
+                                    <p>No Reddit analysis available</p>
+                                    {% if data.posts %}
+                                        <small>{{ data.posts|length }} posts found but not analyzed</small>
+                                    {% else %}
+                                        <small>No posts found</small>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="mt-3">
+                                <a href="/stock/{{ ticker }}" class="btn btn-outline-primary btn-sm">View Details</a>
+                                {% if data.posts %}
+                                <button class="btn btn-outline-info btn-sm" data-bs-toggle="collapse" data-bs-target="#posts-{{ ticker }}">
+                                    <i class="fas fa-eye"></i> View Posts ({{ data.posts|length }})
+                                </button>
+                                {% endif %}
+                            </div>
+                            
+                            {% if data.posts %}
+                            <div class="collapse mt-3" id="posts-{{ ticker }}">
+                                <div class="border-top pt-3">
+                                    <h6 class="mb-3">Recent Reddit Posts about {{ ticker }}</h6>
+                                    {% for post in data.posts[:5] %}
+                                    <div class="card mb-3 border-start border-primary border-3 post-card">
+                                        <div class="card-body py-2">
+                                            <h6 class="card-title mb-1">{{ post.title }}</h6>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="badge bg-info">r/{{ post.subreddit }}</span>
+                                                <div class="text-muted small">
+                                                    <i class="fas fa-arrow-up"></i> {{ post.score }} • 
+                                                    <i class="fas fa-comment"></i> {{ post.comments_count }}
+                                                </div>
+                                            </div>
+                                            {% if post.content %}
+                                            <p class="card-text small text-muted mb-1">
+                                                {{ post.content[:200] }}{% if post.content|length > 200 %}...{% endif %}
+                                            </p>
+                                            {% endif %}
+                                            {% if post.url and post.url != post.permalink %}
+                                            <a href="{{ post.url }}" target="_blank" class="btn btn-outline-secondary btn-xs">
+                                                <i class="fas fa-external-link-alt"></i> View Link
+                                            </a>
+                                            {% endif %}
+                                            <a href="https://reddit.com{{ post.permalink }}" target="_blank" class="btn btn-outline-primary btn-xs">
+                                                <i class="fab fa-reddit"></i> View on Reddit
+                                            </a>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    {% if data.posts|length > 5 %}
+                                    <div class="text-center">
+                                        <small class="text-muted">Showing 5 of {{ data.posts|length }} posts</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer text-muted">
+                            <small>Last updated: {{ data.last_updated if data.last_updated else 'Unknown' }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <h5>No Reddit Data Available</h5>
+                <p>Reddit stock discussion data hasn't been collected yet. Please refresh the Reddit data to see analysis.</p>
+                <form method="post" action="/refresh_data">
+                    <input type="hidden" name="data_type" value="reddit">
+                    <button type="submit" class="btn btn-primary">Refresh Reddit Data</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function changeDate() {
+    const select = document.getElementById('dateSelect');
+    const selectedDate = select.value;
+    window.location.href = `{{ url_for('reddit') }}?date=${selectedDate}`;
+}
+</script>
+
+<style>
+.btn-xs {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.775rem;
+    line-height: 1.2;
+    border-radius: 0.2rem;
+}
+
+.card .border-start {
+    border-left-width: 4px !important;
+}
+
+.post-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.post-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

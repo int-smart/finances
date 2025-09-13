@@ -25,6 +25,11 @@ A comprehensive web application for analyzing stocks, generating investment reco
   - Article content extraction with metadata
   - JSON export functionality
   - Both manual and automated login support
+- **Reddit Integration**: Social sentiment analysis from popular financial communities
+  - Stock ticker mention tracking across relevant subreddits (r/wallstreetbets, r/stocks, etc.)
+  - AI-powered summarization of Reddit discussions
+  - Community sentiment analysis with positive/negative factor extraction
+  - Earnings catalyst and risk identification from social discussions
 
 ## 📊 Screenshots
 

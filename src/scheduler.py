@@ -8,6 +8,7 @@ from src.investor_tracker import InvestorTracker
 from src.stock_tracker import StockTracker
 from src.news_tracker import NewsTracker
 from src.fundamentals_tracker import FundamentalsTracker
+from src.reddit_tracker import RedditTracker
 from src.decision_engine import DecisionEngine
 from src.config import COMPANIES, INVESTORS
 import numpy as np
@@ -31,6 +32,7 @@ class TaskScheduler:
         self.stock_tracker = StockTracker()
         self.news_tracker = NewsTracker(tickers=self.tickers)
         self.fundamentals_tracker = FundamentalsTracker()
+        self.reddit_tracker = RedditTracker()
         self.decision_engine = DecisionEngine()
         
         # Data storage
@@ -154,16 +156,55 @@ class TaskScheduler:
             print("Skipping news collection as requested.")
         
         return news_data
+    
+    def collect_reddit_data(self):
+        """Collect Reddit stock discussions and subreddit analysis"""
+        reddit_data = {}
+        subreddit_data = {}
+        
+        try:
+            print("Collecting Reddit stock discussions...")
+            # Track Reddit discussions for all tickers
+            reddit_data = self.reddit_tracker.track_all_tickers(
+                tickers=self.tickers, 
+                posts_per_ticker=20
+            )
+            
+            # Save Reddit ticker data
+            with open(f"{self.data_dir}/reddit_data.pkl", 'wb') as f:
+                pickle.dump(reddit_data, f)
+            
+            print("Analyzing popular subreddits...")
+            # Analyze popular investment subreddits
+            subreddit_data = self.reddit_tracker.analyze_popular_subreddits(
+                subreddits=['wallstreetbets', 'stocks', 'investing']
+            )
+            
+            # Save subreddit analysis data
+            with open(f"{self.data_dir}/subreddit_data.pkl", 'wb') as f:
+                pickle.dump(subreddit_data, f)
+                
+            print(f"✅ Reddit data collection completed: {len(reddit_data)} ticker discussions, {len(subreddit_data)} subreddit analyses")
+            
+        except Exception as e:
+            print(f"⚠️ Error collecting Reddit data: {e}")
+            print("Continuing with other tasks...")
+        
+        return reddit_data, subreddit_data
 
-    def generate_recommendations(self, investor_data, stock_data, fundamentals_data, news_data):
+    def generate_recommendations(self, investor_data, stock_data, fundamentals_data, news_data, reddit_data=None):
         """Generate investment recommendations based on collected data"""
         print("Generating investment recommendations...")
         self.decision_engine.investor_data = investor_data
         self.decision_engine.news_data = news_data
         self.decision_engine.stock_data = stock_data
         self.decision_engine.fundamentals_data = fundamentals_data
+        
+        # Add Reddit data if available
+        if reddit_data:
+            self.decision_engine.reddit_data = reddit_data
     
-        # Generate recommendations incorporating news summaries
+        # Generate recommendations incorporating news and Reddit summaries
         recommendations = self.decision_engine.generate_recommendations()
         
         with open(f"{self.data_dir}/recommendations.pkl", 'wb') as f:
@@ -239,7 +280,10 @@ class TaskScheduler:
             # 2. Collect news
             news_data = self.collect_news()
             
-            # 3. Load cached investor and fundamentals data
+            # 3. Collect Reddit data
+            reddit_data, subreddit_data = self.collect_reddit_data()
+            
+            # 4. Load cached investor and fundamentals data
             try:
                 with open(f"{self.data_dir}/investor_data.pkl", 'rb') as f:
                     investor_data = pickle.load(f)
@@ -256,20 +300,20 @@ class TaskScheduler:
             except (FileNotFoundError, pickle.UnpicklingError):
                 fundamentals_data = {}
 
-            # 4. Generate recommendations
+            # 5. Generate recommendations
             recommendations = self.generate_recommendations(
-                investor_data, stock_data, fundamentals_data, news_data
+                investor_data, stock_data, fundamentals_data, news_data, reddit_data
             )
             
-            # 5. Generate report
+            # 6. Generate report
             self.generate_report(
                 investor_data, stock_data, fundamentals_data, news_data, recommendations
             )
             
-            # 6. Update the last run timestamp
+            # 7. Update the last run timestamp
             self.update_last_daily_run()
             
-            # 7. Save and upload latest data
+            # 8. Save and upload latest data
             self.save_all_latest_data()
             
             print(f"Daily tasks completed successfully at {datetime.now()}")
@@ -296,6 +340,26 @@ class TaskScheduler:
         if hasattr(self, 'fundamentals_tracker'):
             self.fundamentals_tracker.save_latest_data()
         
+        # Save Reddit data
+        if hasattr(self, 'reddit_tracker'):
+            try:
+                # Save latest Reddit data to cloud
+                if os.path.exists('data/reddit_data.pkl'):
+                    with open('data/reddit_data.pkl', 'rb') as f:
+                        reddit_data = pickle.load(f)
+                    storage = GistStorage(token=os.environ.get('TOKEN_GIST'), repo_owner="int-smart", repo_name="finances")
+                    storage.upload_pickle(reddit_data, 'reddit_data')
+                    
+                if os.path.exists('data/subreddit_data.pkl'):
+                    with open('data/subreddit_data.pkl', 'rb') as f:
+                        subreddit_data = pickle.load(f)
+                    storage = GistStorage(token=os.environ.get('TOKEN_GIST'), repo_owner="int-smart", repo_name="finances")
+                    storage.upload_pickle(subreddit_data, 'subreddit_data')
+                    
+                print("✅ Reddit data uploaded to cloud storage")
+            except Exception as e:
+                print(f"⚠️ Error uploading Reddit data: {e}")
+        
         # Upload recommendations
         if hasattr(self, 'decision_engine') and self.decision_engine.recommendations:
             with open('data/recommendations_latest.pkl', 'wb') as f:
@@ -319,20 +383,23 @@ class TaskScheduler:
         # 4. Collect news
         news_data = self.collect_news()
         
-        # 5. Generate recommendations
+        # 5. Collect Reddit data
+        reddit_data, subreddit_data = self.collect_reddit_data()
+        
+        # 6. Generate recommendations
         recommendations = self.generate_recommendations(
-            investor_data, stock_data, fundamentals_data, news_data
+            investor_data, stock_data, fundamentals_data, news_data, reddit_data
         )
         
-        # 6. Generate report
+        # 7. Generate report
         self.generate_report(
             investor_data, stock_data, fundamentals_data, news_data, recommendations
         )
 
-        # 6. Update the last run timestamp
+        # 8. Update the last run timestamp
         self.update_last_daily_run()
 
-        # 7. Save and upload latest data
+        # 9. Save and upload latest data
         self.save_all_latest_data()
         print(f"Monthly tasks completed at {datetime.now()}")
     
@@ -352,20 +419,23 @@ class TaskScheduler:
         # 4. Collect news
         news_data = self.collect_news()
         
-        # 5. Generate recommendations
+        # 5. Collect Reddit data
+        reddit_data, subreddit_data = self.collect_reddit_data()
+        
+        # 6. Generate recommendations
         recommendations = self.generate_recommendations(
-            investor_data, stock_data, fundamentals_data, news_data
+            investor_data, stock_data, fundamentals_data, news_data, reddit_data
         )
         
-        # 6. Generate report
+        # 7. Generate report
         self.generate_report(
             investor_data, stock_data, fundamentals_data, news_data, recommendations
         )
         
-        # 7. Save and upload latest data
+        # 8. Save and upload latest data
         self.save_all_latest_data()
         
-        # 8. Update the last run timestamp
+        # 9. Update the last run timestamp
         self.update_last_daily_run()
         
         print(f"Full analysis completed at {datetime.now()}")

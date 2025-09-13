@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 from datetime import datetime
 from src.news_summarizer import NewsSummarizer
+from src.reddit_tracker import RedditTracker
 
 # Import your existing modules
 from src.investor_tracker import InvestorTracker
@@ -48,6 +49,7 @@ def index():
     investor_data_fresh = is_data_fresh('investor_data.pkl')
     news_data_fresh = is_data_fresh('news_data.pkl')
     fundamentals_data_fresh = is_data_fresh('fundamentals_data.pkl')
+    reddit_data_fresh = is_data_fresh('reddit_data.pkl')
     recommendations_fresh = is_data_fresh('recommendations.pkl')
     
     # Load current recommendations
@@ -83,6 +85,7 @@ def index():
                           investor_data_fresh=investor_data_fresh,
                           news_data_fresh=news_data_fresh,
                           fundamentals_data_fresh=fundamentals_data_fresh,
+                          reddit_data_fresh=reddit_data_fresh,
                           recommendations_fresh=recommendations_fresh,
                           recommendations=recommendations,
                           historical_dates=historical_dates,
@@ -120,6 +123,15 @@ def refresh_data():
         news_data = news_tracker.track(tickers=tickers)
         news_tracker.save_data(os.path.join(app.config['DATA_DIR'], 'news_data.pkl'))
 
+    if data_type == 'reddit' or data_type == 'all':
+        # Refresh Reddit data
+        reddit_tracker = RedditTracker()
+        reddit_data = reddit_tracker.track_all_tickers(tickers=tickers)
+        reddit_tracker.save_data(os.path.join(app.config['DATA_DIR'], 'reddit_data.pkl'), reddit_data)
+        
+        # Also analyze popular subreddits
+        subreddit_data = reddit_tracker.analyze_popular_subreddits(['wallstreetbets', 'stocks'])
+        reddit_tracker.save_data(os.path.join(app.config['DATA_DIR'], 'subreddit_data.pkl'), subreddit_data)
     
     if data_type == 'fundamentals':
         # Refresh fundamentals data
@@ -133,7 +145,8 @@ def refresh_data():
             investor_data=load_pickle('investor_data.pkl'),
             news_data=load_pickle('news_data.pkl'),
             stock_data=load_pickle('stock_data.pkl'),
-            fundamentals_data=load_pickle('fundamentals_data.pkl')
+            fundamentals_data=load_pickle('fundamentals_data.pkl'),
+            reddit_data=load_pickle('reddit_data.pkl')
         )
         recommendations = decision_engine.generate_recommendations()
         with open(os.path.join(app.config['DATA_DIR'], 'recommendations.pkl'), 'wb') as f:
@@ -241,6 +254,56 @@ def fundamentals():
     fundamentals_data = load_pickle('fundamentals_data.pkl')
     return render_template('fundamentals.html', fundamentals_data=fundamentals_data)
 
+@app.route('/reddit')
+def reddit():
+    """Reddit data page"""
+    reddit_data_history = load_pickle('reddit_data.pkl')
+    
+    # Get all available dates from the history
+    available_dates = []
+    if reddit_data_history:
+        available_dates = sorted(reddit_data_history.keys(), reverse=True)
+        
+    # Get selected date from query parameter, default to most recent
+    selected_date = request.args.get('date', None)
+    
+    # If no date is selected or the selected date doesn't exist, use the most recent
+    if not selected_date or selected_date not in available_dates:
+        selected_date = available_dates[0] if available_dates else None
+        
+    # Get the data for the selected date
+    reddit_data = reddit_data_history.get(selected_date, {}) if selected_date else {}
+    
+    return render_template('reddit.html', 
+                          reddit_data=reddit_data,
+                          available_dates=available_dates,
+                          selected_date=selected_date)
+
+@app.route('/subreddits')
+def subreddits():
+    """Subreddit analysis page"""
+    subreddit_data_history = load_pickle('subreddit_data.pkl')
+    
+    # Get all available dates from the history
+    available_dates = []
+    if subreddit_data_history:
+        available_dates = sorted(subreddit_data_history.keys(), reverse=True)
+        
+    # Get selected date from query parameter, default to most recent
+    selected_date = request.args.get('date', None)
+    
+    # If no date is selected or the selected date doesn't exist, use the most recent
+    if not selected_date or selected_date not in available_dates:
+        selected_date = available_dates[0] if available_dates else None
+        
+    # Get the data for the selected date
+    subreddit_data = subreddit_data_history.get(selected_date, {}) if selected_date else {}
+    
+    return render_template('subreddits.html', 
+                          subreddit_data=subreddit_data,
+                          available_dates=available_dates,
+                          selected_date=selected_date)
+
 @app.route('/recommendations')
 def recommendations():
     """Recommendations page"""
@@ -292,6 +355,19 @@ def load_news_summary(ticker):
             print(f"Error loading news summary for {ticker}: {e}")
     return None
 
+def load_reddit_summary(ticker):
+    """Load Reddit summary for a specific ticker"""
+    summary_file = os.path.join(app.config['DATA_DIR'], 'reddit_summaries', f"{ticker}.pkl")
+    if os.path.exists(summary_file):
+        try:
+            with open(summary_file, 'rb') as f:
+                summaries = pickle.load(f)
+                # Get the most recent summary (should be the latest date)
+                return summaries
+        except Exception as e:
+            print(f"Error loading Reddit summary for {ticker}: {e}")
+    return None
+
 @app.route('/stock/<ticker>')
 def stock_detail(ticker):
     """Stock detail page"""
@@ -318,13 +394,29 @@ def stock_detail(ticker):
     
     # Load news summary
     news_summary = load_news_summary(ticker)
+    
+    # Load Reddit data
+    reddit_data_history = load_pickle('reddit_data.pkl')
+    reddit_posts = []
+    if reddit_data_history:
+        latest_date = max(reddit_data_history.keys()) if reddit_data_history.keys() else None
+        reddit_data = reddit_data_history[latest_date] if latest_date else {}
+        ticker_reddit_data = reddit_data.get(ticker, {})
+        if 'posts' in ticker_reddit_data:
+            reddit_posts = ticker_reddit_data['posts']
+    
+    # Load Reddit summary
+    reddit_summary = load_reddit_summary(ticker)
+    
     return render_template('stock_detail.html', 
                           ticker=ticker,
                           stock_data=ticker_data,
                           news=news,
                           recommendation=recommendation,
                           fundamentals=fundamentals,
-                          news_summary=news_summary)
+                          news_summary=news_summary,
+                          reddit_posts=reddit_posts,
+                          reddit_summary=reddit_summary)
 
 @app.route('/api/stock_chart/<ticker>')
 def stock_chart_data(ticker):
@@ -370,6 +462,68 @@ def refresh_summary(ticker):
     summary = summarizer.summarize_news(ticker, articles)
     
     flash(f"News summary for {ticker} has been refreshed.", "success")
+    return redirect(url_for('stock_detail', ticker=ticker))
+
+@app.route('/refresh_reddit_summary/<ticker>')
+def refresh_reddit_summary(ticker):
+    """Generate a fresh Reddit summary for a ticker"""
+    # Load Reddit data
+    reddit_data_history = load_pickle('reddit_data.pkl')
+    if reddit_data_history:
+        latest_date = max(reddit_data_history.keys()) if reddit_data_history.keys() else None
+        reddit_data = reddit_data_history[latest_date] if latest_date else {}
+    
+    ticker_reddit_data = reddit_data.get(ticker, {})
+    posts = ticker_reddit_data.get('posts', []) if ticker_reddit_data else []
+    
+    if not posts:
+        flash(f"No Reddit posts found for {ticker}.", "warning")
+        return redirect(url_for('stock_detail', ticker=ticker))
+    
+    # Initialize the Reddit tracker which will handle summarization
+    reddit_tracker = RedditTracker()
+    
+    # Generate a new summary using the tracker's built-in functionality
+    summary = reddit_tracker.generate_ticker_summary(ticker, posts)
+    
+    # Save the summary manually
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    summary_data = {
+        current_date: {
+            "summary": summary.summary,
+            "sentiment": summary.sentiment,
+            "price_impact": summary.price_impact,
+            "positive_factors": [{"factor": f.get("factor", ""), "metrics": f.get("metrics", "")} for f in summary.positive_factors],
+            "negative_factors": [{"factor": f.get("factor", ""), "metrics": f.get("metrics", "")} for f in summary.negative_factors],
+            "earnings_boosters": summary.earnings_boosters,
+            "earnings_sinks": summary.earnings_sinks,
+            "source": "Reddit",
+            "total_posts": summary.total_posts,
+            "subreddits": list(summary.subreddit_breakdown.keys()),
+            "avg_score": sum(p.score for p in posts) / len(posts) if posts else 0,
+            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+    }
+    
+    # Save to file
+    import os
+    summary_file = os.path.join(app.config['DATA_DIR'], 'reddit_summaries', f"{ticker}.pkl")
+    os.makedirs(os.path.dirname(summary_file), exist_ok=True)
+    
+    if os.path.exists(summary_file):
+        try:
+            with open(summary_file, 'rb') as f:
+                existing_data = pickle.load(f)
+                existing_data.update(summary_data)
+        except:
+            existing_data = summary_data
+        with open(summary_file, 'wb') as f:
+            pickle.dump(existing_data, f)
+    else:
+        with open(summary_file, 'wb') as f:
+            pickle.dump(summary_data, f)
+    
+    flash(f"Reddit summary for {ticker} has been refreshed.", "success")
     return redirect(url_for('stock_detail', ticker=ticker))
 
 if __name__ == '__main__':

@@ -34,8 +34,12 @@ playwright
 selenium
 webdriver-manager
 
+# Reddit Integration
+praw
+
 # Additional Utilities
 python-dotenv
 schedule
 together
 gist-storage-python
+anthropic

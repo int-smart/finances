@@ -30,6 +30,12 @@
                         </span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Reddit Data
+                        <span class="badge {% if reddit_data_fresh %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                            {% if reddit_data_fresh %}Fresh{% else %}Stale{% endif %}
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
                         Fundamentals Data
                         <span class="badge {% if fundamentals_data_fresh %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
                             {% if fundamentals_data_fresh %}Fresh{% else %}Stale{% endif %}

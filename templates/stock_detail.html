@@ -495,6 +495,164 @@
             </div>
         </div>
     </div>
+    
+    <!-- Reddit Analysis Section -->
+    {% if reddit_posts or reddit_summary %}
+    <div class="col-md-12">
+        <div class="card data-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fab fa-reddit-alien me-2"></i>Reddit Analysis</h5>
+                <a href="/refresh_reddit_summary/{{ ticker }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-sync-alt me-1"></i>Refresh Reddit Summary
+                </a>
+            </div>
+            <div class="card-body">
+                {% if reddit_summary %}
+                    {% for date, summary in reddit_summary.items() %}
+                    <div class="mb-4">
+                        <h6>Reddit Summary ({{ date }})</h6>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <p>{{ summary.summary }}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <div class="mb-2">
+                                        <span class="badge 
+                                            {% if summary.sentiment == 'positive' %}bg-success
+                                            {% elif summary.sentiment == 'negative' %}bg-danger
+                                            {% elif summary.sentiment == 'mixed' %}bg-warning
+                                            {% else %}bg-secondary{% endif %} fs-6">
+                                            {{ summary.sentiment.title() }} Sentiment
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">
+                                        Based on {{ summary.total_posts }} posts
+                                        {% if summary.subreddits %}
+                                        from {{ summary.subreddits|length }} subreddits
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if summary.subreddits %}
+                        <div class="mb-3">
+                            <h6>Active Subreddits</h6>
+                            {% for subreddit in summary.subreddits %}
+                            <span class="badge bg-primary me-1">r/{{ subreddit }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            {% if summary.positive_factors %}
+                            <div class="col-md-6">
+                                <h6 class="text-success">Positive Factors</h6>
+                                <ul class="list-group list-group-flush">
+                                    {% for factor in summary.positive_factors %}
+                                    <li class="list-group-item px-0">
+                                        <strong>{{ factor.factor }}</strong>
+                                        {% if factor.metrics %}
+                                        <br><small class="text-muted">{{ factor.metrics }}</small>
+                                        {% endif %}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                            
+                            {% if summary.negative_factors %}
+                            <div class="col-md-6">
+                                <h6 class="text-danger">Negative Factors</h6>
+                                <ul class="list-group list-group-flush">
+                                    {% for factor in summary.negative_factors %}
+                                    <li class="list-group-item px-0">
+                                        <strong>{{ factor.factor }}</strong>
+                                        {% if factor.metrics %}
+                                        <br><small class="text-muted">{{ factor.metrics }}</small>
+                                        {% endif %}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if summary.earnings_boosters or summary.earnings_sinks %}
+                        <div class="row mt-3">
+                            {% if summary.earnings_boosters %}
+                            <div class="col-md-6">
+                                <h6 class="text-info">Earnings Boosters</h6>
+                                <ul class="list-unstyled">
+                                    {% for booster in summary.earnings_boosters %}
+                                    <li><i class="fas fa-arrow-up text-success me-1"></i>{{ booster }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                            
+                            {% if summary.earnings_sinks %}
+                            <div class="col-md-6">
+                                <h6 class="text-warning">Earnings Risks</h6>
+                                <ul class="list-unstyled">
+                                    {% for sink in summary.earnings_sinks %}
+                                    <li><i class="fas fa-arrow-down text-danger me-1"></i>{{ sink }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if summary.price_impact %}
+                        <div class="alert alert-info mt-3">
+                            <strong>Price Impact:</strong> {{ summary.price_impact }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% if reddit_posts %}
+                <div class="mt-4">
+                    <h6>Recent Reddit Posts</h6>
+                    <div class="accordion" id="redditPostsAccordion">
+                        {% for post in reddit_posts[:5] %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{ loop.index }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
+                                    <div>
+                                        <strong>{{ post.title }}</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            r/{{ post.subreddit }} • {{ post.score }} upvotes • {{ post.comments_count }} comments
+                                        </small>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#redditPostsAccordion">
+                                <div class="accordion-body">
+                                    {% if post.content %}
+                                    <p>{{ post.content }}</p>
+                                    {% else %}
+                                    <p class="text-muted">No content available</p>
+                                    {% endif %}
+                                    <a href="{{ post.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i>View on Reddit
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 

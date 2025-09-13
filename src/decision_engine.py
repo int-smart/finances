@@ -8,11 +8,12 @@ from src.news_summarizer import NewsSummarizer
 from src.trend_analyzer import TrendAnalyzer
 
 class DecisionEngine:
-    def __init__(self, investor_data=None, news_data=None, stock_data=None, fundamentals_data=None):
+    def __init__(self, investor_data=None, news_data=None, stock_data=None, fundamentals_data=None, reddit_data=None):
         self.investor_data = investor_data.get(max(investor_data.keys())) if investor_data else {}
         self.news_data = news_data.get(max(news_data.keys())) if news_data else {}        
         self.stock_data = stock_data or {}
         self.fundamentals_data = fundamentals_data or {}
+        self.reddit_data = reddit_data.get(max(reddit_data.keys())) if reddit_data else {}
         self.recommendations = {}
         self.news_summarizer = NewsSummarizer()
         self.news_summaries = {}

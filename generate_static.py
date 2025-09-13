@@ -13,6 +13,8 @@ def check_data_freshness():
         'investor_data': 'data/investor_data.pkl', 
         'news_data': 'data/news_data.pkl',
         'fundamentals_data': 'data/fundamentals_data.pkl',
+        'reddit_data': 'data/reddit_data.pkl',
+        'subreddit_data': 'data/subreddit_data.pkl',
         'recommendations': 'data/recommendations.pkl'
     }
     
@@ -48,7 +50,7 @@ def load_data_from_cloud():
         return {}
     
     data = {}
-    data_types = ['stock_data', 'investor_data', 'news_data', 'fundamentals_data', 'recommendations']
+    data_types = ['stock_data', 'investor_data', 'news_data', 'fundamentals_data', 'reddit_data', 'subreddit_data', 'recommendations']
     
     for data_type in data_types:
         try:
@@ -107,6 +109,8 @@ def generate_static_site():
     investor_data = cloud_data.get('investor_data', {})
     news_data = cloud_data.get('news_data', {})
     fundamentals_data = cloud_data.get('fundamentals_data', {})
+    reddit_data = cloud_data.get('reddit_data', {})
+    subreddit_data = cloud_data.get('subreddit_data', {})
     recommendations = cloud_data.get('recommendations', {})
 
     # Generate news summaries
@@ -196,6 +200,20 @@ def generate_static_site():
                                          news_data=news_data,
                                          last_updated=last_updated)
             f.write(html_content)
+        
+        # Generate Reddit page
+        with open(f"{static_dir}/reddit.html", "w") as f:
+            html_content = render_template('static_reddit.html', 
+                                         reddit_data=reddit_data,
+                                         last_updated=last_updated)
+            f.write(html_content)
+        
+        # Generate subreddits page
+        with open(f"{static_dir}/subreddits.html", "w") as f:
+            html_content = render_template('static_subreddits.html', 
+                                         subreddit_data=subreddit_data,
+                                         last_updated=last_updated)
+            f.write(html_content)
     
     # Copy static assets (CSS, JS)
     import shutil
@@ -214,6 +232,8 @@ def generate_static_site():
     print(f"  - investors.html")
     print(f"  - news.html")
     print(f"  - news_summaries.html")
+    print(f"  - reddit.html")
+    print(f"  - subreddits.html")
     print(f"  - candlestick-patterns.html (educational)")
     print(f"  - price-patterns-guide.html (educational)")
     print(f"  - patterns-guide.html (educational)")
