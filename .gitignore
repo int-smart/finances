@@ -38,3 +38,4 @@ env/
 data
 output
 investment_reports
+wsj_session.json

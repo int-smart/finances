@@ -528,8 +528,7 @@ class WSJScraper:
             List of article URLs
         """
         try:
-            search_url = f"{self.base_url}/search?query={query}&sort=date-desc"
-            
+            search_url = f"{self.base_url}/search?query={query}"
             # Navigate with faster wait condition
             try:
                 await self.page.goto(search_url, wait_until='domcontentloaded', timeout=30000)
@@ -552,6 +551,7 @@ class WSJScraper:
                 'a[href*="/articles/"]'  # All article links (fallback)
             ]
             
+            import pdb; pdb.set_trace()
             for selector in link_selectors:
                 links = soup.select(selector)
                 for link in links:
@@ -1021,10 +1021,11 @@ if __name__ == "__main__":
             # Manual login demo
             print("\n📰 Manual login demo...")
             try:
-                articles = await scrape_wsj_articles_manual("technology", limit=2, use_confirmation=True)
+                articles = await scrape_wsj_articles_manual("GOOG", limit=2, use_confirmation=True)
                 print(f"✅ Demo complete - scraped {len(articles)} articles")
                 for article in articles:
                     print(f"- {article.get('title', 'No title')}")
+                    print(article)
                 
             except Exception as e:
                 print(f"❌ Error: {e}")
