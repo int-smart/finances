@@ -23,11 +23,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        
-    - name: Install local packages from GitHub
-      run: |
-        pip install git+https://github.com/int-smart/gist-storage-python.git@main
-        pip install git+https://github.com/int-smart/reddit-scraper.git@main
     
     - name: Set up environment variables
       run: |

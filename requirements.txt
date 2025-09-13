@@ -41,5 +41,8 @@ praw
 python-dotenv
 schedule
 together
-gist-storage-python
 anthropic
+
+# Local packages from GitHub
+git+https://github.com/int-smart/gist-storage-python.git@main
+git+https://github.com/int-smart/reddit-scraper.git@main
