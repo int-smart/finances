@@ -26,8 +26,8 @@ jobs:
         
     - name: Install private packages from GitHub
       run: |
-        pip install git+https://${{ secrets.GITHUB_TOKEN }}@github.com/int-smart/gist-storage-python.git@main
-        pip install git+https://${{ secrets.GITHUB_TOKEN }}@github.com/int-smart/reddit-scraper.git@main
+        pip install git+https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/int-smart/gist-storage-python.git@main
+        pip install git+https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/int-smart/reddit-scraper.git@main
     
     - name: Set up environment variables
       run: |
