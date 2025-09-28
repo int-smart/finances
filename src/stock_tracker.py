@@ -299,7 +299,7 @@ class StockTracker:
                     return None
     
     def track(self, tickers=None, commodities=None, period="1y", interval="1d", 
-              include_options=True, save_full_options_chains=True, max_options_expirations=3):
+              include_options=True, save_full_options_chains=True, max_options_expirations=10):
         """
         Track stocks, commodities, and options data.
         

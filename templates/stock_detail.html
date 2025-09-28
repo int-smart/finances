@@ -508,8 +508,24 @@
             </div>
             <div class="card-body">
                 {% if reddit_summary %}
+                    {% set latest_date = reddit_summary.keys() | list | sort | last %}
+                    
+                    <!-- Date Selector -->
+                    {% if reddit_summary.keys() | length > 1 %}
+                    <div class="mb-3">
+                        <label for="redditDateSelect" class="form-label">Select Date:</label>
+                        <select class="form-select" id="redditDateSelect" onchange="showRedditSummary(this.value)">
+                            {% for date in reddit_summary.keys() | sort(reverse=true) %}
+                            <option value="{{ date }}" {% if date == latest_date %}selected{% endif %}>{{ date }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Reddit Summary Content -->
                     {% for date, summary in reddit_summary.items() %}
-                    <div class="mb-4">
+                    <div class="reddit-summary-content mb-4" id="reddit-summary-{{ date }}" 
+                         style="{% if date != latest_date %}display: none;{% endif %}">
                         <h6>Reddit Summary ({{ date }})</h6>
                         
                         <div class="row mb-3">
@@ -613,6 +629,23 @@
                         {% endif %}
                     </div>
                     {% endfor %}
+                    
+                    <!-- JavaScript for date switching -->
+                    <script>
+                    function showRedditSummary(selectedDate) {
+                        // Hide all summary content
+                        const summaryElements = document.querySelectorAll('.reddit-summary-content');
+                        summaryElements.forEach(element => {
+                            element.style.display = 'none';
+                        });
+                        
+                        // Show selected date summary
+                        const selectedElement = document.getElementById('reddit-summary-' + selectedDate);
+                        if (selectedElement) {
+                            selectedElement.style.display = 'block';
+                        }
+                    }
+                    </script>
                 {% endif %}
                 
                 {% if reddit_posts %}
