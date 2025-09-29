@@ -1,0 +1,665 @@
+{% extends "base.html" %}
+
+{% block title %}Trading Strategies{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info" role="alert">
+                <h4 class="alert-heading">Trading Strategies Dashboard</h4>
+                <p>This page will contain various trading strategies and analysis tools. Each strategy will be implemented individually to provide actionable trading insights.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Strategy Results Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card data-card">
+                <div class="card-header">
+                    <h4><i class="fas fa-database"></i> Latest Strategy Results (From Scheduler)</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> These results are calculated by the scheduler using default parameters and saved stock data.
+                        Use the calculator below for custom analysis.
+                    </div>
+                    
+                    <!-- Load Latest Results Button and Date Selection -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-primary" id="load-saved-results">
+                                <i class="fas fa-download"></i> Load Latest Strategy Results
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="strategy-date-select" style="display: none;">
+                                <option value="">Select Date...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-secondary" id="load-historical-results" style="display: none;">
+                                <i class="fas fa-history"></i> Load
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Saved Results Display -->
+                    <div id="saved-results" style="display: none;">
+                        <h5>Current Signals for All Tickers</h5>
+                        <div id="signals-overview" class="row">
+                            <!-- Will be populated with signal cards -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Moving Average Strategy Calculator -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card data-card">
+                <div class="card-header">
+                    <h4><i class="fas fa-calculator"></i> Moving Average Strategy Calculator</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Strategy Description -->
+                    <div class="row">
+                        <div class="col-md-12 mb-4">
+                            <div class="alert alert-info">
+                                <strong>Strategy Overview:</strong> EMA-based trading strategy with three configurations:
+                                <ul class="mb-0 mt-2">
+                                    <li><strong>Single EMA:</strong> Buy when price is above EMA, sell when below</li>
+                                    <li><strong>Double EMA:</strong> Buy on Golden Cross (short EMA > long EMA), sell on Death Cross</li>
+                                    <li><strong>Triple EMA:</strong> Buy when EMAs align bullishly (short > medium > long)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Strategy Configuration Form -->
+                    <form id="ma-strategy-form">
+                        <div class="row">
+                            <!-- Strategy Type Selection -->
+                            <div class="col-md-4 mb-3">
+                                <label for="strategy_type" class="form-label">Strategy Type</label>
+                                <select class="form-select" id="strategy_type" name="strategy_type">
+                                    <option value="single">Single EMA</option>
+                                    <option value="double" selected>Double EMA Crossover</option>
+                                    <option value="triple">Triple EMA</option>
+                                </select>
+                                <small class="form-text text-muted">Choose EMA configuration type</small>
+                            </div>
+
+                            <!-- Stock Selection -->
+                            <div class="col-md-4 mb-3">
+                                <label for="ticker" class="form-label">Select Stock</label>
+                                <select class="form-select" id="ticker" name="ticker">
+                                    {% for ticker in tickers %}
+                                    <option value="{{ ticker }}">{{ ticker }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-text text-muted">Choose stock for analysis</small>
+                            </div>
+
+                            <!-- Period Selection -->
+                            <div class="col-md-4 mb-3">
+                                <label for="period" class="form-label">Time Period</label>
+                                <select class="form-select" id="period" name="period">
+                                    <option value="3mo">3 Months</option>
+                                    <option value="6mo">6 Months</option>
+                                    <option value="1y" selected>1 Year</option>
+                                    <option value="2y">2 Years</option>
+                                    <option value="5y">5 Years</option>
+                                </select>
+                                <small class="form-text text-muted">Historical data period</small>
+                            </div>
+                        </div>
+
+                        <!-- Single EMA Parameters -->
+                        <div id="single-ema-params" class="strategy-params" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="ema_window" class="form-label">EMA Period</label>
+                                    <input type="number" class="form-control" id="ema_window" name="ema_window" 
+                                           value="20" min="5" max="200">
+                                    <small class="form-text text-muted">EMA period (5-200 days)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Double EMA Parameters -->
+                        <div id="double-ema-params" class="strategy-params">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="short_window" class="form-label">Short EMA Period</label>
+                                    <input type="number" class="form-control" id="short_window" name="short_window" 
+                                           value="12" min="5" max="50">
+                                    <small class="form-text text-muted">Fast EMA period (5-50 days)</small>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="long_window" class="form-label">Long EMA Period</label>
+                                    <input type="number" class="form-control" id="long_window" name="long_window" 
+                                           value="26" min="10" max="200">
+                                    <small class="form-text text-muted">Slow EMA period (10-200 days)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Triple EMA Parameters -->
+                        <div id="triple-ema-params" class="strategy-params" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="window1" class="form-label">Short EMA Period</label>
+                                    <input type="number" class="form-control" id="window1" name="window1" 
+                                           value="5" min="3" max="20">
+                                    <small class="form-text text-muted">Shortest EMA period (3-20 days)</small>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="window2" class="form-label">Medium EMA Period</label>
+                                    <input type="number" class="form-control" id="window2" name="window2" 
+                                           value="12" min="5" max="50">
+                                    <small class="form-text text-muted">Medium EMA period (5-50 days)</small>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="window3" class="form-label">Long EMA Period</label>
+                                    <input type="number" class="form-control" id="window3" name="window3" 
+                                           value="26" min="10" max="100">
+                                    <small class="form-text text-muted">Long EMA period (10-100 days)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Optional Parameters -->
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="alpha" class="form-label">Alpha (Optional)</label>
+                                <input type="number" class="form-control" id="alpha" name="alpha" 
+                                       step="0.01" min="0.01" max="1" placeholder="Auto">
+                                <small class="form-text text-muted">EMA smoothing factor (leave empty for auto)</small>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="col-md-8 mb-3 d-flex align-items-end">
+                                <div class="btn-group w-100">
+                                    <button type="button" class="btn btn-primary" id="calculate-signals">
+                                        <i class="fas fa-calculator"></i> Calculate Signals
+                                    </button>
+                                    <button type="button" class="btn btn-success" id="run-strategy">
+                                        <i class="fas fa-play"></i> Run Strategy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Results Section -->
+                    <div id="ma-results" style="display: none;">
+                        <hr>
+                        <h5>Strategy Results</h5>
+                        
+                        <!-- Performance Metrics -->
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <div class="card border-left-primary">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Total Return</h6>
+                                        <h4 id="total-return" class="text-primary">-</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-left-success">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Win Rate</h6>
+                                        <h4 id="win-rate" class="text-success">-</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-left-info">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Current Signal</h6>
+                                        <h4 id="current-signal" class="text-info">-</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-left-warning">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Total Signals</h6>
+                                        <h4 id="total-signals" class="text-warning">-</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Strategy Summary -->
+                        <div class="alert alert-secondary">
+                            <strong>Strategy Summary:</strong> <span id="strategy-summary">-</span>
+                        </div>
+
+                        <!-- Chart Placeholder -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h6>Price Chart with EMA Signals</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="ma-chart" style="height: 400px;">
+                                    <!-- Chart will be rendered here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Placeholder for future strategy implementations -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card data-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-plus-circle fa-2x text-muted mb-3"></i>
+                    <h5 class="text-muted">More Strategies Coming Soon</h5>
+                    <p class="text-muted">Additional trading strategies will be added here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://kit.fontawesome.com/a076d05399.js"></script>
+<script>
+    console.log("Trading Strategies page loaded");
+    
+    // Show/hide EMA fields based on strategy type
+    document.getElementById('strategy_type').addEventListener('change', function() {
+        const strategyType = this.value;
+        const singleParams = document.getElementById('single-ema-params');
+        const doubleParams = document.getElementById('double-ema-params');
+        const tripleParams = document.getElementById('triple-ema-params');
+        
+        // Hide all parameter sections
+        singleParams.style.display = 'none';
+        doubleParams.style.display = 'none';
+        tripleParams.style.display = 'none';
+        
+        // Show relevant parameter section
+        if (strategyType === 'single') {
+            singleParams.style.display = 'block';
+        } else if (strategyType === 'double') {
+            doubleParams.style.display = 'block';
+        } else if (strategyType === 'triple') {
+            tripleParams.style.display = 'block';
+        }
+    });
+    
+    // Initialize form state
+    document.getElementById('strategy_type').dispatchEvent(new Event('change'));
+    
+    // Load Saved Results button
+    document.getElementById('load-saved-results').addEventListener('click', function() {
+        loadSavedResults(this);
+    });
+    
+    // Load Historical Results button
+    document.getElementById('load-historical-results').addEventListener('click', function() {
+        const selectedDate = document.getElementById('strategy-date-select').value;
+        if (selectedDate) {
+            loadHistoricalResults(this, selectedDate);
+        } else {
+            alert('Please select a date first.');
+        }
+    });
+    
+    // Calculate Signals button
+    document.getElementById('calculate-signals').addEventListener('click', function() {
+        runStrategy(this);
+    });
+    
+    // Run Strategy button
+    document.getElementById('run-strategy').addEventListener('click', function() {
+        runStrategy(this);
+    });
+    
+    function runStrategy(button) {
+        const formData = new FormData(document.getElementById('ma-strategy-form'));
+        const params = Object.fromEntries(formData);
+        
+        // Show loading state
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        button.disabled = true;
+        
+        // Make API call to calculate strategy
+        fetch('/api/strategies/calculate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...params,
+                strategy_name: 'moving_average'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayResults(data.result);
+                document.getElementById('ma-results').style.display = 'block';
+            } else {
+                alert('Error running strategy: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error running strategy. Please try again.');
+        })
+        .finally(() => {
+            // Reset button state
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
+    }
+    
+    function loadSavedResults(button) {
+        // Show loading state
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        button.disabled = true;
+        
+        // First load available dates
+        fetch('/api/strategies/dates')
+        .then(response => response.json())
+        .then(dateData => {
+            if (dateData.success && dateData.dates.length > 0) {
+                // Populate date selector
+                const dateSelect = document.getElementById('strategy-date-select');
+                dateSelect.innerHTML = '<option value="">Select Date...</option>';
+                dateData.dates.forEach(date => {
+                    const option = document.createElement('option');
+                    option.value = date;
+                    option.textContent = date;
+                    dateSelect.appendChild(option);
+                });
+                
+                // Show date selection controls
+                dateSelect.style.display = 'block';
+                document.getElementById('load-historical-results').style.display = 'block';
+            }
+            
+            // Fetch latest signals
+            return fetch('/api/strategies/signals');
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displaySavedResults(data.signals);
+                document.getElementById('saved-results').style.display = 'block';
+            } else {
+                alert('Error loading saved results: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading saved results. Please try again.');
+        })
+        .finally(() => {
+            // Reset button state
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
+    }
+    
+    function loadHistoricalResults(button, selectedDate) {
+        // Show loading state
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        button.disabled = true;
+        
+        // Fetch signals for selected date
+        fetch(`/api/strategies/signals?date=${selectedDate}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displaySavedResults(data.signals, `Historical Results for ${data.date}`);
+                document.getElementById('saved-results').style.display = 'block';
+            } else {
+                alert('Error loading historical results: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading historical results. Please try again.');
+        })
+        .finally(() => {
+            // Reset button state
+            button.innerHTML = originalText;
+            button.disabled = false;
+        });
+    }
+    
+    function displaySavedResults(signals, title = null) {
+        const container = document.getElementById('signals-overview');
+        container.innerHTML = '';
+        
+        // Update title if provided
+        if (title) {
+            const titleElement = container.parentElement.querySelector('h5');
+            if (titleElement) {
+                titleElement.textContent = title;
+            }
+        } else {
+            const titleElement = container.parentElement.querySelector('h5');
+            if (titleElement) {
+                titleElement.textContent = 'Current Signals for All Tickers';
+            }
+        }
+        
+        if (!signals.moving_average) {
+            container.innerHTML = '<div class="col-12"><div class="alert alert-warning">No saved strategy results available. Please run the scheduler first.</div></div>';
+            return;
+        }
+        
+        // Group signals by strategy type
+        const strategyTypes = ['single', 'double', 'triple'];
+        
+        strategyTypes.forEach(strategyType => {
+            if (signals.moving_average[strategyType]) {
+                const typeData = signals.moving_average[strategyType];
+                
+                // Create section for this strategy type
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'col-12 mb-4';
+                sectionDiv.innerHTML = `
+                    <h6 class="text-primary">${strategyType.toUpperCase()} EMA Strategy</h6>
+                    <div class="row" id="signals-${strategyType}"></div>
+                `;
+                container.appendChild(sectionDiv);
+                
+                const signalsContainer = document.getElementById(`signals-${strategyType}`);
+                
+                // Add signal cards for each ticker
+                Object.entries(typeData).forEach(([ticker, signal]) => {
+                    const signalClass = signal === 'long' ? 'success' : signal === 'short' ? 'danger' : 'secondary';
+                    const signalIcon = signal === 'long' ? 'fa-arrow-up' : signal === 'short' ? 'fa-arrow-down' : 'fa-minus';
+                    
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'col-md-2 col-sm-3 col-6 mb-2';
+                    cardDiv.innerHTML = `
+                        <div class="card border-${signalClass} text-center">
+                            <div class="card-body py-2">
+                                <h6 class="card-title mb-1">${ticker}</h6>
+                                <span class="badge bg-${signalClass}">
+                                    <i class="fas ${signalIcon}"></i> ${signal.toUpperCase()}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                    signalsContainer.appendChild(cardDiv);
+                });
+            }
+        });
+    }
+    
+    function displayResults(results) {
+        // Update performance metrics
+        document.getElementById('total-return').textContent = results.performance.total_return + '%';
+        document.getElementById('win-rate').textContent = results.performance.win_rate + '%';
+        document.getElementById('current-signal').textContent = results.current_signal.toUpperCase();
+        document.getElementById('total-signals').textContent = results.performance.total_signals;
+        
+        // Update strategy summary
+        document.getElementById('strategy-summary').textContent = results.summary;
+        
+        // Create chart if data is available
+        if (results.chart_data) {
+            createChart(results.chart_data, results.strategy_type);
+        }
+    }
+    
+    function createChart(chartData, strategyType) {
+        // Create Plotly chart
+        const traces = [
+            {
+                x: chartData.dates,
+                y: chartData.prices,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Close Price',
+                line: { color: 'blue', width: 2 }
+            }
+        ];
+        
+        // Add EMA traces based on strategy type
+        if (strategyType === 'single' && chartData.ema) {
+            traces.push({
+                x: chartData.dates,
+                y: chartData.ema,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'EMA',
+                line: { color: 'orange', width: 1 }
+            });
+        } else if (strategyType === 'double') {
+            if (chartData.ema_short) {
+                traces.push({
+                    x: chartData.dates,
+                    y: chartData.ema_short,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'EMA Short',
+                    line: { color: 'orange', width: 1 }
+                });
+            }
+            if (chartData.ema_long) {
+                traces.push({
+                    x: chartData.dates,
+                    y: chartData.ema_long,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'EMA Long',
+                    line: { color: 'red', width: 1 }
+                });
+            }
+        } else if (strategyType === 'triple') {
+            if (chartData.ema1) {
+                traces.push({
+                    x: chartData.dates,
+                    y: chartData.ema1,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'EMA Short',
+                    line: { color: 'orange', width: 1 }
+                });
+            }
+            if (chartData.ema2) {
+                traces.push({
+                    x: chartData.dates,
+                    y: chartData.ema2,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'EMA Medium',
+                    line: { color: 'green', width: 1 }
+                });
+            }
+            if (chartData.ema3) {
+                traces.push({
+                    x: chartData.dates,
+                    y: chartData.ema3,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'EMA Long',
+                    line: { color: 'red', width: 1 }
+                });
+            }
+        }
+        
+        // Add buy/sell signals
+        if (chartData.buy_signals) {
+            traces.push({
+                x: chartData.buy_signals.dates,
+                y: chartData.buy_signals.prices,
+                type: 'scatter',
+                mode: 'markers',
+                name: 'Buy Signals',
+                marker: { color: 'green', size: 8, symbol: 'triangle-up' }
+            });
+        }
+        
+        if (chartData.sell_signals) {
+            traces.push({
+                x: chartData.sell_signals.dates,
+                y: chartData.sell_signals.prices,
+                type: 'scatter',
+                mode: 'markers',
+                name: 'Sell Signals',
+                marker: { color: 'red', size: 8, symbol: 'triangle-down' }
+            });
+        }
+        
+        const layout = {
+            title: 'Moving Average Strategy Signals',
+            xaxis: { title: 'Date' },
+            yaxis: { title: 'Price ($)' },
+            showlegend: true,
+            height: 400,
+            margin: { l: 50, r: 50, t: 50, b: 50 }
+        };
+        
+        Plotly.newPlot('ma-chart', traces, layout);
+    }
+</script>
+
+<style>
+.border-left-primary {
+    border-left: 4px solid #007bff !important;
+}
+.border-left-success {
+    border-left: 4px solid #28a745 !important;
+}
+.border-left-info {
+    border-left: 4px solid #17a2b8 !important;
+}
+.border-left-warning {
+    border-left: 4px solid #ffc107 !important;
+}
+.card {
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-1px);
+}
+#ma-strategy-form .form-control:focus,
+#ma-strategy-form .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+</style>
+{% endblock %}

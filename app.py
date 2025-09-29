@@ -15,10 +15,14 @@ from src.stock_tracker import StockTracker
 from src.fundamentals_tracker import FundamentalsTracker
 from src.decision_engine import DecisionEngine
 from src.config import COMPANIES, INVESTORS
+from src.strategies.strategy_manager import StrategyManager
 from gist_storage_python import GistStorage
 
 app = Flask(__name__)
 app.config['DATA_DIR'] = 'data'
+
+# Initialize strategy manager
+strategy_manager = StrategyManager(data_dir=app.config['DATA_DIR'])
 
 # Helper function to load pickle data
 def load_pickle(filename):
@@ -342,6 +346,12 @@ def recommendations():
                           historical_dates=historical_dates,
                           selected_date=selected_date)
 
+@app.route('/trading-strategies')
+def trading_strategies():
+    """Trading strategies page"""
+    return render_template('trading_strategies.html', 
+                         tickers=COMPANIES)
+
 def load_news_summary(ticker):
     """Load news summary for a specific ticker"""
     summary_file = os.path.join(app.config['DATA_DIR'], 'news_summaries', f"{ticker}.pkl")
@@ -525,6 +535,104 @@ def refresh_reddit_summary(ticker):
     
     flash(f"Reddit summary for {ticker} has been refreshed.", "success")
     return redirect(url_for('stock_detail', ticker=ticker))
+
+@app.route('/api/strategies/<ticker>')
+def api_get_strategy_data(ticker):
+    """API endpoint to get saved strategy data for a ticker"""
+    try:
+        strategy_name = request.args.get('strategy', None)
+        strategy_type = request.args.get('type', None)
+        
+        data = strategy_manager.get_strategy_data_for_ticker(
+            ticker, strategy_name, strategy_type
+        )
+        
+        if 'error' in data:
+            return jsonify({'success': False, 'error': data['error']})
+        
+        return jsonify({'success': True, 'data': data})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/strategies/signals')
+def api_get_all_signals():
+    """API endpoint to get current signals for all tickers"""
+    try:
+        date = request.args.get('date', None)
+        
+        if date:
+            # Get signals for specific date
+            historical_data = strategy_manager.get_strategy_data_for_date(date)
+            if historical_data and 'strategies' in historical_data:
+                signals = {}
+                for strategy_name, strategy_data in historical_data['strategies'].items():
+                    signals[strategy_name] = {}
+                    for strategy_type, type_data in strategy_data.items():
+                        signals[strategy_name][strategy_type] = {}
+                        for ticker, ticker_data in type_data.items():
+                            if ticker_data.get('success'):
+                                signals[strategy_name][strategy_type][ticker] = ticker_data.get('current_signal', 'hold')
+                return jsonify({'success': True, 'signals': signals, 'date': date})
+            else:
+                return jsonify({'success': False, 'error': f'No strategy data found for date {date}'})
+        else:
+            # Get latest signals
+            signals = strategy_manager.get_all_current_signals()
+            return jsonify({'success': True, 'signals': signals})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/strategies/dates')
+def api_get_strategy_dates():
+    """API endpoint to get available strategy data dates"""
+    try:
+        dates = strategy_manager.get_available_strategy_dates()
+        return jsonify({'success': True, 'dates': dates})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/strategies/calculate', methods=['POST'])
+def api_calculate_strategy():
+    """API endpoint for on-demand strategy calculation with custom parameters"""
+    try:
+        data = request.get_json()
+        
+        ticker = data.get('ticker', 'AAPL')
+        strategy_name = data.get('strategy_name', 'moving_average')
+        strategy_type = data.get('strategy_type', 'double')
+        period = data.get('period', '1y')
+        
+        # Extract parameters based on strategy type
+        parameters = {}
+        
+        if strategy_name == 'moving_average':
+            if strategy_type == 'single':
+                parameters['ema_window'] = int(data.get('ema_window', 20))
+            elif strategy_type == 'double':
+                parameters['short_window'] = int(data.get('short_window', 12))
+                parameters['long_window'] = int(data.get('long_window', 26))
+            elif strategy_type == 'triple':
+                parameters['window1'] = int(data.get('window1', 5))
+                parameters['window2'] = int(data.get('window2', 12))
+                parameters['window3'] = int(data.get('window3', 26))
+        
+        # Optional parameters
+        if 'alpha' in data and data['alpha']:
+            parameters['alpha'] = float(data['alpha'])
+        
+        # Calculate strategy on-demand
+        result = strategy_manager.calculate_strategy_on_demand(
+            ticker, strategy_name, strategy_type, parameters, period
+        )
+        
+        if 'error' in result:
+            return jsonify({'success': False, 'error': result['error']})
+        
+        return jsonify({'success': True, 'result': result})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
     # Create data directory if it doesn't exist

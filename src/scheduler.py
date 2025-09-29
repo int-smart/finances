@@ -11,6 +11,7 @@ from src.fundamentals_tracker import FundamentalsTracker
 from src.reddit_tracker import RedditTracker
 from src.decision_engine import DecisionEngine
 from src.config import COMPANIES, INVESTORS
+from src.strategies.strategy_manager import StrategyManager
 import numpy as np
 import schedule
 from gist_storage_python import GistStorage
@@ -34,6 +35,7 @@ class TaskScheduler:
         self.fundamentals_tracker = FundamentalsTracker()
         self.reddit_tracker = RedditTracker()
         self.decision_engine = DecisionEngine()
+        self.strategy_manager = StrategyManager(data_dir=self.data_dir)
         
         # Data storage
         self.data_dir = "data"
@@ -192,6 +194,22 @@ class TaskScheduler:
         
         return reddit_data, subreddit_data
 
+    def run_trading_strategies(self, stock_data):
+        """Run all trading strategies using collected stock data"""
+        print("🎯 Running trading strategies...")
+        try:
+            strategies_data = self.strategy_manager.run_all_strategies_for_all_tickers(
+                tickers=self.tickers, 
+                stock_data=stock_data
+            )
+            
+            print(f"✅ Trading strategies completed for {len(self.tickers)} tickers")
+            return strategies_data
+            
+        except Exception as e:
+            print(f"⚠️ Error running trading strategies: {e}")
+            return {}
+
     def generate_recommendations(self, investor_data, stock_data, fundamentals_data, news_data, reddit_data=None):
         """Generate investment recommendations based on collected data"""
         print("Generating investment recommendations...")
@@ -283,7 +301,10 @@ class TaskScheduler:
             # 3. Collect Reddit data
             reddit_data, subreddit_data = self.collect_reddit_data()
             
-            # 4. Load cached investor and fundamentals data
+            # 4. Run trading strategies
+            strategies_data = self.run_trading_strategies(stock_data)
+
+            # 5. Load cached investor and fundamentals data
             try:
                 with open(f"{self.data_dir}/investor_data.pkl", 'rb') as f:
                     investor_data = pickle.load(f)
@@ -300,20 +321,20 @@ class TaskScheduler:
             except (FileNotFoundError, pickle.UnpicklingError):
                 fundamentals_data = {}
 
-            # 5. Generate recommendations
+            # 6. Generate recommendations
             recommendations = self.generate_recommendations(
                 investor_data, stock_data, fundamentals_data, news_data, reddit_data
             )
             
-            # 6. Generate report
+            # 7. Generate report
             self.generate_report(
                 investor_data, stock_data, fundamentals_data, news_data, recommendations
             )
             
-            # 7. Update the last run timestamp
+            # 8. Update the last run timestamp
             self.update_last_daily_run()
             
-            # 8. Save and upload latest data
+            # 9. Save and upload latest data
             self.save_all_latest_data()
             
             print(f"Daily tasks completed successfully at {datetime.now()}")
@@ -386,12 +407,15 @@ class TaskScheduler:
         # 5. Collect Reddit data
         reddit_data, subreddit_data = self.collect_reddit_data()
         
-        # 6. Generate recommendations
+        # 6. Run trading strategies
+        strategies_data = self.run_trading_strategies(stock_data)
+        
+        # 7. Generate recommendations
         recommendations = self.generate_recommendations(
             investor_data, stock_data, fundamentals_data, news_data, reddit_data
         )
         
-        # 7. Generate report
+        # 8. Generate report
         self.generate_report(
             investor_data, stock_data, fundamentals_data, news_data, recommendations
         )
@@ -422,12 +446,15 @@ class TaskScheduler:
         # 5. Collect Reddit data
         reddit_data, subreddit_data = self.collect_reddit_data()
         
-        # 6. Generate recommendations
+        # 6. Run trading strategies
+        strategies_data = self.run_trading_strategies(stock_data)
+        
+        # 7. Generate recommendations
         recommendations = self.generate_recommendations(
             investor_data, stock_data, fundamentals_data, news_data, reddit_data
         )
         
-        # 7. Generate report
+        # 8. Generate report
         self.generate_report(
             investor_data, stock_data, fundamentals_data, news_data, recommendations
         )
