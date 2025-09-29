@@ -1,5 +1,6 @@
 import time
 import pandas as pd
+import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -7,7 +8,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-from src.config import COMPANIES, NEWS_SOURCES, MAX_ARTICLES_PER_COMPANY, REQUEST_DELAY
+from src.config import COMPANIES, NEWS_SOURCES, MAX_ARTICLES_PER_COMPANY, REQUEST_DELAY, COMPANIES_NAMES_MAP
 import requests
 import os
 from dotenv import load_dotenv
@@ -54,6 +55,35 @@ class NewsTracker:
         
         self.articles = {}
         self.tickers = tickers
+    
+    def is_headline_relevant(self, headline, ticker):
+        """Check if a headline contains the company name or ticker symbol"""
+        if not headline:
+            return False
+        
+        headline_lower = headline.lower()
+        
+        # Check if ticker symbol is in headline
+        if ticker.lower() in headline_lower:
+            return True
+        
+        # Check if company name is in headline
+        company_name = COMPANIES_NAMES_MAP.get(ticker, "")
+        if company_name and company_name.lower() in headline_lower:
+            return True
+        
+        # For some company names, check for partial matches
+        # e.g., "Advanced Micro" for AMD, "Taiwan Semi" for TSM
+        if company_name:
+            # Split company name into words and check if any significant word is present
+            name_words = [word.lower() for word in company_name.split() if len(word) > 3]
+            for word in name_words:
+                # Use word boundaries to avoid partial matches like "Semi" matching "Semiconductor"
+                pattern = r'\b' + re.escape(word) + r'\b'
+                if re.search(pattern, headline_lower):
+                    return True
+        
+        return False
         
     def scrape_wsj(self, company, max_articles=MAX_ARTICLES_PER_COMPANY):
         """Scrape Wall Street Journal articles about a company"""
@@ -72,6 +102,12 @@ class NewsTracker:
             for article in article_elements[:max_articles]:
                 try:
                     headline = article.find_element(By.CSS_SELECTOR, "h3").text
+                    
+                    # Check if headline is relevant to the company before processing further
+                    if not self.is_headline_relevant(headline, company):
+                        print(f"Skipping irrelevant WSJ article: {headline[:60]}...")
+                        continue
+                    
                     summary = article.find_element(By.CSS_SELECTOR, "p").text
                     date = article.find_element(By.CSS_SELECTOR, "p.WSJTheme--timestamp--1K7Z5rGT").text
                     link = article.find_element(By.CSS_SELECTOR, "h3 a").get_attribute("href")
@@ -83,6 +119,7 @@ class NewsTracker:
                         "link": link,
                         "source": "Wall Street Journal"
                     })
+                    print(f"Added relevant WSJ article: {headline[:60]}...")
                 except Exception as e:
                     print(f"Error extracting article details: {e}")
         except Exception as e:
@@ -107,6 +144,12 @@ class NewsTracker:
             for article in article_elements[:max_articles]:
                 try:
                     headline = article.find_element(By.CSS_SELECTOR, "div.o-teaser__heading").text
+                    
+                    # Check if headline is relevant to the company before processing further
+                    if not self.is_headline_relevant(headline, company):
+                        print(f"Skipping irrelevant FT article: {headline[:60]}...")
+                        continue
+                    
                     summary_element = article.find_elements(By.CSS_SELECTOR, "p.o-teaser__standfirst")
                     summary = summary_element[0].text if summary_element else "No summary available"
                     date_element = article.find_elements(By.CSS_SELECTOR, "div.o-teaser__timestamp")
@@ -120,6 +163,7 @@ class NewsTracker:
                         "link": link,
                         "source": "Financial Times"
                     })
+                    print(f"Added relevant FT article: {headline[:60]}...")
                 except Exception as e:
                     print(f"Error extracting article details: {e}")
         except Exception as e:
@@ -152,9 +196,21 @@ class NewsTracker:
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, "li.story-item"))
             )
             print(f"Found {len(article_elements)} articles.")
-            for article in article_elements[:max_articles]:
+            
+            # Keep collecting relevant articles until we have max_articles or run out of articles
+            relevant_articles_count = 0
+            for article in article_elements:
+                if relevant_articles_count >= max_articles:
+                    break
+                    
                 try:
                     headline = article.find_element(By.CSS_SELECTOR, "h3").text
+                    
+                    # Check if headline is relevant to the company before processing further
+                    if not self.is_headline_relevant(headline, company):
+                        print(f"Skipping irrelevant article: {headline[:60]}...")
+                        continue
+                    
                     link_element = article.find_element(By.CSS_SELECTOR, "a")
                     link = link_element.get_attribute("href")
 
@@ -166,9 +222,13 @@ class NewsTracker:
                         "headline": headline,
                         "summary": summary,
                         "link": link
-                    })                
+                    })
+                    relevant_articles_count += 1
+                    print(f"Added relevant article ({relevant_articles_count}/{max_articles}): {headline[:60]}...")                
                 except Exception as e:
                     print(f"Error extracting article details: {e}")
+            
+            print(f"Collected {len(articles)} relevant articles out of {len(article_elements)} total articles.")
 
             # After processing all articles, navigate to each link to get the full content
             for article in articles:
@@ -226,6 +286,12 @@ class NewsTracker:
                 try:
                     headline_element = article.find_element(By.CSS_SELECTOR, "h3.article__headline")
                     headline = headline_element.text
+                    
+                    # Check if headline is relevant to the company before processing further
+                    if not self.is_headline_relevant(headline, company):
+                        print(f"Skipping irrelevant MarketWatch article: {headline[:60]}...")
+                        continue
+                    
                     link = headline_element.find_element(By.CSS_SELECTOR, "a").get_attribute("href")
                     
                     summary_element = article.find_elements(By.CSS_SELECTOR, "p.article__summary")
@@ -241,6 +307,7 @@ class NewsTracker:
                         "link": link,
                         "source": "MarketWatch"
                     })
+                    print(f"Added relevant MarketWatch article: {headline[:60]}...")
                 except Exception as e:
                     print(f"Error extracting article details: {e}")
         except Exception as e:
@@ -281,6 +348,11 @@ class NewsTracker:
                     # Extract headline
                     headline_element = article.find_element(By.CSS_SELECTOR, "div[class*='search-result']")
                     headline = headline_element.text.strip()
+                    
+                    # Check if headline is relevant to the company before processing further
+                    if not self.is_headline_relevant(headline, company):
+                        print(f"Skipping irrelevant Reuters article: {headline[:60]}...")
+                        continue
                 
                     # Extract link
                     link_element = article.find_element(By.CSS_SELECTOR, "a[data-testid='TitleLink']")
@@ -303,6 +375,7 @@ class NewsTracker:
                         "link": link,
                         "source": "Reuters"
                     })
+                    print(f"Added relevant Reuters article: {headline[:60]}...")
                 except Exception as e:
                     print(f"Error extracting Reuters article details: {e}")
         except Exception as e:
@@ -447,12 +520,20 @@ class NewsTracker:
             
             articles = []
             for article in news_data:
+                headline = article.get('title', '')
+                
+                # Check if headline is relevant to the ticker before adding
+                if not self.is_headline_relevant(headline, ticker):
+                    print(f"Skipping irrelevant FMP article: {headline[:60]}...")
+                    continue
+                
                 articles.append({
-                    'headline': article.get('title', ''),
+                    'headline': headline,
                     'link': article.get('url', ''),
                     'full_content': article.get('text', ''),
                     'summary': article.get('text', '')[:200] if article.get('text') else ''
                 })
+                print(f"Added relevant FMP article: {headline[:60]}...")
             return articles
             
         except requests.exceptions.RequestException as e:

@@ -18,6 +18,33 @@ INVESTORS = {
 }
 # List of companies to track
 COMPANIES = ["AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "BRK-B", "JPM", "V", "LTBR", "PLTR", "NVDA", "ASML", "QCOM", "INTC", "AMD", "MU", "TSM", "AVGO", "CEG", "LEU", "XOM", "BEPC", "SMR", "CCJ"]
+COMPANIES_NAMES_MAP = {
+    "AAPL": "Apple",
+    "MSFT": "Microsoft",
+    "AMZN": "Amazon",
+    "GOOGL": "Google",
+    "META": "Meta",
+    "TSLA": "Tesla",
+    "BRK-B": "Berkshire",
+    "JPM": "JPMorgan Chase",
+    "V": "Visa",
+    "LTBR": "Lightbridge",
+    "PLTR": "Palantir Technologies",
+    "NVDA": "NVIDIA",
+    "ASML": "ASML",
+    "QCOM": "Qualcomm",
+    "INTC": "Intel",
+    "AMD": "Advanced Micro",
+    "MU": "Micron",
+    "TSM": "Taiwan Semi",
+    "AVGO": "Broadcom",
+    "CEG": "Constellation Energy",
+    "LEU": "Centrus Energy",
+    "XOM": "Exxon",
+    "BEPC": "BEPC",
+    "SMR": "NuScale",
+    "CCJ": "Cameco"
+}
 # COMPANIES = ["AAPL"]
 
 # List of commodities to track
