@@ -16,6 +16,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from src.strategies.moving_average_strategy import convert_stock_data_to_prices_df, MovingAverageStrategy
+from src.strategies.price_momentum_strategy import PriceMomentumStrategy
 
 
 class StrategyManager:
@@ -32,10 +33,12 @@ class StrategyManager:
         
         # Initialize strategies
         self.ma_strategy = MovingAverageStrategy()
+        self.momentum_strategy = PriceMomentumStrategy()
         
         # Get default strategy configurations
         self.default_strategies = {
-            'moving_average': self.ma_strategy.get_default_configurations()
+            'moving_average': self.ma_strategy.get_default_configurations(),
+            'price_momentum': self.momentum_strategy.get_default_configurations()
         }
     
     def run_all_strategies_for_all_tickers(self, tickers: List[str], stock_data: Dict = None) -> Dict:
@@ -59,6 +62,10 @@ class StrategyManager:
         # Run moving average strategies
         ma_results = self._run_moving_average_strategies(tickers, stock_data)
         all_results['strategies']['moving_average'] = ma_results
+        
+        # Run price momentum strategies
+        momentum_results = self._run_price_momentum_strategies(tickers, stock_data)
+        all_results['strategies']['price_momentum'] = momentum_results
         
         # Save results
         self._save_strategy_results(all_results)
@@ -120,12 +127,145 @@ class StrategyManager:
         
         return ma_results
     
+    def _run_price_momentum_strategies(self, tickers: List[str], stock_data: Dict = None) -> Dict:
+        """Run all price momentum strategy variants for all tickers"""
+        print("📊 Running Price Momentum strategies...")
+        
+        momentum_results = {}
+        
+        # Convert stock data to prices DataFrame for momentum calculations
+        prices_df = None
+        if stock_data and self._has_stock_data(stock_data, tickers[0]):
+            try:
+                prices_df = self._convert_stock_data_to_momentum_prices_df(stock_data, tickers)
+                print(f"  📈 Converted stock data to prices DataFrame: {prices_df.shape}")
+            except Exception as e:
+                print(f"  ⚠️  Failed to convert stock data for momentum: {e}")
+                prices_df = None
+        
+        for strategy_type in self.momentum_strategy.get_strategy_types():
+            print(f"  Running {strategy_type} momentum strategy for all tickers...")
+            momentum_results[strategy_type] = {}
+            
+            try:
+                # Get parameters for this strategy type
+                params = self.default_strategies['price_momentum'][strategy_type].copy()
+                
+                # Run momentum strategy ONCE for all tickers to get proper rankings
+                all_results = self.momentum_strategy.run_strategy(
+                    tickers, strategy_type, params, '2y', prices_df
+                )
+                
+                if all_results.get('success'):
+                    # Extract results for each ticker
+                    for ticker in tickers:
+                        if ticker in all_results.get('ticker_results', {}):
+                            ticker_result = all_results['ticker_results'][ticker]
+                            momentum_results[strategy_type][ticker] = {
+                                'success': True,
+                                'current_signal': ticker_result['current_signal'],
+                                'summary': self.momentum_strategy.get_strategy_summary(ticker, strategy_type, params),
+                                'parameters': params,
+                                'chart_data': ticker_result.get('chart_data', {}),
+                                'momentum_metrics': ticker_result.get('momentum_metrics', {}),
+                                'timestamp': datetime.now().isoformat()
+                            }
+                            print(f"    ✅ {ticker}: {ticker_result['current_signal']} (rank: {ticker_result.get('percentile_rank', 'N/A')})")
+                        else:
+                            momentum_results[strategy_type][ticker] = {
+                                'success': False,
+                                'error': f'No results for {ticker}',
+                                'timestamp': datetime.now().isoformat()
+                            }
+                            print(f"    ❌ {ticker}: No results available")
+                else:
+                    # If the batch run failed, mark all tickers as failed
+                    error_msg = all_results.get('error', 'Batch momentum calculation failed')
+                    for ticker in tickers:
+                        momentum_results[strategy_type][ticker] = {
+                            'success': False,
+                            'error': error_msg,
+                            'timestamp': datetime.now().isoformat()
+                        }
+                        print(f"    ❌ {ticker}: {error_msg}")
+                        
+            except Exception as e:
+                # If there's an exception, mark all tickers as failed
+                error_msg = f"Exception in momentum calculation: {str(e)}"
+                for ticker in tickers:
+                    momentum_results[strategy_type][ticker] = {
+                        'success': False,
+                        'error': error_msg,
+                        'timestamp': datetime.now().isoformat()
+                    }
+                    print(f"    ❌ {ticker}: {error_msg}")
+        
+        return momentum_results
+    
     def _has_stock_data(self, stock_data: Dict, ticker: str) -> bool:
         """Check if stock data contains the required ticker data"""
         return (stock_data and 
                 'stocks' in stock_data and 
                 ticker in stock_data['stocks'] and 
                 'history' in stock_data['stocks'][ticker])
+    
+    def _convert_stock_data_to_momentum_prices_df(self, stock_data: Dict, tickers: List[str]) -> pd.DataFrame:
+        """
+        Convert stock data to prices DataFrame for momentum calculations.
+        
+        Args:
+            stock_data: Stock data dictionary from pickle
+            tickers: List of tickers to include
+            
+        Returns:
+            DataFrame with close prices for all tickers (columns=tickers, index=dates)
+        """
+        price_data = {}
+        
+        for ticker in tickers:
+            if self._has_stock_data(stock_data, ticker):
+                try:
+                    history = stock_data['stocks'][ticker]['history']
+                    # Convert to DataFrame if it's not already
+                    if isinstance(history, dict):
+                        df = pd.DataFrame(history)
+                    else:
+                        df = history.copy()
+                    
+                    # Ensure we have a proper date index
+                    if 'Date' in df.columns:
+                        df = df.set_index('Date')
+                    elif not isinstance(df.index, pd.DatetimeIndex):
+                        df.index = pd.to_datetime(df.index)
+                    
+                    # Get close prices
+                    if 'Close' in df.columns:
+                        price_data[ticker] = df['Close']
+                    elif 'close' in df.columns:
+                        price_data[ticker] = df['close']
+                    else:
+                        print(f"  ⚠️  No Close price column found for {ticker}")
+                        continue
+                        
+                except Exception as e:
+                    print(f"  ⚠️  Error processing {ticker}: {e}")
+                    continue
+        
+        if not price_data:
+            raise ValueError("No valid price data found for any ticker")
+        
+        # Create DataFrame with all tickers
+        prices_df = pd.DataFrame(price_data)
+        
+        # Remove any rows with all NaN values
+        prices_df = prices_df.dropna(how='all')
+        
+        # Sort by date
+        prices_df = prices_df.sort_index()
+        
+        print(f"  📊 Created momentum prices DataFrame: {len(prices_df)} days x {len(prices_df.columns)} tickers")
+        
+        return prices_df
     
     def _save_strategy_results(self, results: Dict):
         """Save strategy results to disk with historical data preservation"""
@@ -220,6 +360,15 @@ class StrategyManager:
                 result['calculation_timestamp'] = datetime.now().isoformat()
             
             return result
+        elif strategy_name == 'price_momentum':
+            result = self.momentum_strategy.run_strategy(ticker, strategy_type, params, period)
+            
+            if result.get('success'):
+                result['summary'] = self.momentum_strategy.get_strategy_summary(ticker, strategy_type, params)
+                result['calculated_on_demand'] = True
+                result['calculation_timestamp'] = datetime.now().isoformat()
+            
+            return result
         else:
             return {'error': f'Strategy {strategy_name} not implemented'}
     
@@ -279,17 +428,52 @@ class StrategyManager:
 
 
 if __name__ == "__main__":
-    """Test the strategy manager"""
-    print("🧪 Testing Strategy Manager")
-    print("=" * 50)
-    
-    # Test with a few tickers
-    test_tickers = ['AAPL', 'MSFT']
+    """Test the strategy manager with real stock data from pickle files"""
+    print("🧪 Testing Strategy Manager with Stock Data")
+    print("=" * 60)
     
     manager = StrategyManager()
     
-    # Run all strategies
-    results = manager.run_all_strategies_for_all_tickers(test_tickers)
+    # Load stock data from pickle file
+    stock_data_file = os.path.join(manager.data_dir, "stock_data.pkl")
+    stock_data = None
+    test_tickers = []
+    
+    try:
+        if os.path.exists(stock_data_file):
+            print(f"📂 Loading stock data from: {stock_data_file}")
+            with open(stock_data_file, 'rb') as f:
+                stock_data = pickle.load(f)
+            
+            if stock_data and 'stocks' in stock_data:
+                test_tickers = list(stock_data['stocks'].keys())
+                print(f"✅ Loaded stock data for {len(test_tickers)} tickers: {test_tickers}")
+                
+                # Show data info for first ticker
+                if test_tickers:
+                    first_ticker = test_tickers[0]
+                    ticker_data = stock_data['stocks'][first_ticker]
+                    if 'history' in ticker_data:
+                        history_len = len(ticker_data['history'])
+                        print(f"   Sample data - {first_ticker}: {history_len} days of history")
+            else:
+                print("⚠️  Stock data file exists but has unexpected format")
+        else:
+            print(f"⚠️  Stock data file not found: {stock_data_file}")
+            print("   Using fallback tickers without pre-loaded data")
+            test_tickers = ['AAPL', 'MSFT']
+            
+    except Exception as e:
+        print(f"❌ Error loading stock data: {e}")
+        print("   Using fallback tickers without pre-loaded data")
+        test_tickers = ['AAPL', 'MSFT']
+        stock_data = None
+    
+    print(f"\n🚀 Running strategies for tickers: {test_tickers}")
+    print("-" * 60)
+    
+    # Run all strategies with stock data
+    results = manager.run_all_strategies_for_all_tickers(test_tickers, stock_data)
     
     print("\n📊 Results Summary:")
     for strategy_name, strategy_data in results['strategies'].items():
@@ -299,20 +483,39 @@ if __name__ == "__main__":
             for ticker, ticker_data in type_data.items():
                 if ticker_data.get('success'):
                     signal = ticker_data.get('current_signal', 'N/A')
-                    print(f"    {ticker}: {signal}")
+                    summary = ticker_data.get('summary', 'N/A')
+                    print(f"    {ticker}: {signal} - {summary}")
                 else:
-                    print(f"    {ticker}: ERROR - {ticker_data.get('error', 'Unknown')}")
+                    error = ticker_data.get('error', 'Unknown')
+                    print(f"    {ticker}: ERROR - {error}")
     
     # Test on-demand calculation
     print("\n🔄 Testing on-demand calculation:")
-    custom_result = manager.calculate_strategy_on_demand(
-        'AAPL', 'moving_average', 'double', 
-        {'short_window': 10, 'long_window': 30}, '6mo'
-    )
-    
-    if custom_result.get('success'):
-        print(f"✅ Custom calculation successful: {custom_result.get('current_signal')}")
-    else:
-        print(f"❌ Custom calculation failed: {custom_result.get('error')}")
+    if test_tickers:
+        test_ticker = test_tickers[0]
+        custom_result = manager.calculate_strategy_on_demand(
+            test_ticker, 'moving_average', 'double', 
+            {'short_window': 10, 'long_window': 30}, '6mo'
+        )
+        
+        if custom_result.get('success'):
+            print(f"✅ Custom MA calculation for {test_ticker}: {custom_result.get('current_signal')}")
+        else:
+            print(f"❌ Custom MA calculation failed: {custom_result.get('error')}")
+        
+        # Test momentum strategy on-demand
+        momentum_result = manager.calculate_strategy_on_demand(
+            test_ticker, 'price_momentum', 'cumulative_return',
+            {'formation_period': 6, 'skip_period': 1}, '2y'
+        )
+        
+        if momentum_result.get('success'):
+            print(f"✅ Custom momentum calculation for {test_ticker}: {momentum_result.get('current_signal')}")
+            if 'momentum_metrics' in momentum_result:
+                metrics = momentum_result['momentum_metrics']
+                print(f"   Cumulative Return: {metrics.get('rcum', 'N/A')}")
+                print(f"   Percentile Rank: {metrics.get('percentile_rank', 'N/A')}")
+        else:
+            print(f"❌ Custom momentum calculation failed: {momentum_result.get('error')}")
     
     print("\n🏁 Strategy Manager test completed!")
