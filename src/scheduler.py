@@ -24,6 +24,7 @@ class TaskScheduler:
         self.skip_news = skip_news
         self.tickers = tickers if tickers else COMPANIES
         self.output_dir = output_dir
+        self.data_dir = DATA_DIR
         
         # Data storage
         self.data_dir = DATA_DIR

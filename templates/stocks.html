@@ -6,8 +6,20 @@
 <div class="row">
     <div class="col-md-12">
         <div class="card data-card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5>Stock Summary</h5>
+                {% if available_dates and available_dates|length > 1 %}
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            Date: {{ selected_date or 'Latest' }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dateDropdown">
+                            {% for date in available_dates %}
+                                <li><a class="dropdown-item" href="?date={{ date }}">{{ date }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
             </div>
             <div class="card-body">
                 {% if stock_data and 'stocks' in stock_data %}
@@ -28,16 +40,16 @@
                                 {% for ticker, data in stock_data.stocks.items() %}
                                 <tr>
                                     <td><a href="/stock/{{ ticker }}">{{ ticker }}</a></td>
-                                    <td>${{ data.latest_price|round(2) if data.latest_price else 'N/A' }}</td>
-                                    <td class="{% if data.get('1d_change_%', 0) > 0 %}text-success{% elif data.get('1d_change_%', 0) < 0 %}text-danger{% endif %}">
-                                        {{ data.get('1d_change_%', 'N/A')|round(2) if data.get('1d_change_%') else 'N/A' }}%
+                                    <td>${{ data.summary.latest_price|round(2) if data.summary and data.summary.latest_price else 'N/A' }}</td>
+                                    <td class="{% if data.summary and data.summary.get('1d_change_%', 0) > 0 %}text-success{% elif data.summary and data.summary.get('1d_change_%', 0) < 0 %}text-danger{% endif %}">
+                                        {{ data.summary.get('1d_change_%', 'N/A')|round(2) if data.summary and data.summary.get('1d_change_%') else 'N/A' }}%
                                     </td>
-                                    <td class="{% if data.get('30d_change_%', 0) > 0 %}text-success{% elif data.get('30d_change_%', 0) < 0 %}text-danger{% endif %}">
-                                        {{ data.get('30d_change_%', 'N/A')|round(2) if data.get('30d_change_%') else 'N/A' }}%
+                                    <td class="{% if data.summary and data.summary.get('30d_change_%', 0) > 0 %}text-success{% elif data.summary and data.summary.get('30d_change_%', 0) < 0 %}text-danger{% endif %}">
+                                        {{ data.summary.get('30d_change_%', 'N/A')|round(2) if data.summary and data.summary.get('30d_change_%') else 'N/A' }}%
                                     </td>
-                                    <td>${{ data.get('52w_low', 'N/A')|round(2) if data.get('52w_low') else 'N/A' }}</td>
-                                    <td>${{ data.get('52w_high', 'N/A')|round(2) if data.get('52w_high') else 'N/A' }}</td>
-                                    <td>{{ data.get('volume', 'N/A')|int if data.get('volume') else 'N/A' }}</td>
+                                    <td>${{ data.summary.get('52w_low', 'N/A')|round(2) if data.summary and data.summary.get('52w_low') else 'N/A' }}</td>
+                                    <td>${{ data.summary.get('52w_high', 'N/A')|round(2) if data.summary and data.summary.get('52w_high') else 'N/A' }}</td>
+                                    <td>{{ data.summary.get('volume', 'N/A')|int if data.summary and data.summary.get('volume') else 'N/A' }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

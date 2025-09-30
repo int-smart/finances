@@ -337,27 +337,11 @@ class StockTracker:
         for commodity in commodities:
             self.get_commodity_data(commodity, period, interval)
 
-        summary = self.get_summary_stats()
-        for ticker in tickers:
-            if ticker in self.stock_data and ticker in summary["stocks"]:
-                self.stock_data[ticker].update(summary["stocks"][ticker])
-            elif ticker not in self.stock_data:
-                print(f"Warning: {ticker} not found in stock_data")
-            elif ticker not in summary["stocks"]:
-                print(f"Warning: {ticker} not found in summary stats")
-        for commodity in commodities:
-            if commodity in self.commodity_data and commodity in summary["commodities"]:
-                self.commodity_data[commodity].update(summary["commodities"][commodity])
-            elif commodity not in self.commodity_data:
-                print(f"Warning: {commodity} not found in commodity_data")
-            elif commodity not in summary["commodities"]:
-                print(f"Warning: {commodity} not found in summary stats")
+        # Get current date for organizing data
+        current_date = datetime.now().strftime("%Y-%m-%d")
         
-        return {
-            "stocks": self.stock_data,
-            "commodities": self.commodity_data,
-            "options": self.options_data
-        }
+        # Organize data by date
+        return self.organize_data_by_date(current_date, tickers, commodities)
     
     def get_summary_stats(self):
         """Get summary statistics for all collected data"""
@@ -432,6 +416,114 @@ class StockTracker:
                 }
         
         return summary
+
+    def organize_data_by_date(self, current_date, tickers, commodities):
+        """Organize data by date, separating history from daily data"""
+        # Load existing data structure if it exists
+        existing_data = self.load_existing_stock_data()
+        
+        # Get summary stats for current data
+        summary = self.get_summary_stats()
+        
+        # Organize stocks data
+        for ticker in tickers:
+            if ticker in self.stock_data:
+                # Extract history and other data
+                ticker_data = self.stock_data[ticker]
+                history = ticker_data.get('history', pd.DataFrame())
+                
+                # Initialize ticker in existing data if not present
+                if ticker not in existing_data['stocks']:
+                    existing_data['stocks'][ticker] = {
+                        'history': history,
+                        'dates': {}
+                    }
+                else:
+                    # Ensure dates key exists
+                    if 'dates' not in existing_data['stocks'][ticker]:
+                        existing_data['stocks'][ticker]['dates'] = {}
+                    
+                    # Append new history data to existing history
+                    if not history.empty:
+                        existing_history = existing_data['stocks'][ticker].get('history', pd.DataFrame())
+                        if not existing_history.empty:
+                            # Combine histories, removing duplicates by index (date)
+                            combined_history = pd.concat([existing_history, history])
+                            combined_history = combined_history[~combined_history.index.duplicated(keep='last')]
+                            combined_history = combined_history.sort_index()
+                            existing_data['stocks'][ticker]['history'] = combined_history
+                        else:
+                            existing_data['stocks'][ticker]['history'] = history
+                
+                # Store current date's data (everything except history)
+                current_data = {
+                    'info': ticker_data.get('info', {}),
+                    'institutional_holders': ticker_data.get('institutional_holders'),
+                    'major_holders': ticker_data.get('major_holders'),
+                    'summary': summary['stocks'].get(ticker, {}),
+                    'timestamp': datetime.now().isoformat()
+                }
+                
+                existing_data['stocks'][ticker]['dates'][current_date] = current_data
+        
+        # Organize commodities data
+        for commodity in commodities:
+            if commodity in self.commodity_data:
+                commodity_data = self.commodity_data[commodity]
+                history = commodity_data.get('history', pd.DataFrame())
+                
+                # Initialize commodity in existing data if not present
+                if commodity not in existing_data['commodities']:
+                    existing_data['commodities'][commodity] = {
+                        'history': history,
+                        'dates': {}
+                    }
+                else:
+                    # Ensure dates key exists
+                    if 'dates' not in existing_data['commodities'][commodity]:
+                        existing_data['commodities'][commodity]['dates'] = {}
+                    
+                    # Append new history data to existing history
+                    if not history.empty:
+                        existing_history = existing_data['commodities'][commodity].get('history', pd.DataFrame())
+                        if not existing_history.empty:
+                            # Combine histories, removing duplicates by index (date)
+                            combined_history = pd.concat([existing_history, history])
+                            combined_history = combined_history[~combined_history.index.duplicated(keep='last')]
+                            combined_history = combined_history.sort_index()
+                            existing_data['commodities'][commodity]['history'] = combined_history
+                        else:
+                            existing_data['commodities'][commodity]['history'] = history
+                
+                # Store current date's data
+                current_data = {
+                    'name': commodity_data.get('name', commodity),
+                    'summary': summary['commodities'].get(commodity, {}),
+                    'timestamp': datetime.now().isoformat()
+                }
+                
+                existing_data['commodities'][commodity]['dates'][current_date] = current_data
+        
+        # Store options data by date (full options data each day)
+        existing_data['options'][current_date] = self.options_data
+        
+        return existing_data
+
+    def load_existing_stock_data(self, filepath="data/stock_data.pkl"):
+        """Load existing stock data structure"""
+        if os.path.exists(filepath):
+            try:
+                with open(filepath, 'rb') as f:
+                    return pickle.load(f)
+            except Exception as e:
+                print(f"Error loading existing stock data: {e}")
+        
+        # Return default structure if file doesn't exist or can't be loaded
+        return {
+            'stocks': {},
+            'commodities': {},
+            'options': {}
+        }
 
     def save_latest_data(self, filepath="data/stock_data_latest.pkl"):
         """Save only the latest data including options (for cloud upload)"""

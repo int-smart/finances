@@ -147,8 +147,23 @@ def generate_static_site():
         
         # Generate stocks page
         with open(f"{static_dir}/stocks.html", "w") as f:
+            # Convert new stock data structure to format expected by template
+            stocks_for_template = {}
+            if stock_data and 'stocks' in stock_data:
+                for ticker, ticker_data in stock_data['stocks'].items():
+                    if 'dates' in ticker_data and ticker_data['dates']:
+                        # Get the most recent date
+                        latest_date = max(ticker_data['dates'].keys())
+                        latest_data = ticker_data['dates'][latest_date]
+                        
+                        # Combine with history for the template
+                        stocks_for_template[ticker] = {
+                            'history': ticker_data.get('history', {}),
+                            **latest_data
+                        }
+            
             html_content = render_template('static_stocks.html', 
-                                         stocks=stock_data.get('stocks', {}),
+                                         stocks=stocks_for_template,
                                          news_data=news_data,
                                          last_updated=last_updated)
             f.write(html_content)
