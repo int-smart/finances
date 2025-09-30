@@ -52,16 +52,16 @@
                                         {% for ticker, data in stocks.items() %}
                                         <tr>
                                             <td><strong>{{ ticker }}</strong></td>
-                                            <td>${{ data.latest_price|round(2) if data.latest_price else 'N/A' }}</td>
-                                            <td class="{% if data.get('1d_change_%', 0) > 0 %}text-success{% elif data.get('1d_change_%', 0) < 0 %}text-danger{% endif %}">
-                                                {{ data.get('1d_change_%', 'N/A')|round(2) if data.get('1d_change_%') else 'N/A' }}%
+                                            <td>${{ data.summary.latest_price|round(2) if data.summary and data.summary.latest_price else 'N/A' }}</td>
+                                            <td class="{% if data.summary and data.summary.get('1d_change_%', 0) > 0 %}text-success{% elif data.summary and data.summary.get('1d_change_%', 0) < 0 %}text-danger{% endif %}">
+                                                {{ data.summary.get('1d_change_%', 'N/A')|round(2) if data.summary and data.summary.get('1d_change_%') else 'N/A' }}%
                                             </td>
-                                            <td class="{% if data.get('30d_change_%', 0) > 0 %}text-success{% elif data.get('30d_change_%', 0) < 0 %}text-danger{% endif %}">
-                                                {{ data.get('30d_change_%', 'N/A')|round(2) if data.get('30d_change_%') else 'N/A' }}%
+                                            <td class="{% if data.summary and data.summary.get('30d_change_%', 0) > 0 %}text-success{% elif data.summary and data.summary.get('30d_change_%', 0) < 0 %}text-danger{% endif %}">
+                                                {{ data.summary.get('30d_change_%', 'N/A')|round(2) if data.summary and data.summary.get('30d_change_%') else 'N/A' }}%
                                             </td>
-                                            <td>${{ data.get('52w_low', 'N/A')|round(2) if data.get('52w_low') else 'N/A' }}</td>
-                                            <td>${{ data.get('52w_high', 'N/A')|round(2) if data.get('52w_high') else 'N/A' }}</td>
-                                            <td>{{ data.get('volume', 'N/A')|int if data.get('volume') else 'N/A' }}</td>
+                                            <td>${{ data.summary.get('52w_low', 'N/A')|round(2) if data.summary and data.summary.get('52w_low') else 'N/A' }}</td>
+                                            <td>${{ data.summary.get('52w_high', 'N/A')|round(2) if data.summary and data.summary.get('52w_high') else 'N/A' }}</td>
+                                            <td>{{ data.summary.get('volume', 'N/A')|int if data.summary and data.summary.get('volume') else 'N/A' }}</td>
                                             <td>
                                                 {% set news_count = 0 %}
                                                 {% set found_news = false %}

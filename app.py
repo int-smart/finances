@@ -32,6 +32,59 @@ def load_pickle(filename):
             return pickle.load(f)
     return None
 
+# Helper function to convert new stock data structure to old format for templates
+def convert_stock_data_for_template(stock_data, selected_date=None):
+    """Convert new date-based stock data structure to format expected by templates"""
+    if not stock_data or 'stocks' not in stock_data:
+        return stock_data
+    
+    converted_data = {'stocks': {}, 'commodities': {}, 'options': {}}
+    
+    # Convert stocks
+    for ticker, ticker_data in stock_data['stocks'].items():
+        if 'dates' in ticker_data and ticker_data['dates']:
+            # Use selected date or most recent date
+            if selected_date and selected_date in ticker_data['dates']:
+                date_to_use = selected_date
+            else:
+                date_to_use = max(ticker_data['dates'].keys())
+            
+            latest_data = ticker_data['dates'][date_to_use]
+            
+            # Combine with history for the template
+            converted_data['stocks'][ticker] = {
+                'history': ticker_data.get('history', pd.DataFrame()),
+                **latest_data
+            }
+    
+    # Convert commodities
+    if 'commodities' in stock_data:
+        for commodity, commodity_data in stock_data['commodities'].items():
+            if 'dates' in commodity_data and commodity_data['dates']:
+                # Use selected date or most recent date
+                if selected_date and selected_date in commodity_data['dates']:
+                    date_to_use = selected_date
+                else:
+                    date_to_use = max(commodity_data['dates'].keys())
+                
+                latest_data = commodity_data['dates'][date_to_use]
+                
+                # Combine with history for the template
+                converted_data['commodities'][commodity] = {
+                    'history': commodity_data.get('history', pd.DataFrame()),
+                    **latest_data
+                }
+    
+    # Convert options (use selected date or most recent)
+    if 'options' in stock_data:
+        if selected_date and selected_date in stock_data['options']:
+            converted_data['options'] = stock_data['options'][selected_date]
+        elif stock_data['options']:
+            latest_options_date = max(stock_data['options'].keys())
+            converted_data['options'] = stock_data['options'][latest_options_date]
+    
+    return converted_data
+
 # Helper function to check if data is fresh (less than 24 hours old)
 def is_data_fresh(filename):
     filepath = os.path.join(app.config['DATA_DIR'], filename)
@@ -200,7 +253,29 @@ def refresh_gist():
 def stocks():
     """Stock data page"""
     stock_data = load_pickle('stock_data.pkl')
-    return render_template('stocks.html', stock_data=stock_data)
+    
+    # Get available dates
+    available_dates = []
+    if stock_data and 'stocks' in stock_data:
+        # Get all unique dates from all tickers
+        all_dates = set()
+        for ticker_data in stock_data['stocks'].values():
+            if 'dates' in ticker_data:
+                all_dates.update(ticker_data['dates'].keys())
+        available_dates = sorted(all_dates, reverse=True)
+    
+    # Get selected date from query parameter
+    selected_date = request.args.get('date', None)
+    if not selected_date and available_dates:
+        selected_date = available_dates[0]
+    
+    # Convert new data structure to format expected by template
+    converted_stock_data = convert_stock_data_for_template(stock_data, selected_date)
+    
+    return render_template('stocks.html', 
+                          stock_data=converted_stock_data,
+                          available_dates=available_dates,
+                          selected_date=selected_date)
 
 @app.route('/investors')
 def investors():
@@ -384,8 +459,11 @@ def stock_detail(ticker):
     # Load stock data
     stock_data = load_pickle('stock_data.pkl')
     
+    # Convert new data structure to format expected by template
+    converted_stock_data = convert_stock_data_for_template(stock_data)
+    
     # Extract data for the specific ticker
-    ticker_data = stock_data.get('stocks', {}).get(ticker, {}) if stock_data else {}
+    ticker_data = converted_stock_data.get('stocks', {}).get(ticker, {}) if converted_stock_data else {}
     
     # Load news data
     news_data_history = load_pickle('news_data.pkl')
@@ -435,15 +513,20 @@ def stock_chart_data(ticker):
     if not stock_data or 'stocks' not in stock_data or ticker not in stock_data['stocks']:
         return jsonify({'error': 'Stock data not available'})
     
-    ticker_data = stock_data['stocks'][ticker]
-    if 'history' not in ticker_data:
+    ticker_info = stock_data['stocks'][ticker]
+    if 'history' not in ticker_info:
         return jsonify({'error': 'Historical data not available'})
     
     # Convert to list of dictionaries for JSON
-    history = ticker_data['history']
+    history = ticker_info['history']
     if isinstance(history, pd.DataFrame):
+        # Remove duplicates and sort by date
+        history = history.drop_duplicates()
+        history = history.sort_index()
+        
         # Reset index to make date a column
         history = history.reset_index()
+        
         # Convert to records format
         chart_data = history.to_dict(orient='records')
     else:
