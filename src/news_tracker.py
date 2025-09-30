@@ -191,6 +191,16 @@ class NewsTracker:
             except:
                 pass  # No consent dialog or different selector
 
+            # Scroll down multiple times to load more articles
+            for i in range(3):
+                self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                time.sleep(2)  # Wait for content to load after scrolling
+                print(f"Scroll {i+1}/3 completed")
+            
+            # Scroll back up to see all content
+            self.driver.execute_script("window.scrollTo(0, 0);")
+            time.sleep(1)
+
             # Find the news articles
             article_elements = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, "li.story-item"))

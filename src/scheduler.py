@@ -10,7 +10,7 @@ from src.news_tracker import NewsTracker
 from src.fundamentals_tracker import FundamentalsTracker
 from src.reddit_tracker import RedditTracker
 from src.decision_engine import DecisionEngine
-from src.config import COMPANIES, INVESTORS
+from src.config import COMPANIES, DATA_DIR
 from src.strategies.strategy_manager import StrategyManager
 import numpy as np
 import schedule
@@ -25,6 +25,10 @@ class TaskScheduler:
         self.tickers = tickers if tickers else COMPANIES
         self.output_dir = output_dir
         
+        # Data storage
+        self.data_dir = DATA_DIR
+        os.makedirs(self.data_dir, exist_ok=True)
+       
         # Create output directory
         os.makedirs(self.output_dir, exist_ok=True)
         
@@ -36,11 +40,7 @@ class TaskScheduler:
         self.reddit_tracker = RedditTracker()
         self.decision_engine = DecisionEngine()
         self.strategy_manager = StrategyManager(data_dir=self.data_dir)
-        
-        # Data storage
-        self.data_dir = "data"
-        os.makedirs(self.data_dir, exist_ok=True)
-        
+         
         # File to track last daily run
         self.last_run_file = os.path.join(self.data_dir, "last_daily_run.txt")
         
