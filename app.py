@@ -496,6 +496,9 @@ def stock_detail(ticker):
     # Load Reddit summary
     reddit_summary = load_reddit_summary(ticker)
     
+    # Load strategy data for charts
+    strategy_data = strategy_manager.get_strategy_data_for_ticker(ticker)
+    
     return render_template('stock_detail.html', 
                           ticker=ticker,
                           stock_data=ticker_data,
@@ -504,7 +507,8 @@ def stock_detail(ticker):
                           fundamentals=fundamentals,
                           news_summary=news_summary,
                           reddit_posts=reddit_posts,
-                          reddit_summary=reddit_summary)
+                          reddit_summary=reddit_summary,
+                          strategy_data=strategy_data)
 
 @app.route('/api/stock_chart/<ticker>')
 def stock_chart_data(ticker):

@@ -17,6 +17,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from src.strategies.moving_average_strategy import convert_stock_data_to_prices_df, MovingAverageStrategy
 from src.strategies.price_momentum_strategy import PriceMomentumStrategy
+from src.strategies.earnings_momentum_strategy import EarningsMomentumStrategy
 
 
 class StrategyManager:
@@ -34,11 +35,13 @@ class StrategyManager:
         # Initialize strategies
         self.ma_strategy = MovingAverageStrategy()
         self.momentum_strategy = PriceMomentumStrategy()
+        self.earnings_momentum_strategy = EarningsMomentumStrategy()
         
         # Get default strategy configurations
         self.default_strategies = {
             'moving_average': self.ma_strategy.get_default_configurations(),
-            'price_momentum': self.momentum_strategy.get_default_configurations()
+            'price_momentum': self.momentum_strategy.get_default_configurations(),
+            'earnings_momentum': self.earnings_momentum_strategy.get_default_configurations()
         }
     
     def run_all_strategies_for_all_tickers(self, tickers: List[str], stock_data: Dict = None) -> Dict:
@@ -66,6 +69,10 @@ class StrategyManager:
         # Run price momentum strategies
         momentum_results = self._run_price_momentum_strategies(tickers, stock_data)
         all_results['strategies']['price_momentum'] = momentum_results
+        
+        # Run earnings momentum strategies
+        earnings_momentum_results = self._run_earnings_momentum_strategies(tickers, stock_data)
+        all_results['strategies']['earnings_momentum'] = earnings_momentum_results
         
         # Save results
         self._save_strategy_results(all_results)
@@ -201,6 +208,28 @@ class StrategyManager:
                     print(f"    ❌ {ticker}: {error_msg}")
         
         return momentum_results
+    
+    def _run_earnings_momentum_strategies(self, tickers: List[str], stock_data: Dict = None) -> Dict:
+        """Run all earnings momentum strategy variants for all tickers"""
+        print("📊 Running Earnings Momentum strategies...")
+        
+        earnings_momentum_results = {}
+        
+        # Note: Earnings momentum strategy requires earnings data, not price data
+        # For now, we'll return empty results with a note that earnings data is needed
+        for strategy_type in self.earnings_momentum_strategy.get_strategy_types():
+            print(f"  Running {strategy_type} earnings momentum strategy...")
+            earnings_momentum_results[strategy_type] = {}
+            
+            for ticker in tickers:
+                earnings_momentum_results[strategy_type][ticker] = {
+                    'success': False,
+                    'error': 'Earnings data required - not available in current stock data',
+                    'timestamp': datetime.now().isoformat()
+                }
+                print(f"    ⚠️  {ticker}: Earnings data required")
+        
+        return earnings_momentum_results
     
     def _has_stock_data(self, stock_data: Dict, ticker: str) -> bool:
         """Check if stock data contains the required ticker data"""
@@ -369,6 +398,14 @@ class StrategyManager:
                 result['calculation_timestamp'] = datetime.now().isoformat()
             
             return result
+        elif strategy_name == 'earnings_momentum':
+            # Note: Earnings momentum requires earnings data, not price data
+            return {
+                'success': False,
+                'error': 'Earnings momentum strategy requires earnings data. Please provide earnings_data parameter.',
+                'calculated_on_demand': True,
+                'calculation_timestamp': datetime.now().isoformat()
+            }
         else:
             return {'error': f'Strategy {strategy_name} not implemented'}
     
@@ -425,6 +462,51 @@ class StrategyManager:
                         signals[strategy_name][strategy_type][ticker] = ticker_data.get('current_signal', 'hold')
         
         return signals
+    
+    def run_earnings_momentum_with_data(self, tickers: List[str], earnings_data: pd.DataFrame, 
+                                      strategy_type: str = 'sue_long_only') -> Dict:
+        """
+        Run earnings momentum strategy with actual earnings data.
+        
+        Args:
+            tickers: List of ticker symbols
+            earnings_data: DataFrame with quarterly earnings data
+            strategy_type: Strategy variant to run
+            
+        Returns:
+            Dictionary with strategy results
+        """
+        print(f"📊 Running Earnings Momentum strategy ({strategy_type}) with earnings data...")
+        
+        try:
+            # Get parameters for the strategy type
+            params = self.default_strategies['earnings_momentum'][strategy_type].copy()
+            
+            # Run the strategy
+            result = self.earnings_momentum_strategy.run_strategy(
+                tickers, strategy_type, params, '1y', earnings_data
+            )
+            
+            if result.get('success'):
+                result['summary'] = f"Earnings momentum strategy completed for {len(tickers)} tickers"
+                result['strategy_type'] = strategy_type
+                result['parameters'] = params
+                result['calculation_timestamp'] = datetime.now().isoformat()
+                
+                # Add individual ticker summaries
+                for ticker, ticker_result in result.get('ticker_results', {}).items():
+                    ticker_result['summary'] = self.earnings_momentum_strategy.get_strategy_summary(
+                        ticker, strategy_type, params
+                    )
+            
+            return result
+            
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Earnings momentum strategy failed: {str(e)}',
+                'calculation_timestamp': datetime.now().isoformat()
+            }
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ from src.reddit_tracker import RedditTracker
 from src.decision_engine import DecisionEngine
 from src.config import COMPANIES, DATA_DIR
 from src.strategies.strategy_manager import StrategyManager
+from src.data.earnings_data import get_earnings_data_for_tickers
 import numpy as np
 import schedule
 from gist_storage_python import GistStorage
@@ -147,6 +148,22 @@ class TaskScheduler:
         self.fundamentals_tracker.save_data(f"{self.data_dir}/fundamentals_data.pkl")
         return fundamentals_data
     
+    def collect_earnings_data(self):
+        """Collect quarterly earnings data"""
+        print("Collecting earnings data...")
+        try:
+            # Use target_quarters=8 for earnings momentum strategy
+            earnings_data = get_earnings_data_for_tickers(self.tickers, self.data_dir, target_quarters=8)
+            if earnings_data is not None and not earnings_data.empty:
+                print(f"✅ Earnings data collected: {earnings_data.shape}")
+                return earnings_data
+            else:
+                print("⚠️ No earnings data collected")
+                return None
+        except Exception as e:
+            print(f"⚠️ Error collecting earnings data: {e}")
+            return None
+    
     def collect_news(self):
         """Collect and track news articles"""
         news_data = {}
@@ -195,14 +212,31 @@ class TaskScheduler:
         
         return reddit_data, subreddit_data
 
-    def run_trading_strategies(self, stock_data):
-        """Run all trading strategies using collected stock data"""
+    def run_trading_strategies(self, stock_data, earnings_data=None):
+        """Run all trading strategies using collected stock data and earnings data"""
         print("🎯 Running trading strategies...")
         try:
             strategies_data = self.strategy_manager.run_all_strategies_for_all_tickers(
                 tickers=self.tickers, 
                 stock_data=stock_data
             )
+            
+            # Run earnings momentum strategy if earnings data is available
+            if earnings_data is not None and not earnings_data.empty:
+                print("📊 Running earnings momentum strategies...")
+                earnings_momentum_results = self.strategy_manager.run_earnings_momentum_with_data(
+                    tickers=self.tickers,
+                    earnings_data=earnings_data,
+                    strategy_type='sue_long_only'
+                )
+                
+                if earnings_momentum_results.get('success'):
+                    strategies_data['strategies']['earnings_momentum'] = {
+                        'sue_long_only': earnings_momentum_results.get('ticker_results', {})
+                    }
+                    print("✅ Earnings momentum strategies completed")
+                else:
+                    print(f"⚠️ Earnings momentum strategies failed: {earnings_momentum_results.get('error', 'Unknown error')}")
             
             print(f"✅ Trading strategies completed for {len(self.tickers)} tickers")
             return strategies_data
@@ -399,17 +433,20 @@ class TaskScheduler:
         # 2. Collect fundamentals
         fundamentals_data = self.collect_fundamentals()
         
-        # 3. Collect stock data
+        # 3. Collect earnings data
+        earnings_data = self.collect_earnings_data()
+        
+        # 4. Collect stock data
         stock_data = self.collect_stock_data()
         
-        # 4. Collect news
+        # 5. Collect news
         news_data = self.collect_news()
         
-        # 5. Collect Reddit data
+        # 6. Collect Reddit data
         reddit_data, subreddit_data = self.collect_reddit_data()
         
-        # 6. Run trading strategies
-        strategies_data = self.run_trading_strategies(stock_data)
+        # 7. Run trading strategies
+        strategies_data = self.run_trading_strategies(stock_data, earnings_data)
         
         # 7. Generate recommendations
         recommendations = self.generate_recommendations(
@@ -441,14 +478,17 @@ class TaskScheduler:
         # 3. Collect fundamentals
         fundamentals_data = self.collect_fundamentals()
         
-        # 4. Collect news
+        # 4. Collect earnings data
+        earnings_data = self.collect_earnings_data()
+        
+        # 5. Collect news
         news_data = self.collect_news()
         
-        # 5. Collect Reddit data
+        # 6. Collect Reddit data
         reddit_data, subreddit_data = self.collect_reddit_data()
         
-        # 6. Run trading strategies
-        strategies_data = self.run_trading_strategies(stock_data)
+        # 7. Run trading strategies
+        strategies_data = self.run_trading_strategies(stock_data, earnings_data)
         
         # 7. Generate recommendations
         recommendations = self.generate_recommendations(

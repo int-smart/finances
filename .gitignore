@@ -39,3 +39,5 @@ data
 output
 investment_reports
 wsj_session.json
+*checkpoints*
+*wandb*
