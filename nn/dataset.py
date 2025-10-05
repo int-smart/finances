@@ -171,7 +171,7 @@ class MultiStockWindowDataset(Dataset):
     Dataset for multi-stock time series with uniform ticker sampling.
     """
     
-    def __init__(self, data_dict, window_size=64, pred_horizon=1, tickers=None, normalize=True, normalization_type='relative'):
+    def __init__(self, data_dict, window_size=64, pred_horizon=1, tickers=None, normalize=True, normalization_type='zscore'):
         """
         Initialize the dataset.
         
@@ -248,6 +248,7 @@ class MultiStockWindowDataset(Dataset):
                 target_mean = mean[close_col_idx]
                 target_std = std[close_col_idx]
                 target_close = (target_close - target_mean) / target_std
+
         
         # Channels-first for CNN: (C, T)
         window = window.T  # (5, window_size)

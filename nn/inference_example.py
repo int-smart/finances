@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from inference import StockPredictor
 from dataset import load_stock_data
+from pathlib import Path
 
 def plot_predictions(tickers, window_data_list, predictions_list, pred_horizon):
     """
@@ -108,7 +109,7 @@ def plot_predictions(tickers, window_data_list, predictions_list, pred_horizon):
     print(f"\n✓ Plots saved to: {output_file}")
 
 
-def evaluate_and_plot_predictions(ticker, data, predictor, num_samples=20, stride=5):
+def evaluate_and_plot_predictions(ticker, data, predictor, num_samples=20, stride=5, checkpoint_path=None, output_dir=None):
     """
     Evaluate model on historical data by making predictions and comparing with actual values.
     
@@ -118,9 +119,13 @@ def evaluate_and_plot_predictions(ticker, data, predictor, num_samples=20, strid
         predictor: StockPredictor instance
         num_samples: Number of prediction windows to evaluate
         stride: Number of days to stride between windows
+        checkpoint_path: Path to checkpoint file (for labeling)
+        output_dir: Directory to save output plots
     """
     print(f"\n{'='*80}")
     print(f"EVALUATING MODEL ON {ticker} HISTORICAL DATA")
+    if checkpoint_path:
+        print(f"Checkpoint: {checkpoint_path}")
     print(f"{'='*80}\n")
     
     window_size = predictor.window_size
@@ -250,7 +255,15 @@ def evaluate_and_plot_predictions(ticker, data, predictor, num_samples=20, strid
     ax1.plot(data.index, data['Close'], 'b-', linewidth=1, label='Actual Price', alpha=0.6)
     ax1.scatter(prediction_dates, [data.loc[d, 'Close'] for d in prediction_dates], 
                color='red', s=30, alpha=0.7, label='Prediction Start Points', zorder=5)
-    ax1.set_title(f'{ticker} - Full Price History with Prediction Points', fontsize=14, fontweight='bold')
+    
+    # Add title with checkpoint info if available
+    title = f'{ticker} - Full Price History with Prediction Points'
+    if checkpoint_path:
+        # Shorten checkpoint path for display
+        checkpoint_name = Path(checkpoint_path).name
+        title += f'\nCheckpoint: {checkpoint_name}'
+    ax1.set_title(title, fontsize=14, fontweight='bold')
+    
     ax1.set_xlabel('Date', fontsize=12)
     ax1.set_ylabel('Price ($)', fontsize=12)
     ax1.legend(loc='best')
@@ -521,7 +534,19 @@ def evaluate_and_plot_predictions(ticker, data, predictor, num_samples=20, strid
     plt.tight_layout()
     
     # Save figure
-    output_file = f'{ticker}_evaluation.png'
+    if output_dir:
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Create filename with checkpoint info
+        if checkpoint_path:
+            checkpoint_name = checkpoint_path.split("/")[1] + "_" + checkpoint_path.split("/")[-1]  # e.g., checkpoint_batch_10000
+            output_file = output_dir / f'{ticker}_{checkpoint_name}_evaluation.png'
+        else:
+            output_file = output_dir / f'{ticker}_evaluation.png'
+    else:
+        output_file = f'{ticker}_evaluation.png'
+    
     plt.savefig(output_file, dpi=150, bbox_inches='tight')
     plt.close()
     print(f"✓ Evaluation plots saved to: {output_file}\n")
@@ -795,7 +820,7 @@ def example_evaluate_on_history():
     print("="*80)
     
     # Initialize predictor
-    checkpoint_path = "checkpoints/best_prob_model.pt"
+    checkpoint_path = "/home/abhishek/Desktop/Projects/finances/nn/wandb/run-20251004_182833-60s1dt6l/files/checkpoints/checkpoint_batch_10000.pt"
     predictor = StockPredictor(checkpoint_path, device='cpu')
     
     # Load data
@@ -820,6 +845,130 @@ def example_evaluate_on_history():
         )
     else:
         print(f"Ticker {ticker} not found in data")
+
+
+def find_all_checkpoints(wandb_dir="wandb", checkpoint_pattern="checkpoint_batch_*.pt"):
+    """
+    Find all checkpoint files in wandb directory.
+    
+    Args:
+        wandb_dir: Path to wandb directory
+        checkpoint_pattern: Pattern to match checkpoint files
+    
+    Returns:
+        List of checkpoint file paths
+    """
+    wandb_path = Path(wandb_dir)
+    
+    if not wandb_path.exists():
+        print(f"Warning: wandb directory not found: {wandb_path}")
+        return []
+    
+    # Find all checkpoints matching pattern in run-* folders
+    checkpoint_paths = []
+    for run_dir in wandb_path.glob("run-2025100*"):
+        checkpoint_dir = run_dir / "files" / "checkpoints"
+        if checkpoint_dir.exists():
+            for checkpoint_file in checkpoint_dir.glob(checkpoint_pattern):
+                checkpoint_paths.append(checkpoint_file)
+    
+    # Sort by modification time (newest first)
+    checkpoint_paths.sort(key=lambda x: x.stat().st_mtime, reverse=True)
+    
+    return checkpoint_paths
+
+
+def example_evaluate_all_checkpoints():
+    """Example: Evaluate all checkpoints in wandb directory."""
+    print("\n" + "="*80)
+    print("EXAMPLE: Evaluating All Checkpoints in wandb Directory")
+    print("="*80)
+    
+    # Find all checkpoints
+    checkpoint_paths = find_all_checkpoints(wandb_dir="wandb")
+    
+    if not checkpoint_paths:
+        print("No checkpoints found in wandb directory!")
+        return
+    
+    print(f"Found {len(checkpoint_paths)} checkpoints")
+    for cp in checkpoint_paths:
+        print(f"  - {cp}")
+    print()
+    
+    # Load data once
+    data_path = "/home/abhishek/Desktop/Projects/Segment/S&P500/Sap_500_data_fresh.pkl"
+    data_dict = load_stock_data(data_path, min_date="2020-01-01")
+    
+    ticker = "MSFT"
+    
+    if ticker not in data_dict:
+        print(f"Ticker {ticker} not found in data")
+        return
+    
+    ticker_data = data_dict[ticker]
+    print(f"Loaded {len(ticker_data)} data points for {ticker}")
+    print(f"Date range: {ticker_data.index[0]} to {ticker_data.index[-1]}\n")
+    
+    # Create output directory
+    output_dir = Path("checkpoint_evaluations")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Output directory: {output_dir.absolute()}\n")
+    
+    # Evaluate each checkpoint
+    results = []
+    for i, checkpoint_path in enumerate(checkpoint_paths, 1):
+        print(f"\n{'='*80}")
+        print(f"Evaluating checkpoint {i}/{len(checkpoint_paths)}")
+        print(f"{'='*80}")
+        
+        try:
+            # Load predictor
+            predictor = StockPredictor(str(checkpoint_path), device='cuda')
+            
+            # Evaluate
+            evaluate_and_plot_predictions(
+                ticker=ticker,
+                data=ticker_data,
+                predictor=predictor,
+                num_samples=300,
+                stride=30,
+                checkpoint_path=str(checkpoint_path),
+                output_dir=output_dir
+            )
+            
+            results.append({
+                'checkpoint': str(checkpoint_path),
+                'status': 'success'
+            })
+            
+        except Exception as e:
+            print(f"❌ Failed to evaluate {checkpoint_path}: {e}")
+            import traceback
+            traceback.print_exc()
+            results.append({
+                'checkpoint': str(checkpoint_path),
+                'status': 'failed',
+                'error': str(e)
+            })
+    
+    # Summary
+    print(f"\n{'='*80}")
+    print("EVALUATION SUMMARY")
+    print(f"{'='*80}")
+    successful = sum(1 for r in results if r['status'] == 'success')
+    failed = sum(1 for r in results if r['status'] == 'failed')
+    print(f"Total checkpoints: {len(results)}")
+    print(f"Successful: {successful}")
+    print(f"Failed: {failed}")
+    print(f"\nResults saved to: {output_dir.absolute()}")
+    
+    if failed > 0:
+        print("\nFailed checkpoints:")
+        for r in results:
+            if r['status'] == 'failed':
+                print(f"  - {r['checkpoint']}")
+                print(f"    Error: {r.get('error', 'Unknown')}")
 
 
 if __name__ == "__main__":
@@ -855,10 +1004,17 @@ if __name__ == "__main__":
     # except Exception as e:
     #     print(f"Example 6 failed: {e}")
     
+    # try:
+    #     example_evaluate_on_history()
+    # except Exception as e:
+    #     print(f"Example 7 failed: {e}")
+    #     import traceback
+    #     traceback.print_exc()
+    
     try:
-        example_evaluate_on_history()
+        example_evaluate_all_checkpoints()
     except Exception as e:
-        print(f"Example 7 failed: {e}")
+        print(f"Example evaluate all checkpoints failed: {e}")
         import traceback
         traceback.print_exc()
 

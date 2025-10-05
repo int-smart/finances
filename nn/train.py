@@ -84,7 +84,7 @@ def train_one_epoch(model, train_loader, val_loader, optimizer, criterion, sched
     total_loss = 0.0
     num_batches = 0
     epoch_val_loss = 0.0  # Initialize validation loss
-    
+    import pdb; pdb.set_trace()
     # Progress tracking
     total_batches = len(train_loader)
     if SHOW_PROGRESS_BAR:
@@ -109,6 +109,10 @@ def train_one_epoch(model, train_loader, val_loader, optimizer, criterion, sched
             loss_components = {'total_loss': loss.item()}
         
         loss.backward()
+        
+        # Calculate gradient norm
+        grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=float('inf'))
+        
         optimizer.step()
         
         total_loss += loss.item()
@@ -120,19 +124,22 @@ def train_one_epoch(model, train_loader, val_loader, optimizer, criterion, sched
         
         # Update progress bar
         if SHOW_PROGRESS_BAR:
-            pbar.set_postfix({'Loss': f'{loss.item():.4f}'})
+            pbar.set_postfix({
+                'Loss': f'{loss.item():.4f}',
+                'Grad Norm': f'{grad_norm.item():.3f}'
+            })
         
         # Validate and log at specified frequency
-        if (batch_idx + 1) % 1000 == 0:
-            # Run validation - handle both model types
-            if isinstance(model, UnifiedPredictionModel):
-                epoch_val_loss, _ = validate_unified_model(model, val_loader, criterion, DEVICE, config)
-            else:
-                epoch_val_loss = validate_model(model, val_loader, criterion, DEVICE)
+        # if (batch_idx + 1) % 5000 == 0:
+        #     # Run validation - handle both model types
+        #     if isinstance(model, UnifiedPredictionModel):
+        #         epoch_val_loss, _ = validate_unified_model(model, val_loader, criterion, DEVICE, config)
+        #     else:
+        #         epoch_val_loss = validate_model(model, val_loader, criterion, DEVICE)
             
-            # Log activation statistics
-            if activation_monitor is not None:
-                activation_monitor.log_activations()
+        #     # Log activation statistics
+        #     if activation_monitor is not None:
+        #         activation_monitor.log_activations()
         
         # Save checkpoint every 5000 batches
         if (batch_idx + 1) % 5000 == 0:
@@ -159,11 +166,15 @@ def train_one_epoch(model, train_loader, val_loader, optimizer, criterion, sched
             # Get current learning rate
             current_lr = optimizer.param_groups[0]['lr']
             
-            # Log batch metrics
+            # Log batch metrics including gradient norm
             logger.log_batch(batch_idx, total_batches, loss.item(), epoch_val_loss, epoch, current_lr)
+            if logger.use_wandb:
+                import wandb
+                wandb.log({'grad_norm': grad_norm.item()})
             
-            # Print progress
+            # Print progress with gradient norm
             print_training_progress(epoch + 1, batch_idx, total_batches, loss.item(), epoch_val_loss, current_lr)
+            print(f"   Gradient Norm: {grad_norm.item():.4f}")
     
     return total_loss / num_batches
 
@@ -265,6 +276,7 @@ def train_model(config=None):
         model = create_model(model_config_simple, DEVICE)
         criterion = nn.MSELoss()
     
+    # model = torch.compile(model)
     # Show model summary
     print_model_summary(model)
     model.print_init_summary()
