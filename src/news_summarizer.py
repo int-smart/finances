@@ -13,7 +13,7 @@ class NewsSummarizer:
         if not api_key:
             print("Warning: TOGETHER_API_KEY environment variable not set. News summarization may not work.")
         self.client = Together(api_key=api_key)
-        self.model = "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"
+        self.model = "openai/gpt-oss-120b"
         self.summaries_dir = "data/news_summaries"
         self.summaries = {}
         os.makedirs(self.summaries_dir, exist_ok=True)

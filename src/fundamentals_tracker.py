@@ -22,7 +22,7 @@ class FundamentalsTracker:
         if not api_key:
             print("Warning: TOGETHER_API_KEY environment variable not set. Summarization may not work.")
         self.client = Together(api_key=api_key)
-        # self.model = "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"
+        # self.model = "openai/gpt-oss-120b"
         self.model = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
     
     def get_financial_ratios(self, ticker, index_date):
