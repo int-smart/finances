@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support and Resistance Levels - Complete Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: #2980b9;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-left: 10px;
+            border-left: 4px solid #3498db;
+            font-size: 1.8em;
+        }
+
+        h3 {
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        h4 {
+            color: #7f8c8d;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+        }
+
+        .chart-box {
+            background-color: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+
+        .chart-box pre {
+            margin: 0;
+            white-space: pre;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .example-box {
+            background-color: #e8f5e8;
+            border: 1px solid #28a745;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .warning-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .error-box {
+            background-color: #f8d7da;
+            border: 1px solid #dc3545;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .tip-box {
+            background-color: #d1ecf1;
+            border: 1px solid #17a2b8;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .toc {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 40px;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+
+        .toc ul {
+            list-style-type: none;
+            margin-left: 0;
+        }
+
+        .toc a {
+            color: #007bff;
+            text-decoration: none;
+            padding: 5px 0;
+            display: block;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        strong {
+            color: #2c3e50;
+        }
+
+        .section-divider {
+            border: 0;
+            height: 2px;
+            background: linear-gradient(to right, #3498db, transparent);
+            margin: 40px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Support and Resistance Levels - Complete Guide</h1>
+        
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="#introduction">What Are Support and Resistance?</a></li>
+                <li><a href="#visual">Visual Representation</a></li>
+                <li><a href="#formation">How Support and Resistance Form</a></li>
+                <li><a href="#examples">Real-World Examples</a></li>
+                <li><a href="#types">Types of Support and Resistance</a></li>
+                <li><a href="#strength">Strength of Support/Resistance</a></li>
+                <li><a href="#identify">How to Identify Support and Resistance</a></li>
+                <li><a href="#trading">Trading With Support and Resistance</a></li>
+                <li><a href="#breakouts">Support and Resistance Breakouts</a></li>
+                <li><a href="#mistakes">Common Mistakes and How to Avoid Them</a></li>
+                <li><a href="#exercise">Practical Exercise</a></li>
+                <li><a href="#tips">Pro Tips</a></li>
+            </ul>
+        </div>
+
+        <p>Support and resistance are like <strong>invisible walls</strong> in the stock market that prices tend to bounce off. Think of them as psychological price barriers where traders make predictable decisions.</p>
+
+        <h2 id="introduction">What Are Support and Resistance?</h2>
+
+        <h3>Support Level <span class="emoji">🛡️</span></h3>
+        <ul>
+            <li><strong>Definition</strong>: A price level where a stock tends to <strong>stop falling</strong> and bounce back up</li>
+            <li><strong>Think of it as</strong>: A floor that prevents the price from falling further</li>
+            <li><strong>Psychology</strong>: "This price is too cheap, I'm buying!"</li>
+        </ul>
+
+        <h3>Resistance Level <span class="emoji">🚧</span></h3>
+        <ul>
+            <li><strong>Definition</strong>: A price level where a stock tends to <strong>stop rising</strong> and bounce back down</li>
+            <li><strong>Think of it as</strong>: A ceiling that prevents the price from going higher</li>
+            <li><strong>Psychology</strong>: "This price is too expensive, I'm selling!"</li>
+        </ul>
+
+        <hr class="section-divider">
+
+        <h2 id="visual">Visual Representation</h2>
+
+        <div class="chart-box">
+            <pre>
+$120 ═══════════════════════ ← RESISTANCE (Ceiling)
+      ↑     ↑     ↑
+$115  │  ╱─╲  ╱─╲  │
+      │ ╱   ╲╱   ╲ │
+$110  │╱           ╲│
+      ╱             ╲
+$105 ╱               ╲
+     ══════════════════════ ← SUPPORT (Floor)
+     ↑               ↑
+   Bounce          Bounce
+            </pre>
+        </div>
+
+        <hr class="section-divider">
+
+        <h2 id="formation">How Support and Resistance Form</h2>
+
+        <h3>1. Psychological Round Numbers</h3>
+        <p>People naturally think in round numbers:</p>
+        <ul>
+            <li><strong>$50, $100, $150</strong> - Major psychological levels</li>
+            <li><strong>$99, $199</strong> - Just below round numbers</li>
+            <li><strong>Example</strong>: Apple stock often finds resistance at $200, $250, $300</li>
+        </ul>
+
+        <h3>2. Previous Highs and Lows</h3>
+        <ul>
+            <li><strong>Previous high</strong> becomes new resistance</li>
+            <li><strong>Previous low</strong> becomes new support</li>
+            <li><strong>Market memory</strong> - Traders remember these levels</li>
+        </ul>
+
+        <h3>3. Moving Averages</h3>
+        <ul>
+            <li><strong>50-day, 200-day moving averages</strong> act as dynamic support/resistance</li>
+            <li><strong>Price tends to bounce</strong> off these moving lines</li>
+        </ul>
+
+        <h3>4. Volume Clusters</h3>
+        <ul>
+            <li><strong>High volume areas</strong> create strong support/resistance</li>
+            <li><strong>Where most trading happened</strong> = where traders will act again</li>
+        </ul>
+
+        <hr class="section-divider">
+
+        <h2 id="examples">Real-World Examples</h2>
+
+        <div class="example-box">
+            <h3>Example 1: Netflix Support</h3>
+            <div class="chart-box">
+                <pre>
+Timeline: Netflix Stock
+Jan: $400 (high)
+Feb: Falls to $350, bounces up
+Mar: Falls to $350 again, bounces up  
+Apr: Falls to $350 third time, bounces up
+
+→ $350 becomes STRONG SUPPORT level
+                </pre>
+            </div>
+        </div>
+
+        <div class="example-box">
+            <h3>Example 2: Tesla Resistance</h3>
+            <div class="chart-box">
+                <pre>
+Timeline: Tesla Stock  
+Week 1: Rises to $900, falls back
+Week 3: Rises to $900 again, falls back
+Week 5: Rises to $900 third time, falls back
+
+→ $900 becomes STRONG RESISTANCE level
+                </pre>
+            </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <h2 id="types">Types of Support and Resistance</h2>
+
+        <h3>1. Horizontal Support/Resistance</h3>
+        <ul>
+            <li><strong>Static levels</strong> that don't change</li>
+            <li><strong>Previous highs/lows, round numbers</strong></li>
+        </ul>
+
+        <div class="chart-box">
+            <pre>
+Price Chart:
+$150 ────────────────── Resistance
+     ↑    ↑    ↑
+   Bounce Bounce Bounce
+            </pre>
+        </div>
+
+        <h3>2. Dynamic Support/Resistance</h3>
+        <ul>
+            <li><strong>Moving levels</strong> that change over time</li>
+            <li><strong>Trend lines, moving averages</strong></li>
+        </ul>
+
+        <div class="chart-box">
+            <pre>
+Price Chart:
+    ╱
+   ╱  ← Rising trend line (dynamic support)
+  ╱
+ ╱
+            </pre>
+        </div>
+
+        <h3>3. Multiple Timeframe Levels</h3>
+        <ul>
+            <li><strong>Daily resistance</strong> might be <strong>weekly support</strong></li>
+            <li><strong>Different timeframes</strong> show different levels</li>
+        </ul>
+
+        <hr class="section-divider">
+
+        <h2 id="strength">Strength of Support/Resistance</h2>
+
+        <h3>Factors That Make Levels Stronger:</h3>
+
+        <h4>1. Number of Touches</h4>
+        <ul>
+            <li><strong>2 touches</strong> = Decent level</li>
+            <li><strong>3+ touches</strong> = Strong level</li>
+            <li><strong>5+ touches</strong> = Very strong level</li>
+        </ul>
+
+        <h4>2. Volume at the Level</h4>
+        <ul>
+            <li><strong>High volume</strong> = Strong level</li>
+            <li><strong>Low volume</strong> = Weak level</li>
+        </ul>
+
+        <h4>3. Time Factor</h4>
+        <ul>
+            <li><strong>Recent levels</strong> = More relevant</li>
+            <li><strong>Old levels</strong> = Less reliable (but major ones still matter)</li>
+        </ul>
+
+        <h4>4. Round Numbers</h4>
+        <ul>
+            <li><strong>$50, $100, $200</strong> = Stronger</li>
+            <li><strong>$73.50</strong> = Weaker</li>
+        </ul>
+
+        <hr class="section-divider">
+
+        <h2 id="identify">How to Identify Support and Resistance</h2>
+
+        <h3>Step 1: Look at the Chart</h3>
+        <ol>
+            <li><strong>Zoom out</strong> - See the bigger picture</li>
+            <li><strong>Mark obvious levels</strong> - Where price bounced multiple times</li>
+            <li><strong>Note round numbers</strong> - $50, $100, etc.</li>
+        </ol>
+
+        <h3>Step 2: Draw the Lines</h3>
+        <div class="chart-box">
+            <pre>
+Drawing Support:
+- Connect the LOWS where price bounced up
+- Draw horizontal line through multiple low points
+
+Drawing Resistance:  
+- Connect the HIGHS where price bounced down
+- Draw horizontal line through multiple high points
+            </pre>
+        </div>
+
+        <h3>Step 3: Check Volume</h3>
+        <ul>
+            <li><strong>High volume at level</strong> = Stronger</li>
+            <li><strong>Low volume at level</strong> = Weaker</li>
+        </ul>
+
+        <hr class="section-divider">
+
+        <h2 id="trading">Trading With Support and Resistance</h2>
+
+        <h3>Buying at Support (Long Strategy)</h3>
+        <div class="example-box">
+            <div class="chart-box">
+                <pre>
+Setup:
+1. Stock approaching support level
+2. Previous bounces at this level  
+3. High volume on previous bounces
+
+Entry: Near support level
+Stop Loss: Below support (if it breaks, get out)
+Target: Previous resistance level
+                </pre>
+            </div>
+        </div>
+
+        <h3>Selling at Resistance (Short Strategy)</h3>
+        <div class="example-box">
+            <div class="chart-box">
+                <pre>
+Setup:
+1. Stock approaching resistance level
+2. Previous rejections at this level
+3. High volume on previous rejections  
+
+Entry: Near resistance level
+Stop Loss: Above resistance (if it breaks, get out)
+Target: Previous support level
+                </pre>
+            </div>
+        </div>
+
+        <hr class="section-divider">
+
+        <h2 id="breakouts">Support and Resistance Breakouts</h2>
+
+        <h3>What Happens When Levels Break?</h3>
+
+        <h4>Support Breaks (Bearish)</h4>
+        <div class="chart-box">
+            <pre>
+Before:           After:
+$100 ═══════     $100 ═══════
+     ↑                ↓
+   Bounce           Breakdown
+                  
+→ Old support becomes NEW RESISTANCE
+            </pre>
+        </div>
+
+        <h4>Resistance Breaks (Bullish)</h4>
+        <div class="chart-box">
+            <pre>
+Before:           After:
+$120 ═══════     $120 ═══════
+     ↓                ↑
+   Rejection        Breakout
+
+→ Old resistance becomes NEW SUPPORT
+            </pre>
+        </div>
+
+        <div class="tip-box">
+            <h4>Breakout Confirmation:</h4>
+            <ol>
+                <li><strong>Volume spike</strong> - High volume on breakout</li>
+                <li><strong>Close beyond level</strong> - Not just a quick spike</li>
+                <li><strong>Retest</strong> - Price comes back to test old level as new support/resistance</li>
+            </ol>
+        </div>
+
+        <hr class="section-divider">
+
+        <h2 id="mistakes">Common Mistakes and How to Avoid Them</h2>
+
+        <div class="error-box">
+            <h4>❌ Mistake 1: Drawing Lines Too Precisely</h4>
+            <ul>
+                <li><strong>Wrong</strong>: Connecting exact highs/lows to the penny</li>
+                <li><strong>Right</strong>: Drawing zones around the general area</li>
+            </ul>
+        </div>
+
+        <div class="error-box">
+            <h4>❌ Mistake 2: Ignoring Volume</h4>
+            <ul>
+                <li><strong>Wrong</strong>: Treating all levels equally</li>
+                <li><strong>Right</strong>: Focusing on high-volume levels</li>
+            </ul>
+        </div>
+
+        <div class="error-box">
+            <h4>❌ Mistake 3: Using Only One Timeframe</h4>
+            <ul>
+                <li><strong>Wrong</strong>: Only looking at daily charts</li>
+                <li><strong>Right</strong>: Checking weekly and monthly levels too</li>
+            </ul>
+        </div>
+
+        <div class="error-box">
+            <h4>❌ Mistake 4: Expecting Perfect Bounces</h4>
+            <ul>
+                <li><strong>Wrong</strong>: Expecting price to bounce exactly at the line</li>
+                <li><strong>Right</strong>: Expecting bounces in the general area</li>
+            </ul>
+        </div>
+
+        <hr class="section-divider">
+
+        <h2 id="exercise">Practical Exercise</h2>
+
+        <div class="warning-box">
+            <h3>Try This With Any Stock:</h3>
+            <ol>
+                <li><strong>Open a chart</strong> (Apple, Microsoft, etc.)</li>
+                <li><strong>Go back 6 months</strong></li>
+                <li><strong>Mark 3 obvious levels</strong> where price bounced multiple times</li>
+                <li><strong>Check if they're still working</strong> - Do recent prices respect these levels?</li>
+                <li><strong>Note the volume</strong> - Were the bounces on high or low volume?</li>
+            </ol>
+        </div>
+
+        <hr class="section-divider">
+
+        <h2 id="tips">Pro Tips</h2>
+
+        <div class="tip-box">
+            <h3>1. Think in Zones, Not Lines</h3>
+            <ul>
+                <li><strong>Support Zone</strong>: $98-$102 (not exactly $100)</li>
+                <li><strong>Resistance Zone</strong>: $148-$152 (not exactly $150)</li>
+            </ul>
+        </div>
+
+        <div class="tip-box">
+            <h3>2. Combine with Other Indicators</h3>
+            <ul>
+                <li><strong>Moving averages</strong> + Support/Resistance</li>
+                <li><strong>RSI</strong> + Support/Resistance</li>
+                <li><strong>Volume</strong> + Support/Resistance</li>
+            </ul>
+        </div>
+
+        <div class="tip-box">
+            <h3>3. Multiple Timeframe Analysis</h3>
+            <ul>
+                <li><strong>Daily support</strong> inside <strong>weekly uptrend</strong> = Stronger</li>
+                <li><strong>Daily resistance</strong> at <strong>weekly resistance</strong> = Very strong</li>
+            </ul>
+        </div>
+
+        <div class="tip-box">
+            <h3>4. Market Context Matters</h3>
+            <ul>
+                <li><strong>Bull market</strong>: Support more likely to hold</li>
+                <li><strong>Bear market</strong>: Resistance more likely to hold</li>
+                <li><strong>Sideways market</strong>: Both equally important</li>
+            </ul>
+        </div>
+        <div class="openai">
+            <h2>Understanding Support and Resistance Levels</h2>
+    
+            <p>Understanding support and resistance levels is one of the most fundamental concepts in technical analysis. These levels act like invisible barriers for price movement, helping traders predict potential turning points in the stock market. Let's explore this in great detail.</p>
+    
+            <h3>🧱 What Are Support and Resistance Levels?</h3>
+    
+            <h4>📌 Support:</h4>
+            <p>Support is like a floor under the price — a level where the price tends to stop falling and may bounce back up.</p>
+            <ul>
+                <li>It forms because buyers come in at that price level, creating demand.</li>
+                <li>Think of it as the "buy zone" where traders believe the asset is cheap.</li>
+            </ul>
+    
+            <h4>📌 Resistance:</h4>
+            <p>Resistance is like a ceiling above the price — a level where the price tends to stop rising and may fall back down.</p>
+            <ul>
+                <li>It forms because sellers show up, creating supply.</li>
+                <li>Think of it as the "sell zone" where traders believe the asset is too expensive.</li>
+            </ul>
+    
+            <h3>🧠 Why Are Support and Resistance Important?</h3>
+            <ul>
+                <li>They help identify entry and exit points.</li>
+                <li>They are used to set stop-loss and profit targets.</li>
+                <li>They give traders a sense of risk vs. reward.</li>
+                <li>They provide clues about market psychology (where buyers/sellers feel comfortable).</li>
+            </ul>
+    
+            <h3>📉 How Are Support and Resistance Levels Formed?</h3>
+    
+            <h4>A. Historical Price Reactions</h4>
+            <ul>
+                <li>If the price repeatedly bounces from a level, that level becomes support.</li>
+                <li>If the price repeatedly gets rejected at a level, that becomes resistance.</li>
+            </ul>
+    
+            <h4>B. Round Numbers</h4>
+            <ul>
+                <li>Prices like ₹100, ₹1000, or $50 often act as psychological barriers.</li>
+                <li>Traders tend to place more orders at such levels.</li>
+            </ul>
+    
+            <h4>C. Moving Averages</h4>
+            <ul>
+                <li>Common moving averages (like 50-day, 200-day) act as dynamic support/resistance.</li>
+            </ul>
+    
+            <h4>D. Trendlines and Channels</h4>
+            <ul>
+                <li>Diagonal lines connecting higher lows (support) or lower highs (resistance) form these levels in a trending market.</li>
+            </ul>
+    
+            <h3>📊 Visual Example:</h3>
+            <p>Let's say a stock moves like this:</p>
+            <p><strong>₹100 → ₹150 → ₹100 → ₹150 → ₹100 → ₹155</strong></p>
+    
+            <p>Here:</p>
+            <ul>
+                <li><strong>₹100 = Support</strong> (price keeps bouncing from this level)</li>
+                <li><strong>₹150 = Resistance</strong> (price keeps falling after touching this level)</li>
+            </ul>
+    
+            <p>Once price breaks ₹150 and goes to ₹155, that resistance becomes new support. This is called a "role reversal".</p>
+    
+            <h3>🔁 What Happens When Price Hits These Levels?</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Situation</th>
+                        <th>Expected Behavior</th>
+                        <th>Why</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Price falls to support</td>
+                        <td>Likely to bounce up</td>
+                        <td>Buyers step in</td>
+                    </tr>
+                    <tr>
+                        <td>Price rises to resistance</td>
+                        <td>Likely to fall down</td>
+                        <td>Sellers take profits</td>
+                    </tr>
+                    <tr>
+                        <td>Price breaks above resistance</td>
+                        <td>Often rallies</td>
+                        <td>Triggers buying (breakout)</td>
+                    </tr>
+                    <tr>
+                        <td>Price breaks below support</td>
+                        <td>Often falls more</td>
+                        <td>Triggers selling (breakdown)</td>
+                    </tr>
+                </tbody>
+            </table>
+    
+            <h3>🔄 Support and Resistance in Different Market Types</h3>
+    
+            <h4>✅ In an Uptrend:</h4>
+            <ul>
+                <li>Support levels form at higher lows.</li>
+                <li>Resistance keeps moving higher with price.</li>
+            </ul>
+    
+            <h4>✅ In a Downtrend:</h4>
+            <ul>
+                <li>Resistance forms at lower highs.</li>
+                <li>Support keeps sliding downward.</li>
+            </ul>
+    
+            <h4>✅ In a Sideways Market:</h4>
+            <ul>
+                <li>Support and resistance form a horizontal range.</li>
+                <li>Price bounces back and forth — great for range trading.</li>
+            </ul>
+    
+            <h3>📌 Key Traits of Strong Support/Resistance</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Trait</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>More Touches</td>
+                        <td>The more times price tests a level, the stronger it is.</td>
+                    </tr>
+                    <tr>
+                        <td>Volume</td>
+                        <td>High volume near the level makes it more reliable.</td>
+                    </tr>
+                    <tr>
+                        <td>Timeframe</td>
+                        <td>Levels on longer timeframes (daily/weekly) are stronger than short ones.</td>
+                    </tr>
+                    <tr>
+                        <td>Break + Retest</td>
+                        <td>After a breakout, the price often retests the level before continuing.</td>
+                    </tr>
+                </tbody>
+            </table>
+    
+            <h3>⚠️ False Breakouts</h3>
+            <p>Sometimes the price briefly crosses a support/resistance level but then reverses quickly. This is called a false breakout or trap.</p>
+    
+            <h4>Avoid getting trapped by:</h4>
+            <ul>
+                <li>Waiting for a close above/below the level</li>
+                <li>Looking for volume confirmation</li>
+                <li>Using candlestick signals like pin bars or engulfing candles</li>
+            </ul>
+    
+            <h3>🔧 How Traders Use Support and Resistance</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Use Case</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Buy near support</td>
+                        <td>Stock is at ₹100 support — trader buys expecting bounce</td>
+                    </tr>
+                    <tr>
+                        <td>Sell near resistance</td>
+                        <td>Stock reaches ₹150 resistance — trader sells or shorts</td>
+                    </tr>
+                    <tr>
+                        <td>Stop-loss below support</td>
+                        <td>Buy at ₹100, place stop-loss at ₹95 in case support fails</td>
+                    </tr>
+                    <tr>
+                        <td>Breakout trade above resistance</td>
+                        <td>Break above ₹150 with high volume → trader buys the breakout</td>
+                    </tr>
+                </tbody>
+            </table>
+    
+            <h3>🧩 Tools to Find Support and Resistance</h3>
+            <ul>
+                <li><strong>Horizontal Lines</strong> – draw at price levels where bounces occurred.</li>
+                <li><strong>Trendlines</strong> – for diagonal support/resistance in trending markets.</li>
+                <li><strong>Moving Averages</strong> – e.g., 50-MA, 200-MA can act as support or resistance.</li>
+                <li><strong>Fibonacci Retracements</strong> – popular tool to find hidden support/resistance zones.</li>
+                <li><strong>Volume Profile/Heat Maps</strong> – show where the most trading happened.</li>
+            </ul>
+    
+            <h3>🪜 Example in Real Life (Kid Analogy)</h3>
+            <ul>
+                <li>Imagine a ball bouncing on the floor (support) and hitting the ceiling (resistance).</li>
+                <li>If the ball breaks the ceiling, it might land on the old ceiling — now it's the new floor!</li>
+                <li>If the floor breaks, the ball falls to the next floor below.</li>
+            </ul>
+    
+            <h3>✅ Summary Table</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Term</th>
+                        <th>What It Is</th>
+                        <th>Behavior</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Support</td>
+                        <td>A level where price tends to stop falling</td>
+                        <td>Acts like a floor</td>
+                    </tr>
+                    <tr>
+                        <td>Resistance</td>
+                        <td>A level where price tends to stop rising</td>
+                        <td>Acts like a ceiling</td>
+                    </tr>
+                    <tr>
+                        <td>Breakout</td>
+                        <td>Price breaks above resistance</td>
+                        <td>Signals bullish move</td>
+                    </tr>
+                    <tr>
+                        <td>Breakdown</td>
+                        <td>Price breaks below support</td>
+                        <td>Signals bearish move</td>
+                    </tr>
+                    <tr>
+                        <td>Retest</td>
+                        <td>Price returns to test the broken level</td>
+                        <td>Confirms breakout or breakdown</td>
+                    </tr>
+                    <tr>
+                        <td>Role Reversal</td>
+                        <td>Old support becomes new resistance (and vice versa)</td>
+                        <td>Happens after breakouts</td>
+                    </tr>
+                </tbody>
+            </table>
+    
+            <p><strong>Would you like annotated charts or examples from real stocks (like Tesla, Nifty, or Reliance) showing these levels in action? I can walk you through a case study!</strong></p>
+        </div>
+        <div class="highlight" style="text-align: center; padding: 20px; margin: 40px 0; font-size: 1.1em; font-weight: bold;">
+            Think of support and resistance like <strong>invisible magnets</strong> in the market - they don't always work, but they work often enough to give you a significant edge in trading when used properly!
+        </div>
+
+        <hr class="section-divider">
+
+        <footer style="text-align: center; color: #6c757d; margin-top: 40px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+            <p><strong>Disclaimer:</strong> This guide is for educational purposes only. Always do your own research and consider consulting with a financial advisor before making investment decisions.</p>
+            <p style="margin-top: 10px;">Created with ❤️ by Cody - Your AI Coding Assistant from Sourcegraph</p>
+        </footer>
+    </div>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll to top functionality
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                if (!document.getElementById('scrollToTop')) {
+                    const scrollBtn = document.createElement('button');
+                    scrollBtn.id = 'scrollToTop';
+                    scrollBtn.innerHTML = '↑';
+                    scrollBtn.style.cssText = `
+                        position: fixed;
+                        bottom: 20px;
+                        right: 20px;
+                        background: #3498db;
+                        color: white;
+                        border: none;
+                        border-radius: 50%;
+                        width: 50px;
+                        height: 50px;
+                        font-size: 20px;
+                        cursor: pointer;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                        z-index: 1000;
+                        transition: all 0.3s ease;
+                    `;
+                    scrollBtn.onclick = () => window.scrollTo({top: 0, behavior: 'smooth'});
+                    document.body.appendChild(scrollBtn);
+                }
+            } else {
+                const scrollBtn = document.getElementById('scrollToTop');
+                if (scrollBtn) scrollBtn.remove();
+            }
+        });
+    </script>
+</body>
+</html>
